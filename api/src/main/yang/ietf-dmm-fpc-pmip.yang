@@ -1,0 +1,71 @@
+module ietf-dmm-fpc-pmip {
+    namespace "urn:ietf:params:xml:ns:yang:ietf-dmm-fpc-pmip";
+    prefix fpc-pmip;
+
+    organization "IETF DMM Working Group";
+    contact "Satoru Matsushima <satoru.matsushima@g.softbank.co.jp>";
+
+    description
+    "This module contains YANG definition for
+     Forwarding Policy Configuration Protocol.(FPCP)";
+
+    revision 2016-01-19 {
+        description "Changes based on -01 version of FPCP draft.";
+        reference "draft-ietf-dmm-fpc-cpdp-01";
+    }
+
+    identity pmip-tunnel-type {
+        description "PMIP Tunnel Type";
+    }
+    identity grev1 {
+        base "fpc-pmip:pmip-tunnel-type";
+    }
+    identity grev2 {
+        base "fpc-pmip:pmip-tunnel-type";
+    }
+    identity ipinip {
+        base "fpc-pmip:pmip-tunnel-type";
+    }
+    grouping pmip-mobility {
+        leaf type {
+            type identityref {
+                base "fpc-pmip:pmip-tunnel-type";
+            }
+        }
+        choice value {
+            case gre {
+                leaf key {
+                    type uint32;
+                    description "GRE_KEY";
+                }
+            }
+        }
+    }
+
+    typedef pmip-instr {
+      description "Instruction Set for PMIP";
+      type bits {
+        bit assign-ip {
+          position 0;
+        }
+        bit assign-dpn {
+          position 1;
+        }
+        bit session {
+          position 2;
+        }
+        bit uplink {
+          position 3;
+        }
+        bit downlink {
+          position 4;
+        }
+      }
+    }
+
+    grouping pmip-commandset {
+      leaf instr-pmip-mob {
+        type fpc-pmip:pmip-instr;
+      }
+    }
+}

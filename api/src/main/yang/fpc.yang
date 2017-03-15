@@ -1,0 +1,164 @@
+module fpc {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:fpc";
+    prefix "fpc";
+
+    import ietf-dmm-fpcagent { prefix fpcagent; }
+    import ietf-dmm-fpcbase { prefix fpcbase; }
+    import ietf-inet-types { prefix inet; }
+    import ietf-dmm-fpc-pmip { prefix fpc-pmip; }
+    import ietf-dmm-threegpp { prefix threegpp; }
+
+    revision "2015-01-05" {
+        description "Initial revision of fpc model";
+    }
+
+   // grouping zmq-dpn-config {
+   //   leaf topic {
+   //     type string;
+  //    }
+   // }
+
+   // augment "/fpcagent:tenants/fpcagent:tenant/fpcagent:fpc-topology/fpcagent:dpns" {
+  //    uses zmq-dpn-config;
+   // }
+
+    // New DPN Type
+    identity zmq-dpn-control-protocol {
+      base "fpcbase:fpc-dpn-control-protocol";
+    }
+
+    typedef membership-match-type {
+      type enumeration {
+        enum eq { value 0; }
+        enum super { value 1; }
+        enum psuper { value 2; }
+        enum sub { value 3; }
+        enum psub { value 4; }
+        enum overlap { value 5; }
+        enum nonoverlap { value 6; }
+      }
+    }
+
+    grouping membership-value {
+      leaf policy-membership {
+        type string;
+      }
+    }
+
+    augment "/fpcagent:tenants/fpcagent:tenant/fpcagent:fpc-policy/fpcagent:descriptors/fpcagent:descriptor-value" {
+      case tft-plusplus {
+          uses fpc:membership-value;
+          leaf membership-match-type {
+            type fpc:membership-match-type;
+          }
+      }
+    }
+
+    augment "/fpcagent:tenants/fpcagent:tenant/fpcagent:fpc-mobility/fpcagent:contexts" {
+      uses fpc:membership-value;
+    }
+    augment "/fpcagent:configure/fpcagent:input/fpcagent:op_body/fpcagent:create_or_update/fpcagent:contexts" {
+      uses fpc:membership-value;
+    }
+    augment "/fpcagent:configure-bundles/fpcagent:input/fpcagent:bundles/fpcagent:op_body/fpcagent:create_or_update/fpcagent:contexts" {
+       uses fpc:membership-value;
+    }
+    augment "/fpcagent:configure/fpcagent:output/fpcagent:result-type/fpcagent:common-success/fpcagent:contexts" {
+       uses fpc:membership-value;
+    }
+    augment "/fpcagent:configure-bundles/fpcagent:output/fpcagent:bundles/fpcagent:result-type/fpcagent:common-success/fpcagent:contexts" {
+       uses fpc:membership-value;
+    }
+    // TODO - Add Notification Augments for membership-value
+
+      container tx-stats {
+        config false;
+        leaf last-ts {
+          type string;
+        }
+        leaf total-txs {
+          type uint64;
+        }
+        list states {
+          key state;
+          leaf state {
+            type string;
+          }
+          leaf entries {
+            type uint64;
+          }
+          container total-time {
+            leaf mantissa {
+              type uint64;
+            }
+            leaf exponent {
+              type int32;
+            }
+          }
+          container average-time {
+            leaf mantissa {
+              type uint64;
+            }
+            leaf exponent {
+              type int32;
+            }
+          }
+        }
+      }
+
+    grouping connection-config {
+        leaf client-id {
+          type fpcagent:client-identifier;
+        }
+        leaf tenant-id {
+          type fpcbase:fpc-identity;
+        }
+        leaf-list supported-features {
+          type string;
+        }
+        leaf endpoint-uri {
+          type inet:uri;
+        }
+        leaf supports-oknotify-model {
+          type boolean;
+        }
+        leaf supports-ack-model {
+          type boolean;
+        }
+    }
+
+
+    container connection-info {
+      list connections {
+          config false;
+          key client-id;
+          leaf client-id {
+            type string;
+          }
+          container requested-info {
+            uses fpc:connection-config;
+          }
+          container assigned-info {
+            uses fpc:connection-config;
+          }
+      }
+    }
+
+    rpc register_client {
+      input {
+        uses fpc:connection-config;
+      }
+      output {
+        uses fpc:connection-config;
+      }
+    }
+
+    rpc deregister_client {
+      input {
+        leaf client-id {
+          type fpcagent:client-identifier;
+        }
+      }
+    }
+}
