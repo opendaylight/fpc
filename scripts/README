@@ -1,0 +1,37 @@
+# ------------------------------------------------------------------
+#  Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+#
+#  This program and the accompanying materials are made available under the
+#  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+#  and is available at http://www.eclipse.org/legal/epl-v10.html
+# ------------------------------------------------------------------
+
+This directory contains scripts to execute against the fp agent.
+
+The agent information script (agent-info.sh) can be executed at any time.
+
+getstats.sh can also be executed at any time and shows the transactions and state entry counts.
+
+The bindclient.sh (maps the client Id used by other scripts to the 'default' tenant) MUST
+be executed prior to operating any script successfully in this directory (except agent-info.sh and
+getstats.sh).
+
+Prior to manipulating contexts, the DPN must be added to the agent.
+	Use as `adddpn.sh put` - Adds the target DPN.
+
+You can verify the adddpn operation by looking at the result of `adddpn.sh get` or 
+`get-topology.sh`
+
+Contexts can be manipulated in order, e.g.
+context_create.sh
+context_update.sh
+context_delete.sh
+
+To use context_get.sh correctly the HTTP Notifier must be configured (see Agent Configuration parameters) 
+and the HTTP server (in the httptest directory must be running).
+
+unbindclient.sh should be executed after testing to free up the client identity mapping.
+
+
+
+

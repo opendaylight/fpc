@@ -1,0 +1,326 @@
+module ietf-dmm-threegpp {
+    namespace "urn:ietf:params:xml:ns:yang:threegpp";
+    prefix threegpp;
+
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
+    import ietf-traffic-selector-types { prefix traffic-selectors; revision-date 2016-01-14; }
+    import ietf-pmip-qos { prefix pmipqos; revision-date 2016-02-10; }
+
+
+    organization "IETF DMM Working Group";
+    contact "Satoru Matsushima <satoru.matsushima@g.softbank.co.jp>";
+
+    description
+    "This module contains YANG definition for
+     3GPP Related Mobility Structures";
+
+    revision 2016-08-03 {
+        description "Initial";
+        reference "draft-ietf-dmm-fpc-cpdp-04";
+    }
+
+    // Tunnel Types
+    identity threeGPP-tunnel-type {
+        description "Base Tunnel Type";
+    }
+
+    identity gtpv1 {
+        base "threegpp:threeGPP-tunnel-type";
+    }
+
+    identity gtpv2 {
+        base "threegpp:threeGPP-tunnel-type";
+    }
+
+    grouping teid-value {
+         leaf tunnel-identifier {
+            description "TEID";
+            type uint32;
+        }
+    }
+
+    grouping threeGPP-tunnel {
+        leaf tunnel-type {
+            type identityref  {
+              base "threegpp:threeGPP-tunnel-type";
+            }
+        }
+        uses threegpp:teid-value;
+    }
+
+    // QoS Profile
+    typedef fpc-qos-class-identifier {
+        type uint8 {
+            range "1..9";
+        }
+        description "QCI";
+    }
+
+    grouping threeGPP-QoS {
+        leaf qci {
+            type fpc-qos-class-identifier;
+        }
+        leaf gbr {
+            type uint32;
+        }
+        leaf mbr {
+            type uint32;
+        }
+        leaf apn-ambr {
+            type uint32;
+        }
+        leaf ue-ambr {
+            type uint32;
+        }
+        container arp {
+            uses pmipqos:Allocation-Retention-Priority-Value;
+        }
+    }
+
+    typedef ebi-type {
+      type uint8 {
+        range "0..15";
+      }
+    }
+
+   // From 3GPP TS 24.008 version 13.5.0 Release 13
+   typedef component-type-enum {
+        type enumeration {
+            enum ipv4RemoteAddress { value 16; }
+            enum ipv4LocalAddress  { value 17; }
+            enum ipv6RemoteAddress { value 32; }
+            enum ipv6RemoteAddressPrefix { value 33; }
+            enum ipv6LocalAddressPrefix { value 35; }
+            enum protocolNextHeader { value 48; }
+            enum localPort { value 64; }
+            enum localPortRange { value 65; }
+            enum reomotePort { value 80; }
+            enum remotePortRange { value 81; }
+            enum secParamIndex { value 96; }
+            enum tosTraffClass { value 112; }
+            enum flowLabel { value 128; }
+        }
+    }
+
+    typedef packet-filter-direction {
+        type enumeration {
+          enum preRel7Tft { value 0; }
+          enum uplink { value 1; }
+          enum downlink { value 2; }
+          enum bidirectional { value 3; }
+        }
+    }
+
+    typedef component-type-id {
+        type uint8 {
+          range "16 | 17 | 32 | 33 | 35 | 48 | 64 | 65 | 80 | 81 | 96 | 112 | 128";
+        }
+    }
+
+    grouping packet-filter {
+      leaf direction {
+          type threegpp:packet-filter-direction;
+      }
+      leaf identifier {
+          type uint8 {
+            range "1..15";
+          }
+      }
+      leaf evaluation-precedence {
+          type uint8;
+      }
+      list contents {
+        key component-type-identifier;
+        leaf component-type-identifier {
+            type threegpp:component-type-id;
+        }
+        choice value {
+          case ipv4-local {
+            leaf ipv4-local {
+              type inet:ipv4-address;
+            }
+            leaf ipv4-local-mask {
+              type inet:ipv4-address;
+            }
+          }
+          case ipv6-address-local {
+            leaf ipv6-address-local {
+              type inet:ipv6-prefix;
+            }
+            leaf ipv6-address-local-mask {
+              type inet:ipv6-prefix;
+            }
+          }
+          case ipv6-prefix-local {
+            leaf ipv6-prefix-local {
+              type inet:ipv6-prefix;
+            }
+          }
+
+          case ipv4-ipv6-remote {
+            leaf ipv4-ipv6-remote {
+              type inet:ip-address;
+            }
+            leaf ipv4-ipv6-remote-mask {
+              type inet:ip-address;
+            }
+          }
+
+          case ipv4-remote {
+            leaf ipv4-remote {
+              type inet:ipv4-address;
+            }
+            leaf ipv4-remote-mask {
+              type inet:ipv4-address;
+            }
+          }
+          case ipv6-address-remote {
+            leaf ipv6-address-remote {
+              type inet:ipv6-prefix;
+            }
+            leaf ipv6-address-remote-mask {
+              type inet:ipv6-prefix;
+            }
+          }
+          case ipv6-prefix-remote {
+            leaf ipv6-prefix-remote {
+              type inet:ipv6-prefix;
+            }
+          }
+
+          case protocol-next-header {
+            leaf next-header {
+              type uint8;
+            }
+          }
+
+          case local-port {
+            leaf local-port {
+              type inet:port-number;
+            }
+          }
+          case local-port-range {
+            leaf local-port-lo {
+              type inet:port-number;
+            }
+            leaf local-port-hi {
+              type inet:port-number;
+            }
+          }
+          case remote-port {
+            leaf remote-port {
+              type inet:port-number;
+            }
+          }
+          case remote-port-range {
+            leaf remote-port-lo {
+              type inet:port-number;
+            }
+            leaf remote-port-hi {
+              type inet:port-number;
+            }
+          }
+          case ipsec-index {
+            leaf ipsec-index {
+              type traffic-selectors:ipsec-spi;
+            }
+          }
+          case traffic-class {
+            leaf traffic-class {
+              type inet:dscp;
+            }
+          }
+          case traffic-class-range {
+              leaf traffic-class-lo {
+                type inet:dscp;
+              }
+              leaf traffic-class-hi {
+                type inet:dscp;
+              }
+          }
+          case flow-label-type {
+            leaf-list flow-label-type {
+              type inet:ipv6-flow-label;
+            }
+          }
+        }
+      }
+    }
+
+    grouping tft {
+      list packet-filters {
+          key identifier;
+          uses threegpp:packet-filter;
+      }
+    }
+
+    typedef imsi-type {
+        type uint64;
+    }
+
+    typedef threegpp-instr {
+      description "Instruction Set for 3GPP R11";
+      type bits {
+        bit assign-ip {
+          position 0;
+        }
+        bit assign-fteid-ip {
+          position 1;
+        }
+        bit assign-fteid-teid {
+          position 2;
+        }
+        bit session {
+          position 3;
+        }
+        bit uplink {
+          position 4;
+        }
+        bit downlink {
+          position 5;
+        }
+        bit assign-dpn {
+          position 6;
+        }
+        bit indirect-forward {
+          position 7;
+        }
+        bit create_new_tft {
+          position 8;
+        }
+        bit delete_existing_tft {
+          position 9;
+        }
+        bit add_filters_to_existing_tft {
+          position 10;
+        }
+        bit replace_filters_in_existing_tft {
+          position 11;
+        }
+        bit delete_filters_from_existing_tft {
+          position 12;
+        }
+        bit no_tft_op {
+          position 13;
+        }
+      }
+    }
+
+    grouping threegpp-properties {
+      leaf imsi {
+        type threegpp:imsi-type;
+      }
+      leaf ebi {
+        type threegpp:ebi-type;
+      }
+      leaf lbi {
+        type threegpp:ebi-type;
+      }
+    }
+
+    grouping threegpp-commandset {
+      leaf instr-3gpp-mob {
+        type threegpp:threegpp-instr;
+      }
+    }
+}

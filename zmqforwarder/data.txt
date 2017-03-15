@@ -1,0 +1,51 @@
+ietf-dmm-fpcagent:configure   
+{
+    "input": {
+        "op-id": "1",
+        "contexts": [
+            {
+                "instructions": {
+                    "instr-3gpp-mob": "session uplink downlink"
+                },
+                "context-id": "/imsi:9135551234/apn:a.example.com",
+                "dpn-group": "site1-l3",
+                "delegating-ip-prefixes": [
+                    "192.168.1.5/32"
+                ],
+                "ul": {
+                    "tunnel-local-address": "192.168.1.1",
+                    "tunnel-remote-address": "10.1.1.1",
+                    "mobility-tunnel-parameters": {
+                    	"tunnel-type": "ietf-dmm-threegpp:gtpv1",
+                        "tunnel-identifier": "3333"
+                    },
+                    "dpn-parameters": {}
+                },
+                "dl": {
+                    "tunnel-local-address": "192.168.1.1",
+                    "tunnel-remote-address": "10.1.1.1",
+                    "mobility-tunnel-parameters": {
+                        "tunnel-type": "ietf-dmm-threegpp:gtpv1",
+                        "tunnel-identifier": "2222"
+                    },
+                    "dpn-parameters": {}
+                },
+                "dpns": [
+                    {
+                        "dpn-id": "dpn1",
+                        "direction": "uplink",
+                        "dpn-parameters": {}
+                    }
+                ],
+                "imsi": "9135551234",
+                "ebi": "5",
+                "lbi": "5"
+            }
+        ],
+        "client-id": "1",
+        "session-state": "complete",
+        "admin-state": "enabled",
+        "op-type": "create",
+        "op-ref-scope": "none"
+    }
+}

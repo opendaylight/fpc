@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright © 2016 Copyright (c) Sprint, Inc. and others. All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+  odl:use-default-for-reference-types="true">
+
+  <reference id="dataBroker"
+    interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
+    odl:type="default" />
+    
+  <reference id="rpcRegistryDependency"
+	interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"
+	odl:type="default" />
+	
+	<reference id="notificationService" 
+      interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService" />
+      
+  <odl:clustered-app-config id="config"
+        binding-class="org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcConfig">
+      <odl:default-config><![CDATA[
+	    <fpc-config xmlns="urn:opendaylight:fpc:config">
+	      <monitor-threads>4</monitor-threads>
+	      <scheduled-monitors-poolsize>4</scheduled-monitors-poolsize>
+	      <dpn-listener-uri>tcp://127.0.0.1:5569</dpn-listener-uri>
+	      <dpn-listener-id>1</dpn-listener-id>
+	      <dpn-client-uri>tcp://127.0.0.1:5559</dpn-client-uri>
+	      <dpn-client-threads>40</dpn-client-threads>
+	      <metricsupdate-ms>10000</metricsupdate-ms>
+	      <mobilityupdate-ms>30000</mobilityupdate-ms>
+	      <activation-threads>40</activation-threads>
+	      <target-read-limit>15</target-read-limit>
+	      <default-tenant-id>default</default-tenant-id>
+	      <default-group-id>defaultTenant</default-group-id>
+	      <prefers-fast-clients>true</prefers-fast-clients>
+	      <http-notifier-clients>3</http-notifier-clients>
+	      <zmq-nbi-server-poolsize>1</zmq-nbi-server-poolsize>
+		  <zmq-nbi-server-uri>tcp://127.0.0.1:5570</zmq-nbi-server-uri>
+		  <zmq-nbi-inproc-uri>inproc://backend</zmq-nbi-inproc-uri>
+		  <zmq-nbi-handler-poolsize>10</zmq-nbi-handler-poolsize>
+		  <http-nio2-nb-poolsize>80</http-nio2-nb-poolsize>
+		   <http-nio2-nb-port>9292</http-nio2-nb-port>
+	    </fpc-config>
+	  ]]></odl:default-config>  
+  </odl:clustered-app-config>
+
+  <bean id="provider"
+    class="org.opendaylight.fpc.impl.FpcProvider"
+    init-method="init" destroy-method="close">
+    <argument ref="dataBroker" />
+    <argument ref="rpcRegistryDependency" />
+    <argument ref="notificationService" />
+    <argument ref="config"/>
+  </bean>
+
+</blueprint>

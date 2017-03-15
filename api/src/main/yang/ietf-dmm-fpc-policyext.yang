@@ -1,0 +1,53 @@
+module ietf-dmm-fpc-policyext {
+    namespace "urn:ietf:params:xml:ns:yang:fpcpolicyext";
+    prefix fpcpolicyext;
+
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
+
+    organization "IETF DMM Working Group";
+    contact "Satoru Matsushima <satoru.matsushima@g.softbank.co.jp>";
+
+    description
+    "This module contains YANG definition for
+     Forwarding Policy Configuration Protocol (FPCP)
+     common Policy Action and Descriptor extensions";
+
+    revision 2016-08-03 {
+        description "Changes based on -04 version of FPC draft.";
+        reference "draft-ietf-dmm-fpc-cpdp-04";
+    }
+
+    grouping simple-nat {
+      leaf outbound-nat-address {
+        type inet:ip-address;
+      }
+    }
+
+    grouping simple-napt {
+      leaf source-port {
+        type inet:port-number;
+      }
+      leaf outbound-napt-address {
+        type inet:ip-address;
+      }
+      leaf destination-port {
+        type inet:port-number;
+      }
+    }
+
+    grouping prefix-traffic-descriptor {
+        description
+        "Traffic descriptor group collects parameters to
+         identify target traffic flow.  It represents
+         source/destination as IP prefixes";
+
+        leaf destination-ip {
+            type inet:ip-prefix;
+            description "Rule of destination IP";
+        }
+        leaf source-ip {
+            type inet:ip-prefix;
+            description "Rule of source IP";
+        }
+    }
+}

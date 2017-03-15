@@ -1,0 +1,676 @@
+module ietf-dmm-fpcbase {
+    namespace "urn:ietf:params:xml:ns:yang:fpcbase";
+    prefix fpcbase;
+
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
+    import ietf-dmm-fpc-pmip { prefix fpc-pmip; revision-date 2016-01-19; }
+    import ietf-traffic-selector-types { prefix traffic-selectors; }
+    import ietf-dmm-fpc-policyext { prefix fpcpolicyext; }
+    import ietf-dmm-threegpp { prefix threegpp; }
+    import ietf-pmip-qos { prefix qos-pmip; }
+
+    organization "IETF DMM Working Group";
+    contact "Satoru Matsushima <satoru.matsushima@g.softbank.co.jp>";
+
+    description
+    "This module contains YANG definition for
+     Forwarding Policy Configuration Protocol.(FPCP)";
+
+    revision 2016-08-03 {
+        description "Changes based on -04 version of FPC draft.";
+        reference "draft-ietf-dmm-fpc-cpdp-04";
+    }
+
+    feature fpc-basic-agent {
+        description "This is an agent co-located with a DPN.  In this case
+        only DPN Peer Groups, the DPN Id and Control Protocols are exposed
+        along with the core structures.";
+    }
+    feature fpc-multi-dpn {
+        description "The agent supports multiple DPNs.";
+    }
+
+    typedef fpc-identity {
+        type union {
+            type uint32;
+            type string;
+            type instance-identifier;
+        }
+    }
+
+    grouping target-value {
+      leaf target {
+          type fpc-identity;
+      }
+    }
+
+    grouping targets-value {
+      list targets {
+          key "target";
+          leaf target {
+            type fpc-identity;
+          }
+          leaf-list dpn-id {
+                type fpcbase:fpc-dpn-id;
+          }
+      }
+    }
+
+    // Descriptor Structure
+    typedef fpc-descriptor-id-type {
+        type fpcbase:fpc-identity;
+        description "Descriptor-ID";
+    }
+    identity fpc-descriptor-type {
+        description "A traffic descriptor";
+    }
+    grouping fpc-descriptor-id {
+      leaf descriptor-id {
+        type fpcbase:fpc-identity;
+      }
+    }
+
+    identity pmip-selector-descriptor {
+      base "fpcbase:fpc-descriptor-type";
+    }
+    identity prefix-descriptor {
+      base "fpcbase:fpc-descriptor-type";
+    }
+    identity threegpp-tft-decriptor {
+      base "fpcbase:fpc-descriptor-type";
+    }
+
+    grouping fpc-descriptor {
+        uses fpcbase:fpc-descriptor-id;
+        leaf descriptor-type {
+          mandatory true;
+          type identityref {
+            base "fpc-descriptor-type";
+          }
+          description "Descriptor Type";
+        }
+        choice descriptor-value {
+          case all-traffic {
+            leaf all-traffic {
+              type empty;
+            }
+          }
+          case pmip-selector {
+            uses traffic-selectors:traffic-selector;
+          }
+          case prefix-descriptor {
+              uses fpcpolicyext:prefix-traffic-descriptor;
+          }
+          case threegpp-tft {
+              uses threegpp:tft;
+          }
+        }
+    }
+
+    // Action Structure
+    typedef fpc-action-id-type {
+        type fpcbase:fpc-identity;
+        description "Action-ID";
+    }
+    identity fpc-action-type {
+        description "Action Type";
+    }
+    grouping fpc-action-id {
+      leaf action-id {
+        type fpcbase:fpc-action-id-type;
+      }
+    }
+
+    identity simple-nat-action {
+      base "fpcbase:fpc-action-type";
+    }
+    identity simple-napt-action {
+      base "fpcbase:fpc-action-type";
+    }
+    identity copy-action {
+      base "fpcbase:fpc-action-type";
+    }
+    identity drop-action {
+      base "fpcbase:fpc-action-type";
+    }
+
+    grouping fpc-action {
+        uses fpcbase:fpc-action-id;
+        leaf action-type {
+          mandatory true;
+          type identityref {
+            base "fpc-action-type";
+          }
+          description "Action Type";
+        }
+        choice action-value {
+          case drop {
+            leaf drop {
+              type empty;
+            }
+          }
+          case simple-nat {
+              uses fpcpolicyext:simple-nat;
+          }
+          case simple-napt {
+              uses fpcpolicyext:simple-napt;
+          }
+          case copy-forward {
+              uses fpcbase:copy-forward;
+          }
+        }
+    }
+
+    // Rule Structure
+    grouping fpc-rule {
+        description
+          "FPC Rule.  When no actions are present the action is DROP.
+          When no Descriptors are empty the default is 'all traffic'.";
+        list descriptors {
+          key descriptor-id;
+          uses fpcbase:fpc-descriptor-id;
+          leaf direction {
+            type fpc-direction;
+          }
+        }
+        list actions {
+          key action-id;
+          leaf order {
+              type uint32;
+          }
+          uses fpcbase:fpc-action-id;
+        }
+    }
+
+    // Policy Structures
+    typedef fpc-policy-id {
+        type fpcbase:fpc-identity;
+    }
+    grouping fpc-policy {
+        leaf policy-id {
+            type fpcbase:fpc-policy-id;
+        }
+        list rules {
+            key order;
+            leaf order {
+              type uint32;
+            }
+            uses fpcbase:fpc-rule;
+        }
+    }
+
+    // Policy Group
+    typedef fpc-policy-group-id {
+        type fpcbase:fpc-identity;
+    }
+    grouping fpc-policy-group {
+      leaf policy-group-id {
+        type fpcbase:fpc-policy-group-id;
+      }
+      leaf-list policies {
+        type fpcbase:fpc-policy-id;
+      }
+    }
+
+    // Mobility Structures
+    // Port Group
+    typedef fpc-port-id {
+        type fpcbase:fpc-identity;
+    }
+    grouping fpc-port {
+        leaf port-id {
+            type fpcbase:fpc-port-id;
+        }
+        leaf-list policy-groups {
+            type fpcbase:fpc-policy-group-id;
+        }
+    }
+
+    // Context Group
+    typedef fpc-context-id {
+        type fpcbase:fpc-identity;
+    }
+    grouping fpc-context-profile {
+        description "A profile that applies to a specific direction";
+        leaf tunnel-local-address {
+            type inet:ip-address;
+            description "Uplink endpoint address of the DPN which agent exists.";
+        }
+        leaf tunnel-remote-address {
+            type inet:ip-address;
+            description "Uplink endpoint address of the DPN which agent exists.";
+        }
+        leaf lifetime {
+            type uint32;
+        }
+        leaf tunnel-mtu-size {
+            type uint32;
+            description "Tunnel MTU size";
+        }
+        container mobility-tunnel-parameters {
+            description "Specifies profile specific uplink tunnel parameters to the DPN which the agent exists. The profiles includes GTP/TEID for 3gpp profile, GRE/Key for ietf-pmip profile, or new profile if anyone will define it.";
+            uses fpcbase:mobility-info;
+        }
+        container nexthop {
+            uses fpcbase:fpc-nexthop;
+        }
+        container qos-profile-parameters {
+            uses fpcbase:fpc-qos-profile;
+        }
+        container dpn-parameters {
+        }
+        list vendor-parameters {
+            key "vendor-id vendor-type";
+            uses fpcbase:vendor-attributes;
+        }
+    }
+
+    typedef fpc-direction {
+       type enumeration {
+         enum uplink;
+         enum downlink;
+       }
+    }
+
+    grouping fpc-context {
+        leaf context-id {
+            type fpcbase:fpc-context-id;
+        }
+        leaf dormant {
+            type boolean;
+        }
+        leaf-list ports {
+            type fpcbase:fpc-port-id;
+        }
+        leaf dpn-group {
+          type fpcbase:fpc-dpn-group-id;
+        }
+        leaf-list delegating-ip-prefixes {
+            type inet:ip-prefix;
+        }
+        container ul {
+            if-feature fpcbase:fpc-basic-agent;
+            uses fpcbase:fpc-context-profile;
+        }
+        container dl {
+            if-feature fpcbase:fpc-basic-agent;
+            uses fpcbase:fpc-context-profile;
+        }
+        list dpns {
+            if-feature fpcbase:fpc-multi-dpn;
+            key "dpn-id direction";
+            leaf dpn-id {
+                type fpcbase:fpc-dpn-id;
+            }
+            leaf direction {
+                mandatory true;
+                type fpcbase:fpc-direction;
+            }
+            uses fpcbase:fpc-context-profile;
+        }
+        leaf parent-context {
+            type fpcbase:fpc-context-id;
+        }
+        uses threegpp:threegpp-properties;
+    }
+
+    // Mobility (Tunnel) Information
+    grouping mobility-info {
+        choice mobprofile-parameters {
+            case nothing {
+              leaf none {
+                type empty;
+              }
+            }
+            case pmip-tunnel {
+              uses fpc-pmip:pmip-mobility;
+              choice pmiptunnel-or-ref {
+                  case defined-selector {
+                    uses traffic-selectors:traffic-selector;
+                  }
+                  case predefined-selector {
+                     leaf selector-reference {
+                        type fpcbase:fpc-identity;
+                     }
+                  }
+              }
+            }
+            case threegpp-tunnel {
+              uses threegpp:threeGPP-tunnel;
+              choice tft-or-ref {
+                  case defined-tft {
+                    uses threegpp:tft;
+                  }
+                  case predefined-tft {
+                     leaf tft-reference {
+                        type fpcbase:fpc-identity;
+                     }
+                  }
+              }
+            }
+        }
+    }
+
+    // Next Hop Structures
+    typedef fpcp-service-path-id {
+        type uint32 {
+            range "0..33554431";
+        }
+        description "SERVICE_PATH_ID";
+    }
+
+    identity fpc-nexthop-type {
+        description "Next Hop Type";
+    }
+    identity fpc-nexthop-ip {
+        base "fpcbase:fpc-nexthop-type";
+    }
+    identity fpc-nexthop-servicepath {
+        base "fpcbase:fpc-nexthop-type";
+    }
+    grouping fpc-nexthop {
+        leaf nexthop-type {
+            type identityref {
+              base "fpcbase:fpc-nexthop-type";
+            }
+        }
+        choice nexthop-value {
+            case ip {
+                leaf ip {
+                  type inet:ip-address;
+                }
+            }
+            case servicepath {
+                leaf servicepath {
+                    type fpcbase:fpcp-service-path-id;
+                }
+            }
+        }
+    }
+
+    // QoS Information
+    identity fpc-qos-type {
+        description "Base identity from which specific uses of QoS types are derived.";
+    }
+    grouping fpc-qos-profile {
+        leaf qos-type {
+            type identityref {
+                base fpcbase:fpc-qos-type;
+            }
+            description "the profile type";
+        }
+        choice value {
+          case qos-pmip {
+              uses qos-pmip:qosattribute;
+          }
+          case threegpp-qos {
+            uses threegpp:threeGPP-QoS;
+          }
+        }
+    }
+
+    // Vendor Specific Attributes
+    identity vendor-specific-type {
+        description "Vendor Specific Attribute Type";
+    }
+    grouping vendor-attributes {
+        leaf vendor-id {
+            type fpcbase:fpc-identity;
+        }
+        leaf vendor-type {
+            type identityref {
+                base "fpcbase:vendor-specific-type";
+            }
+        }
+        choice value {
+            case empty-type {
+                leaf empty-type {
+                    type empty;
+                }
+            }
+        }
+    }
+
+    // Topology
+    typedef fpc-domain-id {
+        type fpcbase:fpc-identity;
+    }
+    grouping fpc-domain {
+      leaf domain-id {
+        type fpcbase:fpc-domain-id;
+      }
+      leaf domain-name {
+        type string;
+      }
+      leaf domain-type {
+        type string;
+      }
+    }
+
+
+    typedef fpc-dpn-id {
+        type fpcbase:fpc-identity;
+        description "DPN Identifier";
+    }
+    identity fpc-dpn-control-protocol {
+        description "DPN Control Protocol";
+    }
+    grouping fpc-dpn {
+        leaf dpn-id {
+          type fpcbase:fpc-dpn-id;
+        }
+        leaf dpn-name {
+          type string;
+        }
+        leaf-list dpn-groups {
+          type fpcbase:fpc-dpn-group-id;
+        }
+        leaf node-reference {
+          type instance-identifier;
+        }
+        // WORKAROUND for OsgiBundleScanningSchemaService not picking up the
+        // fpc augments.
+        leaf topic {
+          type string;
+        }
+    }
+
+    typedef fpc-dpn-group-id {
+        type fpcbase:fpc-identity;
+        description "DPN Group Identifier";
+    }
+    identity fpc-forwaridingplane-role {
+        description "Role of DPN Group in the Forwarding Plane";
+    }
+    identity fpc-access-type {
+        description "Access Type of the DPN Group";
+    }
+    identity fpc-mobility-profile-type {
+        description "Mobility Profile Type";
+    }
+
+    grouping fpc-dpn-peer-group {
+        leaf remote-dpn-group-id {
+            type fpcbase:fpc-dpn-group-id;
+        }
+        leaf remote-mobility-profile {
+            type identityref {
+                base "fpcbase:fpc-mobility-profile-type";
+            }
+        }
+        leaf remote-data-plane-role {
+            type identityref {
+                base "fpcbase:fpc-forwaridingplane-role";
+            }
+        }
+        leaf remote-endpoint-address {
+            type inet:ip-address;
+        }
+        leaf local-endpoint-address {
+            type inet:ip-address;
+        }
+        leaf tunnel-mtu-size {
+            type uint32;
+        }
+    }
+
+    // Events, Probes & Notifications
+    identity event-type {
+        description "Base Event Type";
+    }
+
+    typedef event-type-id {
+        type uint32;
+    }
+
+    grouping monitor-id {
+      leaf monitor-id {
+        type fpcbase:fpc-identity;
+      }
+    }
+
+    identity report-type {
+      description "Type of Report";
+    }
+    identity periodic-report {
+      base "fpcbase:report-type";
+    }
+    identity threshold-report {
+      base "fpcbase:report-type";
+    }
+    identity scheduled-report {
+      base "fpcbase:report-type";
+    }
+    identity events-report {
+      base "fpcbase:report-type";
+    }
+
+    grouping report-config {
+      choice event-config-value {
+        case periodic-config {
+            leaf period {
+              type uint32;
+            }
+        }
+        case threshold-config {
+            leaf lo-thresh {
+              type uint32;
+            }
+            leaf hi-thresh {
+              type uint32;
+            }
+        }
+        case scheduled-config {
+            leaf report-time {
+              type uint32;
+            }
+        }
+        case events-config-ident {
+            leaf-list event-identities {
+              type identityref {
+                base "fpcbase:event-type";
+              }
+            }
+        }
+        case events-config {
+            leaf-list event-ids {
+              type uint32;
+            }
+        }
+      }
+    }
+
+    grouping monitor-config {
+      uses fpcbase:monitor-id;
+      uses fpcbase:target-value;
+      uses fpcbase:report-config;
+    }
+
+    grouping report {
+      uses fpcbase:monitor-config;
+      choice report-value {
+        leaf trigger {
+          type fpcbase:event-type-id;
+        }
+        case simple-empty {
+          leaf nothing {
+            type empty;
+          }
+        }
+        case simple-val32 {
+          leaf val32 {
+            type uint32;
+          }
+        }
+        case any-data {
+          leaf data {
+            type string;
+          }
+        }
+      }
+    }
+
+    // PMIP Identities
+    identity ietf-pmip-access-type {
+      base "fpcbase:fpc-access-type";
+    }
+
+    identity fpcp-qos-index-pmip {
+        base "fpcbase:fpc-qos-type";
+    }
+    identity traffic-selector-mip6 {
+        base "fpcbase:fpc-descriptor-type";
+    }
+    identity ietf-pmip {
+        base "fpcbase:fpc-mobility-profile-type";
+    }
+
+    // Threegpp
+    identity threeGPP-qos-profile-parameters {
+        base "fpcbase:fpc-qos-type";
+    }
+
+    identity threeGPP-access-type {
+      base "fpcbase:fpc-access-type";
+    }
+
+    // Profile Type
+    identity threeGPP-mobility {
+         base "fpcbase:fpc-mobility-profile-type";
+    }
+
+    // Policy Extensions
+    identity service-function {
+        base "fpcbase:fpc-descriptor-type";
+        description "Base Identifier for Service Functions.";
+    }
+
+    identity napt-service {
+        base "service-function";
+    }
+
+    identity nat-service {
+        base "service-function";
+    }
+
+    identity copy-forward {
+      base "fpcbase:fpc-descriptor-type";
+      description "Copies a packet then forwards to a specific destination";
+    }
+    grouping copy-forward {
+      container destination {
+        choice value {
+          case port-ref {
+            leaf port-ref {
+              type fpcbase:fpc-port-id;
+            }
+          }
+          case context-ref {
+            leaf context-ref {
+              type fpcbase:fpc-context-id;
+            }
+          }
+        }
+      }
+    }
+}

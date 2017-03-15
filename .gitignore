@@ -1,0 +1,53 @@
+# Ignore Everything
+
+.*
+cli/*
+target/*
+karaf/*
+artifacts/*
+api/.*
+api/target/*
+api/src/main/*
+features/target/*
+features/src/main/*
+it/target/*
+it/src/test/java/org/opendaylight/fpcpagent/*
+impl/target/*
+impl/src/test/*
+impl/src/main/config/*
+impl/src/main/yang/*
+impl/src/main/yang-gen-config/*
+impl/src/main/java/org/opendaylight/*
+
+# Except for the themes directories:
+
+# pom files
+!pom.xml
+!karaf/pom.xml
+!it/pom.xml
+!impl/pom.xml
+!features/pom.xml
+!artifacts/pom.xml
+!api/pom.xml
+
+# features file
+!features/src/main/features
+
+# git ignore file
+!.gitignore
+
+# api directory
+!api/src/main/yang
+
+# impl directories
+!impl/src/main/java/org/opendaylight/fpc
+#!impl/src/main/java/org/opendaylight/fpcpagent/impl/*
+#!impl/src/main/java/org/opendaylight/fpcpagent/transforms/*
+#!impl/src/main/java/org/opendaylight/fpcpagent/transforms/of13templateopt/*
+
+# it directories
+!it/src/test/java/org/opendaylight/fpcpagent/it
+
+# shipping script
+!project_backup.sh
+
