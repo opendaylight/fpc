@@ -1,0 +1,19 @@
+<fpc-config xmlns="urn:opendaylight:fpc:config">
+  <monitor-threads>4</monitor-threads>
+  <scheduled-monitors-poolsize>4</scheduled-monitors-poolsize>
+  <dpn-listener-uri>tcp://127.0.0.1:5569</dpn-listener-uri>
+  <dpn-listener-id>1</dpn-listener-id>
+  <dpn-client-uri>tcp://127.0.0.1:5559</dpn-client-uri>
+  <dpn-client-threads>5</dpn-client-threads>
+  <metricsupdate-ms>10000</metricsupdate-ms>
+  <mobilityupdate-ms>30000</mobilityupdate-ms>
+  <activation-threads>5</activation-threads>
+  <target-read-limit>10</target-read-limit>
+  <http-notifier-clients>3</http-notifier-clients>
+  <zmq-nbi-server-poolsize>1</zmq-nbi-server-poolsize>
+  <zmq-nbi-server-uri>tcp://127.0.0.1:5570</zmq-nbi-server-uri>
+  <zmq-nbi-inproc-uri>inproc://backend</zmq-nbi-inproc-uri>
+  <zmq-nbi-handler-poolsize>10</zmq-nbi-handler-poolsize>
+  <http-nio2-nb-poolsize>80</http-nio2-nb-poolsize>
+  <http-nio2-nb-port>9292</http-nio2-nb-port>
+</fpc-config>

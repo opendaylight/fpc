@@ -1,0 +1,79 @@
+module fpc-config {
+    yang-version 1;
+    namespace "urn:opendaylight:fpc:config";
+    prefix fpc-config;
+
+    description
+      "Configuration for ...";
+
+    revision "2016-09-27" {
+        description
+            "Initial revision.";
+    }
+
+    container fpc-config {
+        leaf scheduled-monitors-poolsize {
+          type uint16;
+        }
+        leaf monitor-threads  {
+          type uint16;
+        }
+        leaf dpn-listener-uri {
+          type string;
+        }
+        leaf dpn-listener-id {
+          type string;
+        }
+        leaf dpn-client-uri {
+          type string;
+        }
+        leaf dpn-client-threads {
+          type uint16;
+        }
+        leaf metricsupdate-ms {
+          type uint32;
+        }
+        leaf mobilityupdate-ms {
+          type uint32;
+        }
+        leaf activation-threads {
+          type uint16;
+        }
+        leaf target-read-limit {
+          type uint16;
+        }
+        leaf default-tenant-id {
+          type string;
+        }
+        leaf default-group-id {
+          type string;
+        }
+        leaf prefers-fast-clients {
+          type boolean;
+        }
+        leaf http-notifier-clients {
+          type uint16;
+        }
+        leaf zmq-nbi-server-poolsize {
+          type uint16;
+        }
+        leaf zmq-nbi-server-uri {
+          type string;
+        }
+        leaf zmq-nbi-inproc-uri {
+          type string;
+        }
+        leaf zmq-nbi-handler-poolsize {
+          type uint16;
+        }
+        leaf http-nio2-nb-poolsize {
+          type uint16;
+        }
+        leaf http-nio2-nb-port {
+          type uint16;
+        }
+        leaf max-trans-rate {
+          type uint16;
+        }
+    }
+}

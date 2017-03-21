@@ -1,0 +1,1872 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="2.9" jmeter="3.0 r1743807">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Agent Generic Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1472850574000</longProp>
+        <longProp name="ThreadGroup.end_time">1472850574000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="false">
+          <collectionProp name="AuthManager.auth_list">
+            <elementProp name="" elementType="Authorization">
+              <stringProp name="Authorization.url">http://localhost:8181</stringProp>
+              <stringProp name="Authorization.username">admin</stringProp>
+              <stringProp name="Authorization.password">admin</stringProp>
+              <stringProp name="Authorization.domain"></stringProp>
+              <stringProp name="Authorization.realm">application</stringProp>
+            </elementProp>
+          </collectionProp>
+        </AuthManager>
+        <hashTree/>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">8181</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path"></stringProp>
+          <stringProp name="HTTPSampler.concurrentPool">6</stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Client Binding" enabled="true"/>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Bind HTTP Client" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;tenant-id&quot;: &quot;default&quot;,&#xd;
+        &quot;supported-features&quot;: [&#xd;
+            &quot;urn:ietf:params:xml:ns:yang:fpcagent:fpc-bundles&quot;,&#xd;
+            &quot;urn:ietf:params:xml:ns:yang:fpcagent:operation-ref-scope&quot;,&#xd;
+            &quot;urn:ietf:params:xml:ns:yang:fpcagent:fpc-agent-assignments&quot;,&#xd;
+            &quot;urn:ietf:params:xml:ns:yang:fpcagent:instruction-bitset&quot;&#xd;
+        ],&#xd;
+        &quot;endpoint-uri&quot;: &quot;http://127.0.0.1:9997/&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/fpc:register_client</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="DPN Setup (Only Once)" enabled="true"/>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Add DPN" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;dpns&quot;: [&#xd;
+        {&#xd;
+            &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+            &quot;dpn-name&quot;: &quot;site1-anchor1&quot;,&#xd;
+            &quot;dpn-groups&quot;: [&#xd;
+                &quot;foo&quot;&#xd;
+            ],&#xd;
+            &quot;fpc:topic&quot;: &quot;1&quot;&#xd;
+        }&#xd;
+    ]&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-topology/dpns/dpn1</stringProp>
+            <stringProp name="HTTPSampler.method">PUT</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Get Toology - Post DPN Install" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value"></stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">application/json</stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-topology/dpns/dpn1</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Get Agent Info" enabled="false">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">application/json</stringProp>
+          <stringProp name="HTTPSampler.path">/restconf/config/ietf-dmm-fpcagent:fpc-agent-info</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Agent - Config - Simple CREATE Test Group" enabled="true">
+          <stringProp name="TestPlan.comments">Only Tests Header Logic - it is NOT a cache test</stringProp>
+        </OnceOnlyController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - CREATE - Ref Scope=none - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;1&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:a.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                    	&quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;3333&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;2222&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;create&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - CREATE - Ref Scope=op - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;2&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:b.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;3333&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;4444&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;create&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;op&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - CREATE - Ref Scope=bundle - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;3&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:c.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;5555&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;6666&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;create&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;bundle&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - CREATE - Ref Scope=storage - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;4&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:d.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;7777&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;8888&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;create&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;storage&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - CREATE - Ref Scope=unknown - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;5&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:e.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;9999&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;11111&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;create&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;unknown&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - CREATE - Ref Scope=unassigned - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;6&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:f.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;22222&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;33333&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;create&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - CREATE (FAIL) - No Body" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;7&quot;,&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;create&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Error-Type-Id is Zero" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-1150521199">&quot;error-type-id&quot;:0</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Get" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;8&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:a.example.com&quot;&#xd;
+            },&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:b.example.com&quot;&#xd;
+            },&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:d.example.com&quot;&#xd;
+            }           &#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;query&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;storage&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Agent - Config - Simple UPDATE Test Group" enabled="true">
+          <stringProp name="TestPlan.comments">Only Tests Header Logic - it is NOT a cache test</stringProp>
+        </OnceOnlyController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - UPDATE - Ref Scope=none - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;9&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:a.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;44444&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;55555&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - UPDATE - Ref Scope=op - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;10&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:b.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;44444&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;55555&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - UPDATE - Ref Scope=bundle - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;11&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:c.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;44444&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;55555&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - UPDATE - Ref Scope=storage - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;12&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:d.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;44444&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;55555&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - UPDATE - Ref Scope=unknown - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;13&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:e.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;44444&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;55555&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - UPDATE - Ref Scope=unassigned - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;14&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;/imsi:9135551234/apn:f.example.com&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;44444&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;55555&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - UPDATE (FAIL) - No Body" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;15&quot;,&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Error-Type-Id is Zero" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-1150521199">&quot;error-type-id&quot;:0</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Get" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;16&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:e.example.com&quot;&#xd;
+            },&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:k.example.com&quot;&#xd;
+            },&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:d.example.com&quot;&#xd;
+            }           &#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;query&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;storage&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Agent - Config - Simple DELETE Test Group" enabled="true">
+          <stringProp name="TestPlan.comments">Only Tests Header Logic - it is NOT a cache test</stringProp>
+        </OnceOnlyController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - DELETE - Ref Scope=none - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;17&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+                { &quot;target&quot;: &quot;/imsi:9135551234/apn:a.example.com&quot; }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;delete&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - DELETE - Ref Scope=op - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;18&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+            { &quot;target&quot;: &quot;/imsi:9135551234/apn:b.example.com&quot; }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;delete&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;op&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - DELETE - Ref Scope=bundle - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;19&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+            { &quot;target&quot;: &quot;/imsi:9135551234/apn:c.example.com&quot; }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;delete&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;bundle&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - DELETE - Ref Scope=storage - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;20&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+            { &quot;target&quot;: &quot;/imsi:9135551234/apn:d.example.com&quot; }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;delete&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;storage&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - DELETE - Ref Scope=unknown - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;21&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+            { &quot;target&quot;: &quot;/imsi:9135551234/apn:e.example.com&quot; }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;delete&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;unknown&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - DELETE - Ref Scope=unassigned - Context -1 per message" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;22&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+            { &quot;target&quot;: &quot;/imsi:9135551234/apn:f.example.com&quot; }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;delete&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Result OK-Notify-Follows Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-812546946">&quot;result&quot;:&quot;ok-notify-follows&quot;</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - CONFIGURE - DELETE (FAIL) - No Body" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;23&quot;,&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;delete&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Error-Type-Id is Six" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-1150521193">&quot;error-type-id&quot;:6</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Get" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;25&quot;,&#xd;
+        &quot;targets&quot;: [&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:a.example.com&quot;&#xd;
+            },&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:b.example.com&quot;&#xd;
+            },&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:c.example.com&quot;&#xd;
+            } ,&#xd;
+                        {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:d.example.com&quot;&#xd;
+            },&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:e.example.com&quot;&#xd;
+            },&#xd;
+            {&#xd;
+                &quot;target&quot;: &quot;/imsi:9135551234/apn:f.example.com&quot;&#xd;
+            }          &#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;query&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;storage&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Authorization</stringProp>
+              <stringProp name="Header.value">Basic YWRtaW46YWRtaW4=</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="2.9" jmeter="3.0 r1743807">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="3GPP Contexts" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">250</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">400</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1472856334000</longProp>
+        <longProp name="ThreadGroup.end_time">1472856334000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="false">
+          <collectionProp name="AuthManager.auth_list">
+            <elementProp name="" elementType="Authorization">
+              <stringProp name="Authorization.url">http://localhost:8181</stringProp>
+              <stringProp name="Authorization.username">admin</stringProp>
+              <stringProp name="Authorization.password">admin</stringProp>
+              <stringProp name="Authorization.domain"></stringProp>
+              <stringProp name="Authorization.realm"></stringProp>
+            </elementProp>
+          </collectionProp>
+        </AuthManager>
+        <hashTree/>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">8181</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path"></stringProp>
+          <stringProp name="HTTPSampler.concurrentPool">6</stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Context ID Counter" enabled="true">
+          <stringProp name="CounterConfig.start">1</stringProp>
+          <stringProp name="CounterConfig.end"></stringProp>
+          <stringProp name="CounterConfig.incr">1</stringProp>
+          <stringProp name="CounterConfig.name">counter3</stringProp>
+          <stringProp name="CounterConfig.format"></stringProp>
+          <boolProp name="CounterConfig.per_user">false</boolProp>
+        </CounterConfig>
+        <hashTree/>
+        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Op Counter" enabled="true">
+          <stringProp name="CounterConfig.start">1</stringProp>
+          <stringProp name="CounterConfig.end"></stringProp>
+          <stringProp name="CounterConfig.incr">1</stringProp>
+          <stringProp name="CounterConfig.name">counter1</stringProp>
+          <stringProp name="CounterConfig.format"></stringProp>
+          <boolProp name="CounterConfig.per_user">false</boolProp>
+        </CounterConfig>
+        <hashTree/>
+        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Context Counter" enabled="true">
+          <stringProp name="CounterConfig.start">100000</stringProp>
+          <stringProp name="CounterConfig.end"></stringProp>
+          <stringProp name="CounterConfig.incr">1</stringProp>
+          <stringProp name="CounterConfig.name">counter2</stringProp>
+          <stringProp name="CounterConfig.format"></stringProp>
+          <boolProp name="CounterConfig.per_user">false</boolProp>
+        </CounterConfig>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Authorization</stringProp>
+              <stringProp name="Header.value">Basic YWRtaW46YWRtaW4=</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Connection</stringProp>
+              <stringProp name="Header.value">keep-alive</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Create A Context" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;${counter1}&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;session uplink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;imsi-9135551234-${counter3}&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                    	&quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;1111&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;2222&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout">5000</stringProp>
+          <stringProp name="HTTPSampler.response_timeout">7000</stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">false</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Uniform Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">0</stringProp>
+          <stringProp name="RandomTimer.range">100.0</stringProp>
+        </UniformRandomTimer>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Update A Context" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&#xd;
+    &quot;input&quot;: {&#xd;
+        &quot;op-id&quot;: &quot;${counter2}&quot;,&#xd;
+        &quot;contexts&quot;: [&#xd;
+            {&#xd;
+                &quot;instructions&quot;: {&#xd;
+                    &quot;instr-3gpp-mob&quot;: &quot;downlink&quot;&#xd;
+                },&#xd;
+                &quot;context-id&quot;: &quot;imsi-9135551234-${counter3}&quot;,&#xd;
+                &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
+                &quot;delegating-ip-prefixes&quot;: [&#xd;
+                    &quot;192.168.1.5/32&quot;&#xd;
+                ],&#xd;
+                &quot;ul&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                    	&quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;5555&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dl&quot;: {&#xd;
+                    &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
+                    &quot;tunnel-remote-address&quot;: &quot;10.1.1.1&quot;,&#xd;
+                    &quot;mobility-tunnel-parameters&quot;: {&#xd;
+                        &quot;tunnel-type&quot;: &quot;ietf-dmm-threegpp:gtpv1&quot;,&#xd;
+                        &quot;tunnel-identifier&quot;: &quot;4444&quot;&#xd;
+                    },&#xd;
+                    &quot;dpn-parameters&quot;: {}&#xd;
+                },&#xd;
+                &quot;dpns&quot;: [&#xd;
+                    {&#xd;
+                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;direction&quot;: &quot;uplink&quot;,&#xd;
+                        &quot;dpn-parameters&quot;: {}&#xd;
+                    }&#xd;
+                ],&#xd;
+                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;ebi&quot;: &quot;5&quot;,&#xd;
+                &quot;lbi&quot;: &quot;5&quot;&#xd;
+            }&#xd;
+        ],&#xd;
+        &quot;client-id&quot;: &quot;1&quot;,&#xd;
+        &quot;session-state&quot;: &quot;complete&quot;,&#xd;
+        &quot;admin-state&quot;: &quot;enabled&quot;,&#xd;
+        &quot;op-type&quot;: &quot;update&quot;,&#xd;
+        &quot;op-ref-scope&quot;: &quot;none&quot;&#xd;
+    }&#xd;
+}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout">5000</stringProp>
+          <stringProp name="HTTPSampler.response_timeout">7000</stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/restconf/operations/ietf-dmm-fpcagent:configure</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">false</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
