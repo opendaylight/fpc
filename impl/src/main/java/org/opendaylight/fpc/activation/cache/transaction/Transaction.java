@@ -302,7 +302,7 @@ public class Transaction {
      * @param ts - Timestamp of completion
      */
     public void complete(long ts) {
-        countDown.increment();
+        countDown.decrement();
         if (countDown.longValue() == 0) {
             publish();
         }

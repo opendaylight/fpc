@@ -33,6 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.DeregisterClientInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.DeregisterClientOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.FpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.RegisterClientInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.RegisterClientOutput;
@@ -262,7 +263,7 @@ public class FpcServiceImpl implements FpcService {
     }
 
     @Override
-    public Future<RpcResult<Void>> deregisterClient(DeregisterClientInput input) {
+    public Future<RpcResult<DeregisterClientOutput>> deregisterClient(DeregisterClientInput input) {
          try {
              if (connections.remove(input.getClientId().toString()) != null) {
                  TenantManager.deregisterClient(input.getClientId());
@@ -270,10 +271,10 @@ public class FpcServiceImpl implements FpcService {
                  LOG.info("Connection Removed for Client {}", input.getClientId());
                  checkPoint();
              }
-             return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+             return Futures.immediateFuture(RpcResultBuilder.<DeregisterClientOutput>success().build());
          } catch (Exception exc) {
             ErrorLog.logError("Error in new Connection Binding" + exc.getMessage(), exc.getStackTrace());
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed()
+            return Futures.immediateFuture(RpcResultBuilder.<DeregisterClientOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION,
                             "Error Occurred During Client Binding",
                             exc)

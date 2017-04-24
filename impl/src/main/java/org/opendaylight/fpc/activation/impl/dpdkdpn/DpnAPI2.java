@@ -328,6 +328,24 @@ public class DpnAPI2 {
     }
 
     /**
+     * Schedule to Delete Bearer.
+     * @param api - DpnAPI2
+     * @param dpn - DPN
+     * @param s1u_sgw_gtpu_teid - SGW GTP-U TEID
+     * @param time - Time in Seconds to schedule
+     */
+    public void delete_bearer(
+            DpnAPI2 api,
+            String dpn,
+            Long s1u_sgw_gtpu_teid,
+            Long time)
+    {
+
+
+        DeleteContextScheduler.getInstance().delete(api, dpn, s1u_sgw_gtpu_teid, time);
+    }
+
+    /**
      * Delete Bearer.
      * @param dpn - DPN
      * @param s1u_sgw_gtpu_teid - SGW GTP-U TEID
@@ -347,7 +365,6 @@ public class DpnAPI2 {
         	ErrorLog.logError(e.getStackTrace());
         };
     }
-
     /**
      * Short to Byte
      * @param value - Short
