@@ -91,7 +91,7 @@ public class DpnAPIListener {
 
     // Message format
     // [ Message - 1 Byte ] [ Source DPN - 1 Byte ] [ IMSI - 8 bytes  ]
-    // [ EBI - 1 byte ] [ DSCP - 1 Byte ] [ Sender F-TEID - 4 bytes ]
+    // [ EBI - 1 byte ] [ DSCP - 1 Byte ]
     /**
      * Decodes a DownlinkDataNotification
      * @param buf - message buffer
@@ -105,7 +105,7 @@ public class DpnAPIListener {
         return ddnB.setImsi(new ImsiType(toBigInt(buf, 2)))
             .setEbi(new EbiType(toShort(buf,6)))
             .setDscp(toShort(buf,7))
-            .setSenderFteid((long)toInt(buf,8))
+            //.setSenderFteid((long)toInt(buf,8))
             .build();
     }
 

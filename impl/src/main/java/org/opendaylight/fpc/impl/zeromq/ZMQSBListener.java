@@ -112,7 +112,7 @@ public class ZMQSBListener implements AutoCloseable {
             while ((!Thread.currentThread ().isInterrupted ()) &&
                     run) {
                 String addr = subscriber.recvStr();
-                String contents = subscriber.recvStr ();
+                String contents = subscriber.recvStr();
                 LOG.info(addr + " : " + contents);
                 Map.Entry<FpcDpnId, Object> entry = dpnApi.decode(contents.getBytes());
                 if (entry.getValue() instanceof DownlinkDataNotification) {

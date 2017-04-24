@@ -571,9 +571,6 @@ module ietf-dmm-fpcagent {
               leaf ebi {
                 type threegpp:ebi-type;
               }
-              leaf sender-fteid {
-                type uint32;
-              }
               leaf dscp {
                 type uint8;
               }
