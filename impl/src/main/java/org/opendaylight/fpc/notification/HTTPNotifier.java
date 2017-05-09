@@ -150,6 +150,8 @@ class HTTPNotifier implements Worker {
                         	ErrorLog.logError(e.getStackTrace());
                         } catch (HttpException e) {
                         	ErrorLog.logError(e.getStackTrace());
+                        } catch (Exception e){
+                        	ErrorLog.logError(e.getStackTrace());
                         }
                     }
                 }
