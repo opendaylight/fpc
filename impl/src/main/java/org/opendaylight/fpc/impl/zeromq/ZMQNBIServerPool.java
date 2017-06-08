@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,6 +31,9 @@ import com.google.common.base.Throwables;
  */
 public class ZMQNBIServerPool {
     private static final Logger LOG = LoggerFactory.getLogger(ZMQNBIServerPool.class);
+    /**
+     * QName
+     */
     public static final QName TOP_ODL_FPC_QNAME =
             QName.create("urn:ietf:params:xml:ns:yang:fpcagent", "2016-08-03","config-result-notification").intern();
     static final YangInstanceIdentifier configResultNotificationYII =
@@ -125,7 +128,7 @@ public class ZMQNBIServerPool {
          * Constructor.
          *
          * @param ctx - ZMQ Context
-         * @throws Exception
+         * @throws Exception - Throws Exception
          */
         public server_worker(ZContext ctx) throws Exception {
             this.ctx = ctx;

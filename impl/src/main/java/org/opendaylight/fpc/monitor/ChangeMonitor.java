@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -61,7 +61,7 @@ public class ChangeMonitor implements AutoCloseable {
         /**
          * Constructor.
          *
-         * @param clientId - Client Idnetifier
+         * @param clientId - Client Identifier
          * @param smb - SimpleMonitorBuilder prepared to generate the Notification.
          */
         public ThreshListener(ClientIdentifier clientId, SimpleMonitorBuilder smb) {

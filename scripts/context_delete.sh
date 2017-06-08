@@ -1,6 +1,6 @@
 #!/bin/bash
 # ------------------------------------------------------------------
-#  Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+#  Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
 #
 #  This program and the accompanying materials are made available under the
 #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,7 +17,7 @@ curl -i \
         "op-id": "3",
         "targets": [
             {
-                "target": "/ietf-dmm-fpcagent:tenants/tenant/default/fpc-mobility/contexts/imsi-9135551234"
+                "target": "/ietf-dmm-fpcagent:tenants/tenant/default/fpc-mobility/contexts/4294967297"
             }
         ],
         "client-id": "1",

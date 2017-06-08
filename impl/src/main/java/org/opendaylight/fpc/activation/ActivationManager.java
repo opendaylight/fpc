@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -109,6 +109,7 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
     public void removeDpn(Dpns dpn) {
         if (dpn != null) {
             LOG.info("Activation Manager - Removing Dpn " + dpn.getDpnId());
+            tenantMgr.getDpnInfo().get(dpn.getDpnId().toString()).activator.shutdown();
             tenantMgr.getDpnInfo().remove(dpn.getDpnId().toString());
         }
     }

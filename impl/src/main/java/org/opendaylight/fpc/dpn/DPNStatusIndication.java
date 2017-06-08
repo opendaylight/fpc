@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -14,43 +14,47 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev16080
  * Provides basic status changes,
  */
 public class DPNStatusIndication {
-    static public final FpcDpnId UNKNONW = new FpcDpnId("UKASSIGNED");
+    /**
+     * DpcDpnId with value UNASSIGNED
+     */
+    static public final FpcDpnId UNKNONW = new FpcDpnId("UNASSIGNED");
 
     /**
      * Basic DPN Status
      */
     public enum Status {
+        /**
+         * DPN HELLO
+         */
         HELLO,
+        /**
+         * DPN GOODBYE
+         */
         BYE,
+        /**
+         * DPN OVERLOAD INDICATION
+         */
         OVERLOAD_INDICATION
     }
 
     private final Status status;
-    private final FpcDpnId dpnId;
-    public byte[] rawId;
+    private final String key; //nodeId +"/"+ networkId
+    /**
+     * Node Reference of the DPN
+     */
+    public Short nodeRef;
 
     /**
      * Constructor providing the DPN and its associated Status.
      * @param status - DPN Status
-     * @param id - DPN Identity
+     * @param key - Combination of node id and network id
      */
     public DPNStatusIndication (Status status,
-                                FpcDpnId id) {
+                                String key) {
         this.status = status;
-        this.dpnId = id;
+        this.key = key;
     }
 
-    /**
-     * Constructor providing the DPN and its associated Status.
-     * @param status - DPN Status
-     * @param rawId - DPN Identity (as raw bytes)
-     */
-    public DPNStatusIndication (Status status,
-                                byte[] rawId) {
-        this.status = status;
-        this.dpnId = UNKNONW;
-        this.rawId = rawId;
-    }
 
     /**
      * Provides DPN Status
@@ -61,18 +65,10 @@ public class DPNStatusIndication {
     }
 
     /**
-     * Provides the DPN id
+     * Provides the DPN key - nodeId +"/"+ networkId
      * @return FpcDpnId
      */
-    public FpcDpnId getId() {
-        return dpnId;
-    }
-
-    /**
-     * Provides the DPN id
-     * @return byte array representing the DPN Id
-     */
-    public byte[] getRawId() {
-        return rawId;
+    public String getKey() {
+        return this.key;
     }
 }

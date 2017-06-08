@@ -1,6 +1,7 @@
+# coding: utf8
 #!/usr/bin/python
 
-#Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+#Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
 #
 #This program and the accompanying materials are made available under the
 #terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,13 +23,13 @@ Serving https server on localhost:8000
 You can use this to test GET and POST methods.
 
 """
-
+from SocketServer import ThreadingMixIn
 import BaseHTTPServer, SimpleHTTPServer
 import SocketServer
 import logging
 import cgi
 import ssl
-
+import json
 import sys
 
 if len(sys.argv) > 2:
@@ -42,6 +43,8 @@ else:
     I = ""
 
 count = 0
+class ThreadingServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
+    pass
 
 class ServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
@@ -59,12 +62,27 @@ class ServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             content_len = int(self.headers.getheader('content-length', 0))
             post_body = self.rfile.read(content_len)
             logging.warning(post_body)
+            json_body = json.loads(post_body)
             logging.warning("======= POST END =======")
             count += 1
             logging.warning("POST msg count: "+str(count))
         else:
             logging.warning("Content-Type is not application/json; charset=UTF-8'")
-        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+        if 'notify' in json_body and json_body['notify']['message-type']=='Downlink-Data-Notification':
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                resp = {}
+                resp['message-type'] = "Downlink-Data-Notification-Ack"
+                #resp['dl-buffering-duration'] = 5
+                #resp['dl-buffering-suggested-count'] = 16
+                resp['client-id'] = json_body['notify']['client-id']
+                resp['op-id'] = json_body['notify']['op-id']
+                resp['dpn-id'] = json_body['notify']['dpn-id']
+                self.wfile.write(json.dumps(resp))
+        else:
+            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+
         
 Handler = ServerHandler
 
@@ -74,7 +92,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'ssl':
     httpd.socket = ssl.wrap_socket (httpd.socket, certfile='./mycert.pem', server_side=True)
 else:
     isSSL = 'http'
-    httpd = SocketServer.TCPServer(("", PORT), Handler)
+    httpd = ThreadingServer(("", PORT), Handler)
 
 print "@rochacbruno Python http server version 0.1 (for testing purposes only)"
 print "Serving at: %(protocol)s://%(interface)s:%(port)s" % dict(interface=I or "localhost", port=PORT, protocol=isSSL)

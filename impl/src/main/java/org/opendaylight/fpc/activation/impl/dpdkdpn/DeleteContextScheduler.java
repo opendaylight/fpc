@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * Deletes a context scheduler
+ */
 public final class DeleteContextScheduler {
 
 	private static volatile DeleteContextScheduler instance;
@@ -27,13 +30,13 @@ public final class DeleteContextScheduler {
 	private static final Logger LOG = LoggerFactory.getLogger(DeleteContextScheduler.class);
 
 	class DeleteBearerCall implements Callable<DeleteBearerCall>{
-	    private final String dpnTopic;
+	    private final Short dpnTopic;
 	    private DpnAPI2 api;
 	    private Long s1u_sgw_gtpu_teid;
 	    ScheduledFuture<DeleteBearerCall> schedFuture = null;
 
-	    public DeleteBearerCall(DpnAPI2 api, String dpnTopic, Long s1u_sgw_gtpu_teid) {
-	        this.dpnTopic = dpnTopic;
+	    public DeleteBearerCall(DpnAPI2 api, Short dpnTopic2, Long s1u_sgw_gtpu_teid) {
+	        this.dpnTopic = dpnTopic2;
 	        this.s1u_sgw_gtpu_teid = s1u_sgw_gtpu_teid;
 	        this.api = api;
 	    }
@@ -74,6 +77,10 @@ public final class DeleteContextScheduler {
 
 	}
 
+	/**
+	 * Get an instance of DeleteContextScheduler
+	 * @return - instance of DeleteContextScheduler
+	 */
 	public static DeleteContextScheduler getInstance()
 	{
 		if (instance == null) {
@@ -86,7 +93,14 @@ public final class DeleteContextScheduler {
         return instance;
 	}
 
-	public void delete(DpnAPI2 api, String dpnTopic, Long s1u_sgw_gtpu_teid, Long time) {
+	/**
+	 * Delete a bearer after specified time
+	 * @param api - DPN API object
+	 * @param dpnTopic - ZMQ Topic of the DPN
+	 * @param s1u_sgw_gtpu_teid - GTPU TEID of the bearer
+	 * @param time - Time after which the delete should occur
+	 */
+	public void delete(DpnAPI2 api, Short dpnTopic, Long s1u_sgw_gtpu_teid, Long time) {
 
 		DeleteBearerCall deleteBearerInstance = new DeleteBearerCall(api, dpnTopic, s1u_sgw_gtpu_teid);
 		ScheduledFuture<DeleteBearerCall> futureValue = (ScheduledFuture<DeleteBearerCall>) scheduledExecutorService.schedule(deleteBearerInstance, time, TimeUnit.SECONDS);

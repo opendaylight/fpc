@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,9 +22,21 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
  * - teid Managers use the String readable (quad notation) of the IPv4 address as key.
  */
 public class DpnHolder {
+    /**
+     * IPv4 Pool Managers
+     */
     public Map<String, IPv4RangeManager> ipv4PoolManagers;
+    /**
+     * TEID MAnagers
+     */
     public Map<String, Counter> teidManagers;
+    /**
+     * Activator
+     */
     public Activator activator;
+    /**
+     * DPN
+     */
     public Dpns dpn;
 
     /**

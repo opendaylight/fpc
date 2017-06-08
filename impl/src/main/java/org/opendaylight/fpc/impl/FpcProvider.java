@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,11 +23,13 @@ import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.fpc.activation.ActivatorFactory;
 import org.opendaylight.fpc.activation.cache.StorageWriter;
 import org.opendaylight.fpc.activation.cache.transaction.Metrics;
+import org.opendaylight.fpc.activation.cache.transaction.WriteToCache;
 import org.opendaylight.fpc.activation.impl.dpdkdpn.DpdkImplFactory;
 import org.opendaylight.fpc.activation.workers.ActivationThreadPool;
 import org.opendaylight.fpc.activation.workers.MonitorThreadPool;
 import org.opendaylight.fpc.impl.zeromq.ZMQNBIServerPool;
 import org.opendaylight.fpc.impl.zeromq.ZMQSBListener;
+import org.opendaylight.fpc.impl.zeromq.ZMQSBMessagePool;
 import org.opendaylight.fpc.monitor.Events;
 import org.opendaylight.fpc.monitor.ScheduledMonitors;
 import org.opendaylight.fpc.notification.HTTPClientPool;
@@ -76,6 +78,10 @@ public class FpcProvider implements AutoCloseable {
     private ZMQNBIServerPool zmqNbi;
     private ZMQSBListener zmqSbListener;
 
+    /**
+     * Returns the instance of the FpcProvider
+     * @return FpcProvider instance
+     */
     public static FpcProvider getInstance() {
         return _instance;
     }
@@ -117,6 +123,17 @@ public class FpcProvider implements AutoCloseable {
             throw new Exception("FpcProvider - Error during start/run for ZMQ Client Pool. Exiting...");
         }
 
+        try {
+            ZMQSBMessagePool.createInstance(
+                    config.getDpnMessageProcessorThreads(),config.getNodeId(),config.getNetworkId());
+            ZMQSBMessagePool.getInstance().start();
+            ZMQSBMessagePool.getInstance().run();
+        } catch (Exception e) {
+        	ErrorLog.logError(e.getStackTrace());
+            close();
+            throw new Exception("FpcProvider - Error during start/run for ZMQ SB Message Pool. Exiting...");
+        }
+
         StorageWriter.init(dataBroker, config.getMobilityupdateMs());
 
         FpcIdentity defaultTenantId = new FpcIdentity(config.getDefaultTenantId());
@@ -124,6 +141,12 @@ public class FpcProvider implements AutoCloseable {
                 new HashMap<Class<? extends FpcDpnControlProtocol>,ActivatorFactory>();
         cpFactories.put(ZmqDpnControlProtocol.class, new DpdkImplFactory());
         TenantManager.populateTenant(defaultTenantId, cpFactories);
+
+        try{
+        	new Thread(new WriteToCache()).start();
+        } catch (Exception e) {
+        	ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
+        }
 
         this.activationService = new ActivationThreadPool(dataBroker,config.getActivationThreads());
         this.monitorService = new MonitorThreadPool(dataBroker, config.getMonitorThreads());
@@ -165,7 +188,7 @@ public class FpcProvider implements AutoCloseable {
                 config.getZmqNbiHandlerPoolsize());
 
         //ZMQ SB Listener
-        zmqSbListener = new ZMQSBListener(config.getDpnListenerUri(), config.getDpnListenerId());
+        zmqSbListener = new ZMQSBListener(config.getDpnListenerUri(), config.getZmqBroadcastAll(), config.getZmqBroadcastControllers(), config.getZmqBroadcastDpns(), config.getNodeId(), config.getNetworkId());
         zmqSbListener.open();
 
         ScheduledMonitors.init(config.getScheduledMonitorsPoolsize());
@@ -283,7 +306,7 @@ public class FpcProvider implements AutoCloseable {
                 tb.setTenantId(fpcid)
                   .setKey(new TenantKey(fpcid));
                 List<Tenant> tenants = new ArrayList<Tenant>();
-
+                tenants.add(tb.build());
                 WriteTransaction wt = dataBroker.newWriteOnlyTransaction();
                 wt.put(dsType, InstanceIdentifier.create(Tenants.class),
                           new TenantsBuilder()
@@ -317,13 +340,6 @@ public class FpcProvider implements AutoCloseable {
         if (fpcCoreServices != null) {
             fpcCoreServices.close();
         }
-        if (ZMQClientPool.getInstance() != null) {
-            try {
-                ZMQClientPool.getInstance().close();
-            } catch (Exception e) {
-            	ErrorLog.logError(e.getStackTrace());
-            }
-        }
         if (httpNotifierPool != null) {
             try {
                 httpNotifierPool.close();
@@ -340,6 +356,20 @@ public class FpcProvider implements AutoCloseable {
         }
         if (zmqSbListener != null) {
             zmqSbListener.stop();
+        }
+        if(ZMQSBMessagePool.getInstance() != null) {
+            try {
+            	ZMQSBMessagePool.getInstance().close();
+            } catch (Exception e) {
+            	ErrorLog.logError(e.getStackTrace());
+            }
+        }
+        if (ZMQClientPool.getInstance() != null) {
+            try {
+                ZMQClientPool.getInstance().close();
+            } catch (Exception e) {
+            	ErrorLog.logError(e.getStackTrace());
+            }
         }
 
         LOG.info("FpcProvider - Closed");

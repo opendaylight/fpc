@@ -1,11 +1,11 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.fpc.activation.impl.dpdkdpn;
+/*package org.opendaylight.fpc.activation.impl.dpdkdpn;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -27,7 +27,7 @@ import org.zeromq.ZMQ;
 /**
  * DPN API Command Line Test Harness
  */
-public class DpnCmd2 {
+/*public class DpnCmd2 {
     private static final String S1U_ENB_GTPU_IPV4 = "s1u_enb_gtpu_ipv4";
     private static final String S1U_ENB_GTPU_TEID = "s1u_enb_gtpu_teid";
     private static final String DEDICATED_EBI = "dedicated_ebi";
@@ -44,7 +44,7 @@ public class DpnCmd2 {
      * @param option - Options
      * @return Option Value (as String)
      */
-    private static String GetCmdOption(CommandLine cmd, String option) {
+    /*private static String GetCmdOption(CommandLine cmd, String option) {
         if (cmd.hasOption(option)) {
 
            return cmd.getOptionValue(option);
@@ -59,7 +59,7 @@ public class DpnCmd2 {
      * Test
      * @param args - Arguments
      */
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
 
         // create Options object
         Options options = new Options();
@@ -194,4 +194,4 @@ public class DpnCmd2 {
         socketT.interrupt();
         System.exit(0);
     }
-}
+}*/

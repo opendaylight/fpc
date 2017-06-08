@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,12 +18,12 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 
 /**
- * Generic Thread pool class which provides instances of Workers and uses a 
+ * Generic Thread pool class which provides instances of Workers and uses a
  * cycle iterator.  A CountdownLatch is used to signal all Workers simultaneously
  * to begin processing.
  *
  * @param <T> - A subclass of Worker
- * 
+ *
  * @see com.google.common.collect.Iterables
  * @see java.util.concurrent.CountDownLatch
  * @see org.opendaylight.fpc.utils.Worker
@@ -52,9 +52,9 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
     }
 
     /**
-     * Creates a Threadpool Factory 
+     * Creates a Threadpool Factory
      * @param db - Data Broker
-     * @return A Factory (Supplier of Worker subclass) 
+     * @return A Factory (Supplier of Worker subclass)
      */
     protected abstract Supplier<? extends T> getPoolFactory(DataBroker db);
 
@@ -69,7 +69,7 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
     /**
      * Starts the individual threads of the pool.  They SHOULD not process
      * until the count down signal is called via run.
-     * 
+     *
      * @see #run()
      * @throws Exception - thrown when an error occurs during start up.
      */
@@ -88,7 +88,7 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
 
     /**
      * Signals all threads to proceed with their work.
-     * 
+     *
      * @throws Exception - thrown when an error occurs during the signal
      */
     public void run() throws Exception {
@@ -98,7 +98,7 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
     /**
      * Shuts down the threads in this pool.  This is done by calling stop,
      * pausing 1 second and then calling close on the Worker.
-     * 
+     *
      * @throws Exception - thrown when any error occurs during the stop and close calls
      */
     protected void shutDown() throws Exception {
@@ -114,9 +114,9 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
     }
 
     /**
-     * Retrieves the next worker.  If the iterator is at the last element in the 
+     * Retrieves the next worker.  If the iterator is at the last element in the
      * pool it cycles to the first element.
-     * 
+     *
      * @return T - A subclass of Worker
      */
     public T getWorker() {

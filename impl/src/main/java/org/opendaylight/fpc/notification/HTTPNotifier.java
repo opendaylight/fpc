@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,16 +20,23 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.methods.HttpAsyncMethods;
+import org.json.JSONObject;
+import org.opendaylight.fpc.activation.impl.dpdkdpn.DpnAPI2;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.FpcCodecUtils;
 import org.opendaylight.fpc.utils.Worker;
+import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigResultNotification;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Notify;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.notify.value.DownlinkDataNotification;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -52,7 +60,8 @@ class HTTPNotifier implements Worker {
     private static final InstanceIdentifier<ConfigResultNotification> configResultNotificationII =
             InstanceIdentifier.create(ConfigResultNotification.class);
     private static final CloseableHttpAsyncClient client = HttpAsyncClients.createDefault();
-
+    private ResponseHandler<String> handler;
+    private DpnAPI2 api;
     // TODO - This is prob a bad idea... FIX ME!
     private static final Map<String, HttpURLConnection> connections = new ConcurrentHashMap<String, HttpURLConnection>();
     private static final FpcCodecUtils fpcCodecUtils;
@@ -80,8 +89,9 @@ class HTTPNotifier implements Worker {
         this.run = false;
         this.startSignal = startSignal;
         this.blockingNotificationQueue = blockingNotificationQueue;
+        handler = new BasicResponseHandler();
+        this.api = new DpnAPI2(ZMQClientPool.getInstance().getWorker());
     }
-
 
     @Override
     public boolean isOpen() {
@@ -91,6 +101,7 @@ class HTTPNotifier implements Worker {
     @Override
     public void stop() {
         this.run = false;
+        this.api = null;
     }
 
     @Override
@@ -115,49 +126,71 @@ class HTTPNotifier implements Worker {
         LOG.info("HTTPNotifier RUN started");
         try {
             while(run) {
-                AbstractMap.SimpleEntry<Uri,Notification> obj =
-                        (AbstractMap.SimpleEntry<Uri,Notification>) blockingNotificationQueue.take();
-                if (obj.getValue() instanceof ConfigResultNotification) {
-                    if(obj.getKey() != null){
-                        String url = obj.getKey().getValue();
-                        try{
-                            client.start();
-                            String postBody = fpcCodecUtils.notificationToJsonString(ConfigResultNotification.class,
-                                    (DataObject)obj.getValue(),
-                                    true);
-                            HttpRequest post = HttpAsyncMethods.createPost(url, postBody, ContentType.APPLICATION_JSON).generateRequest();
-                            post.setHeader("User-Agent", "ODL Notification Agent");
-                            post.setHeader("charset", "utf-8");
-                            client.execute((HttpUriRequest) post, new FutureCallback<HttpResponse>() {
-                                @Override
-                                public void cancelled() {
-                                    LOG.error(post.getRequestLine() + "-> Cancelled");
-                                }
-
-                                @Override
-                                public void completed(HttpResponse resp) {
-                                    LOG.debug(post.getRequestLine() + "->" + resp.getStatusLine());
-                                }
-
-                                @Override
-                                public void failed(Exception e) {
-                                    ErrorLog.logError(post.getRequestLine() + "->" + e.getMessage(), e.getStackTrace());
-                                }
-                            });
-                        } catch (UnsupportedEncodingException e) {
-                        	ErrorLog.logError(e.getStackTrace());
-                        } catch (IOException e) {
-                        	ErrorLog.logError(e.getStackTrace());
-                        } catch (HttpException e) {
-                        	ErrorLog.logError(e.getStackTrace());
-                        } catch (Exception e){
-                        	ErrorLog.logError(e.getStackTrace());
-                        }
-                    }
+                SimpleEntry<Uri, Notification> obj = (AbstractMap.SimpleEntry<Uri,Notification>) blockingNotificationQueue.take();
+                String postBody = null;
+                try
+                {
+	            	if(obj.getValue() instanceof ConfigResultNotification){
+	            		postBody = fpcCodecUtils.notificationToJsonString(ConfigResultNotification.class,
+	                            (DataObject)obj.getValue(),
+	                            true);
+	            	}
+	            	else if(obj.getValue() instanceof Notify){
+	            		postBody = fpcCodecUtils.notificationToJsonString(Notify.class,
+	                            (DataObject)obj.getValue(),
+	                            true);
+	            	}
+                } catch (Exception e){
+                	ErrorLog.logError(e.getStackTrace());
                 }
+            	if(obj.getKey() != null && postBody != null){
+            		String url = obj.getKey().getValue();
+                    try{
+                        client.start();
+                        HttpRequest post = HttpAsyncMethods.createPost(url, postBody, ContentType.APPLICATION_JSON).generateRequest();
+                        post.setHeader("User-Agent", "ODL Notification Agent");
+                        post.setHeader("charset", "utf-8");
+                        client.execute((HttpUriRequest) post, new FutureCallback<HttpResponse>() {
+                            @Override
+                            public void cancelled() {
+                                LOG.debug(post.getRequestLine() + "-> Cancelled");
+                            }
 
+                            @Override
+                            public void completed(HttpResponse resp) {
+                                try {
+                                	if(obj.getValue() instanceof Notify){
+                                		if(((Notify)obj.getValue()).getValue() instanceof DownlinkDataNotification){
+                                			String body = handler.handleResponse(resp);
+                							JSONObject json_body = new JSONObject(body);
+                							api.ddnAck(json_body);
+                							LOG.info("Response Body: "+body);
+                                		}
+                                	}
+        						} catch (IOException e) {
+        							ErrorLog.logError(e.getStackTrace());
+        						}
+                            }
+
+                            @Override
+                            public void failed(Exception e) {
+                                ErrorLog.logError(post.getRequestLine() + "->" + e.getMessage(), e.getStackTrace());
+                            }
+                        });
+                    } catch (UnsupportedEncodingException e) {
+                    	ErrorLog.logError(e.getStackTrace());
+                    } catch (IOException e) {
+                    	ErrorLog.logError(e.getStackTrace());
+                    } catch (HttpException e) {
+                    	ErrorLog.logError(e.getStackTrace());
+                    } catch (Exception e) {
+                    	ErrorLog.logError(e.getStackTrace());
+                    }
+            	}
             }
         } catch (InterruptedException e) {
+        	ErrorLog.logError(e.getStackTrace());
+        } catch (Exception e) {
         	ErrorLog.logError(e.getStackTrace());
         }
     }

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ------------------------------------------------------------------
-#  Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+#  Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
 #
 #  This program and the accompanying materials are made available under the
 #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,7 +20,8 @@ curl -i \
             "dpn-groups": [
                 "foo"
             ],
-            "topic": "1"
+            "node-id": "node1",
+            "network-id": "network1"
         }
     ]
 }' \

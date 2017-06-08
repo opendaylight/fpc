@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -131,11 +131,11 @@ public class ConfigureWorker
             for (Contexts context : (oCache.getPayloadContexts() == null) ? Collections.<Contexts>emptyList() : oCache.getPayloadContexts()) {
                 for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
                     dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
-                    if (dpnInfo.activator != null) {
+                    if (dpnInfo!=null && dpnInfo.activator != null) {
                         try {
-                            dpnInfo.activator.activate(input.getOpType(), (context.getInstructions() != null) ?
+                            dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
                                     context.getInstructions() : input.getInstructions(), context, oCache);
-                            dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
+                            //dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
                         } catch (Exception e) {
                             return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
                                     e,
@@ -156,8 +156,8 @@ public class ConfigureWorker
             try {
                 OpCache result = StorageCacheUtils.read(doq.getTargets(), tx.getTenantContext());
                 tx.setResultType(result.getConfigSuccess());
-                tx.complete(System.currentTimeMillis());
-                tx.publish(false);
+                tx.complete(System.currentTimeMillis(),false);
+                //tx.publish(false);
                 return null;
             } catch (Exception e) {
                 return processActivationError(new ErrorTypeId(ErrorTypeIndex.QUERY_FAILURE),
@@ -201,8 +201,8 @@ public class ConfigureWorker
                                 dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
                                 if (dpnInfo.activator != null) {
                                     try {
-                                        dpnInfo.activator.delete(input.getInstructions(), target, context);
-                                        dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
+                                        dpnInfo.activator.delete(input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
+                                        //dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
                                     } catch (Exception e) {
                                         return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
                                                 e,

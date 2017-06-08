@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -216,7 +216,17 @@ public class FpcCodecUtils {
             DataObject notification,
             boolean pretty) {
         final Writer writer = new StringWriter();
-        NormalizedNode<?, ?> node = codecRegistry.toNormalizedNodeNotification((Notification)notification);
+        NormalizedNode<?, ?> node = null;
+        try {
+        	node = codecRegistry.toNormalizedNodeNotification((Notification)notification);
+        } catch (RuntimeException e){
+        	try {
+				Thread.sleep(200);
+			} catch (InterruptedException e1) {
+				ErrorLog.logError(e1.getStackTrace());
+			}
+        	node = codecRegistry.toNormalizedNodeNotification((Notification)notification);
+        }
         try {
             final SchemaPath scPath = SchemaPath.create(true, BindingReflections.findQName(notification.getImplementedInterface()));
 

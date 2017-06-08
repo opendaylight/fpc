@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,15 +16,11 @@ import org.opendaylight.fpc.utils.Counter;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Prefix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Manages an IPv4 Pool (Range).
  */
 public class IPv4RangeManager extends Counter {
-    private static final Logger LOG = LoggerFactory.getLogger(IPv4RangeManager.class);
-
     /**
      * Constructs an IPv4 Pool Manager
      * @param base - IPPrefix used for the basis of the Pool Manager

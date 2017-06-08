@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,11 +15,14 @@ import org.opendaylight.fpc.activation.cache.Cache;
 import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.fpc.utils.IPToDecimal;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpHeader.OpType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.instructions.Instructions;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Ports;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.threegpp.rev160803.ThreeGPPTunnel;
@@ -39,7 +42,7 @@ public class DpdkImpl implements Activator {
 	protected static final Logger LOG = LoggerFactory.getLogger(DpdkImpl.class);
 
 	DpnHolder dpnHolder;
-	String dpnTopic;
+	Short dpnTopic;
 	DpnAPI2 api;
 
 	/**
@@ -61,7 +64,8 @@ public class DpdkImpl implements Activator {
 		this.dpnHolder = dpnHolder;
 		if (dpnHolder.dpn != null) {
 			this.start();
-			DpnAPIListener.setUlDpnMapping((short) dpnHolder.dpn.getTopic().getBytes()[0], dpnHolder.dpn.getDpnId());
+			//DpnAPIListener.setUlDpnMapping((short) dpnHolder.dpn.getTopic().getBytes()[0], dpnHolder.dpn.getDpnId());
+			DpnAPIListener.setUlDpnMapping(dpnHolder.dpn.getNodeId().toString()+"/"+dpnHolder.dpn.getNetworkId().toString(), dpnHolder.dpn.getDpnId());
 		}
 	}
 
@@ -69,7 +73,7 @@ public class DpdkImpl implements Activator {
 	public boolean canActivate() {
 		if (dpnHolder.dpn == null)
 			return false;
-		return (dpnHolder.dpn.getTopic() != null);
+		return (DpnAPIListener.getTopicFromDpnId(dpnHolder.dpn.getDpnId()) != null);
 	}
 
 	@Override
@@ -89,7 +93,8 @@ public class DpdkImpl implements Activator {
 	public boolean start() {
 		if (this.dpnHolder.dpn != null) {
 			api = new DpnAPI2(ZMQClientPool.getInstance().getWorker());
-			this.dpnTopic = dpnHolder.dpn.getTopic().substring(0, 1);
+			//this.dpnTopic = dpnHolder.dpn.getTopic().substring(0, 1);
+			this.dpnTopic = DpnAPIListener.getTopicFromNode(this.dpnHolder.dpn.getNodeId().toString()+"/"+this.dpnHolder.dpn.getNetworkId().toString());
 			return true;
 		}
 		return false;
@@ -98,7 +103,7 @@ public class DpdkImpl implements Activator {
 	@Override
 	public boolean shutdown() {
 		if (dpnHolder.dpn != null) {
-			DpnAPIListener.removeUlDpnMapping((short) dpnHolder.dpn.getTopic().getBytes()[0]);
+			DpnAPIListener.removeUlDpnMapping(dpnHolder.dpn.getNodeId().toString()+"/"+dpnHolder.dpn.getNetworkId().toString());
 		}
 		if (api != null) {
 			api = null;
@@ -107,11 +112,11 @@ public class DpdkImpl implements Activator {
 	}
 
 	@Override
-	public void activate(OpType opType, Instructions instructions, Contexts context, Cache cache) throws Exception {
+	public void activate(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, Instructions instructions, Contexts context, Cache cache) throws Exception {
 		// Look for 3GPP Command Instructions or Error out
 		if (instructions != null) {
 			if (instructions.getInstrType() instanceof ThreegppCommandset) {
-				activate(opType, (ThreegppCommandset) instructions.getInstrType(), context, cache);
+				activate(clientIdentifier, opIdentifier, opType, (ThreegppCommandset) instructions.getInstrType(), context, cache);
 				return;
 			}
 		}
@@ -134,7 +139,8 @@ public class DpdkImpl implements Activator {
 	 * @throws Exception
 	 *             - If an error occurs during the Activation
 	 */
-	private void activate(OpType opType, ThreegppCommandset commands, Contexts context, Cache cache) throws Exception {
+	private void activate(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, ThreegppCommandset commands, Contexts context, Cache cache) throws Exception {
+		this.dpnTopic = DpnAPIListener.getTopicFromNode(this.dpnHolder.dpn.getNodeId().toString()+"/"+this.dpnHolder.dpn.getNetworkId().toString());
 		rxMessages.incrementAndGet();
 		IpPrefix assignedPrefix = (context.getDelegatingIpPrefixes() == null) ? null
 				: (context.getDelegatingIpPrefixes().isEmpty()) ? null : context.getDelegatingIpPrefixes().get(0);
@@ -153,9 +159,10 @@ public class DpdkImpl implements Activator {
 							.getMobprofileParameters()).getTunnelIdentifier();
 				} else
 					throw new Exception("Session Create Requested but no UL Tunnel Info provided");
+
 				api.create_session(dpnTopic, threeProps.getImsi().getValue(),
 						IPToDecimal.cidrBase(assignedPrefix.getIpv4Prefix().getValue()), threeProps.getEbi().getValue(),
-						context.getUl().getTunnelLocalAddress().getIpv4Address(), s1u_sgw_gtpu_teid);
+						context.getUl().getTunnelLocalAddress().getIpv4Address(), s1u_sgw_gtpu_teid,clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
 				txMessages.incrementAndGet();
 				// TODO - Mod create_session to include TFT for X2 with SGW
 				// re-selection
@@ -171,7 +178,7 @@ public class DpdkImpl implements Activator {
 						throw new Exception(
 								"Session Create with implied DL information but no DL Tunnel Info provided");
 					api.modify_bearer_dl(dpnTopic, s1u_sgw_gtpu_teid,
-							context.getDl().getTunnelRemoteAddress().getIpv4Address(), s1u_enb_gtpu_teid);
+							context.getDl().getTunnelRemoteAddress().getIpv4Address(), s1u_enb_gtpu_teid,clientIdentifier.getInt64(), opIdentifier.getValue());
 					txMessages.incrementAndGet();
 				}
 			} else if (commands.getInstr3gppMob().isIndirectForward()) {
@@ -215,7 +222,7 @@ public class DpdkImpl implements Activator {
 					s1u_sgw_gtpu_teid = ((ThreeGPPTunnel) context.getUl().getMobilityTunnelParameters()
 							.getMobprofileParameters()).getTunnelIdentifier();
 					api.modify_bearer_dl(dpnTopic, context.getDl().getTunnelRemoteAddress().getIpv4Address(),
-							s1u_enb_gtpu_teid, s1u_sgw_gtpu_teid, null);
+							s1u_enb_gtpu_teid, context.getDl().getTunnelLocalAddress().getIpv4Address(), null, clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
 				} else {
 					s1u_enb_gtpu_lifeTime = context.getDl().getLifetime();
 					if (s1u_enb_gtpu_lifeTime == 0L)
@@ -264,7 +271,7 @@ public class DpdkImpl implements Activator {
 			} else {
 				// Bearer Delete seems odd - how does DL get deleted
 				// LOG.info("Sending Message");
-				api.delete_session(dpnTopic, threeProps.getLbi().getValue(), s1u_sgw_gtpu_teid);
+				api.delete_session(dpnTopic, threeProps.getLbi().getValue(), s1u_sgw_gtpu_teid, clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
 				txMessages.incrementAndGet();
 			}
 		}
@@ -281,7 +288,8 @@ public class DpdkImpl implements Activator {
 	}
 
 	@Override
-	public void delete(Instructions instructions, Targets target, FpcContext context) throws Exception {
+	public void delete(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, Instructions instructions, Targets target, FpcContext context) throws Exception {
+		this.dpnTopic = DpnAPIListener.getTopicFromNode(this.dpnHolder.dpn.getNodeId().toString()+"/"+this.dpnHolder.dpn.getNetworkId().toString());
 		rxMessages.incrementAndGet();
 		Long teid = (context.getUl().getMobilityTunnelParameters().getMobprofileParameters() instanceof ThreeGPPTunnel)
 				? ((ThreeGPPTunnel) context.getUl().getMobilityTunnelParameters().getMobprofileParameters())
@@ -297,7 +305,7 @@ public class DpdkImpl implements Activator {
 			txMessages.incrementAndGet();
 		} else {
 			if (context.getLbi() != null) {
-				api.delete_session(dpnTopic, context.getLbi().getValue(), teid);
+				api.delete_session(dpnTopic, context.getLbi().getValue(), teid, clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
 				txMessages.incrementAndGet();
 			}
 		}
@@ -317,13 +325,13 @@ public class DpdkImpl implements Activator {
 
 	@Override
 	public void announceHello(String identity) {
-		api.hello(DpnAPI2.BROADCAST_TOPIC, identity);
+		api.hello((short)DpnAPI2.BROADCAST_TOPIC, identity);
 		txMessages.incrementAndGet();
 	}
 
 	@Override
 	public void announceGoodbye(String identity) {
-		api.bye(DpnAPI2.BROADCAST_TOPIC, identity);
+		api.bye((short)DpnAPI2.BROADCAST_TOPIC, identity);
 		txMessages.incrementAndGet();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -477,7 +477,7 @@ public class NameResolver {
     /**
      * Adds a Key Value to the map for a specific uri value.
      * @param map - current QName to Object mapping
-     * @param node - DataSchemaNode 
+     * @param node - DataSchemaNode
      * @param uriValue - uri value to add
      * @throws Exception if error occurs during Uri decoding.
      */
@@ -624,8 +624,8 @@ public class NameResolver {
             if (value.getString() != null) {
                 return value.getString();
             } else
-           if (value.getUint32() != null) {
-               return value.getUint32().toString();
+           if (value.getInt64() != null) {
+               return value.getInt64().toString();
            } else
 
            if (value.getInstanceIdentifier() != null) {

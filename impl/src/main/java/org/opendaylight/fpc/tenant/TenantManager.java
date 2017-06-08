@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -12,20 +12,30 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.fpc.activation.ActivationManager;
 import org.opendaylight.fpc.activation.ActivatorFactory;
 import org.opendaylight.fpc.activation.cache.StorageCache;
+import org.opendaylight.fpc.activation.impl.dpdkdpn.DpnAPIListener;
 import org.opendaylight.fpc.assignment.AssignmentManager;
 import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.fpc.impl.FpcProvider;
+import org.opendaylight.fpc.impl.FpcServiceImpl;
+import org.opendaylight.fpc.notification.Notifier;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.DpnStatusValue;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Tenants;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.notify.value.DpnAvailabilityBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantKey;
@@ -37,14 +47,22 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnControlProtocol;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnGroupId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPortId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 
 /**
  * A Generic Object for Tenant specific information.
@@ -55,6 +73,7 @@ public class TenantManager implements AutoCloseable {
     private static final Map<String, TenantManager> clientIdToTenants = new HashMap<String, TenantManager>();
     private static final List<ActivatorFactory> defaultActivatorFactories = new ArrayList<ActivatorFactory>();
     private static DataBroker dataBroker;
+    private int dpnIdCounter = 0;
 
     protected StorageCache sc;
     protected final Tenant tenant;
@@ -210,11 +229,11 @@ public class TenantManager implements AutoCloseable {
                 .setTenantId(tenantId)
                 .setKey(new TenantKey(tenantId))
                 .setFpcMobility(new FpcMobilityBuilder()
-                //        .setPorts(ara)
                         .build())
                 .setFpcPolicy(new FpcPolicyBuilder().build())
                 .setFpcTopology(new FpcTopologyBuilder().build())
                 .build() : t;
+
         this.activationManager = new ActivationManager(this, dataBroker);
         if (cpFactories != null) {
             if (!cpFactories.isEmpty()) {
@@ -325,7 +344,203 @@ public class TenantManager implements AutoCloseable {
         }
     }
 
-    @Override
+    private boolean dpnIdExists(String dpnId){
+    	FpcDpnId fpcDpnId = new FpcDpnId(new FpcIdentity(dpnId));
+    	if(tenant.getFpcTopology() != null && tenant.getFpcTopology().getDpns() != null){
+    		for(Dpns dpn: tenant.getFpcTopology().getDpns()){
+    			if(dpn.getDpnId().equals(fpcDpnId)){
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
+
+    /**
+     * Adds a DPN to both datastores
+     * @param nodeId - node id of the DPN
+     * @param networkId - network id of the DPN
+     */
+    public void addDpnToDataStore(String nodeId, String networkId) {
+    	//if add = true, add dpn, if add = false, remove dpn
+    	if(tenant != null){
+    		FpcTopology topo = tenant.getFpcTopology();
+            if (topo != null) {
+            	if(getDpnId(nodeId,networkId)!=null){
+    				return;
+    			}
+            	while(dpnIdExists("dpn"+String.valueOf(++dpnIdCounter)));
+
+			    writeDpnToDataStore(LogicalDatastoreType.CONFIGURATION,"dpn"+String.valueOf(dpnIdCounter),"site1-anchor"+String.valueOf(dpnIdCounter),"foo",nodeId,networkId);
+			    writeDpnToDataStore(LogicalDatastoreType.OPERATIONAL,"dpn"+String.valueOf(dpnIdCounter),"site1-anchor"+String.valueOf(dpnIdCounter),"foo",nodeId,networkId);
+            }
+    	}
+    }
+
+    /**
+     * Removes a DPN from both data stores
+     * @param nodeId - node id of the DPN
+     * @param networkId - network id of the DPN
+     */
+    public void removeDpnFromDataStore(String nodeId, String networkId){
+    	removeDpnFromDataStore(LogicalDatastoreType.CONFIGURATION,nodeId,networkId);
+    	removeDpnFromDataStore(LogicalDatastoreType.OPERATIONAL,nodeId,networkId);
+    }
+
+    private FpcDpnId getDpnId(String nodeId, String networkId){
+    	Tenant dtenant = getTenant(new FpcIdentity("default"));
+    	if(dtenant.getFpcTopology() != null && dtenant.getFpcTopology().getDpns() != null){
+    		for(Dpns dpn: dtenant.getFpcTopology().getDpns()){
+    			if(dpn.getNodeId().equals(nodeId) && dpn.getNetworkId().equals(networkId)){
+    				return dpn.getDpnId();
+    			}
+    		}
+    	}
+    	return null;
+    }
+
+    private void removeDpnFromDataStore(LogicalDatastoreType dsType, String nodeId, String networkId){
+    	if(dataBroker!=null){
+
+    		FpcTopology topo = tenant.getFpcTopology();
+    		if(topo != null){
+    			FpcDpnId dpnId = getDpnId(nodeId,networkId);
+    			if(dpnId == null)
+    				return;
+    			ReadWriteTransaction dpnTx = dataBroker.newReadWriteTransaction();
+
+    			try {
+    				Optional<Dpns> dpn = dpnTx.read(dsType, InstanceIdentifier.builder(Tenants.class)
+						.child(Tenant.class, tenant.getKey())
+						.child(FpcTopology.class)
+						.child(Dpns.class, new DpnsKey(new FpcDpnId(dpnId)))
+						.build()).get();
+
+
+	    			dpnTx.delete(dsType, InstanceIdentifier.builder(Tenants.class)
+						.child(Tenant.class, tenant.getKey())
+						.child(FpcTopology.class)
+						.child(Dpns.class, new DpnsKey(new FpcDpnId(dpnId)))
+						.build());
+
+	    			CheckedFuture<Void,TransactionCommitFailedException> submitFuture = dpnTx.submit();
+
+	    			Futures.addCallback(submitFuture, new FutureCallback<Void>() {
+
+	    	            @Override
+	    	            public void onSuccess(final Void result) {
+	    	                // Commited successfully
+	    	            	LOG.info("Dpn (nodeId = "+nodeId+") was deleted successfully");
+	    	            	ArrayList<Uri> uris = new ArrayList<Uri>();
+	    	            	for( Entry<String, TenantManager> entry: clientIdToTenants.entrySet()){
+	    	            		if(entry.getValue().getTenant().getTenantId().getString().equals(FpcProvider.getInstance().getConfig().getDefaultTenantId())){
+	    	            			uris.add(FpcServiceImpl.getNotificationUri(entry.getKey()));
+	    	            		}
+	    	            	}
+	    	            	if(dsType.equals(LogicalDatastoreType.CONFIGURATION))
+	    	            		Notifier.issueDpnAvailabilityNotification(uris,
+	    	            			new DpnAvailabilityBuilder()
+	    	            			.setMessageType("Dpn-Availability")
+	    	            			.setDpnStatus(DpnStatusValue.DpnStatus.Unavailable)
+	    	            			.setDpnId(new FpcDpnId(dpnId))
+	    	            			.setDpnGroups(dpn.get().getDpnGroups())
+	    	            			.setDpnName(dpn.get().getDpnName())
+	    	            			.setNetworkId(networkId)
+	    	    					.setNodeId(nodeId)
+	    	            			.build()
+	    	            			);
+	    	            }
+
+	    	            @Override
+	    	            public void onFailure(final Throwable t) {
+	    	                // Transaction failed
+
+	    	                if(t instanceof OptimisticLockFailedException) {
+	    	                    // Failed because of concurrent transaction modifying same data
+	    	                	LOG.info("OptimisticLockFailedException while deleteing the DPN (nodeId = "+nodeId+") from the Data store.");
+	    	                } else {
+	    	                   // Some other type of TransactionCommitFailedException
+	    	                	LOG.info("Other exception while deleteing the DPN (nodeId = "+nodeId+") from the Data store.");
+	    	                }
+	    	            }
+
+	    	        });
+
+    			} catch (InterruptedException | ExecutionException e) {
+					ErrorLog.logError(e.getStackTrace());
+				}
+
+    		}
+    	}
+    }
+
+    private void writeDpnToDataStore(LogicalDatastoreType dsType, String dpnId, String dpnName, String dpnGroupId, String nodeId, String networkId) {
+		if(dataBroker != null){
+
+			WriteTransaction dpnTx = dataBroker.newWriteOnlyTransaction();
+
+			ArrayList<FpcDpnGroupId> dpnGroups= new ArrayList<FpcDpnGroupId>();
+			dpnGroups.add(new FpcDpnGroupId(dpnGroupId));
+			dpnTx.put(dsType,
+					InstanceIdentifier.builder(Tenants.class)
+					.child(Tenant.class, tenant.getKey())
+					.child(FpcTopology.class)
+					.child(Dpns.class, new DpnsKey(new FpcDpnId(dpnId)))
+					.build(),
+					new DpnsBuilder()
+					.setDpnGroups(dpnGroups)
+					.setDpnName(dpnName)
+					.setDpnId(new FpcDpnId(dpnId))
+					.setNetworkId(networkId)
+					.setNodeId(nodeId)
+					.build());
+			CheckedFuture<Void,TransactionCommitFailedException> submitFuture = dpnTx.submit();
+
+			Futures.addCallback(submitFuture, new FutureCallback<Void>() {
+
+	            @Override
+	            public void onSuccess(final Void result) {
+	                // Commited successfully
+	            	LOG.info("Dpn (nodeId = "+nodeId+") added successfully in the data store");
+	            	ArrayList<Uri> uris = new ArrayList<Uri>();
+	            	for( Entry<String, TenantManager> entry: clientIdToTenants.entrySet()){
+	            		if(entry.getValue().getTenant().getTenantId().getString().equals(FpcProvider.getInstance().getConfig().getDefaultTenantId())){
+	            			uris.add(FpcServiceImpl.getNotificationUri(entry.getKey()));
+	            		}
+	            	}
+	            	if(dsType.equals(LogicalDatastoreType.CONFIGURATION))
+	            		Notifier.issueDpnAvailabilityNotification(uris,
+	            			new DpnAvailabilityBuilder()
+	            			.setMessageType("Dpn-Availability")
+	            			.setDpnStatus(DpnStatusValue.DpnStatus.Available)
+	            			.setDpnId(new FpcDpnId(dpnId))
+	            			.setDpnGroups(dpnGroups)
+	            			.setDpnName(dpnName)
+	            			.setNetworkId(networkId)
+	    					.setNodeId(nodeId)
+	            			.build()
+	            			);
+	            }
+
+	            @Override
+	            public void onFailure(final Throwable t) {
+	                // Transaction failed
+
+	                if(t instanceof OptimisticLockFailedException) {
+	                    // Failed because of concurrent transaction modifying same data
+	                	LOG.info("OptimisticLockFailedException while adding the DPN (nodeId = "+nodeId+") to the Data store.");
+	                } else {
+	                   // Some other type of TransactionCommitFailedException
+	                	LOG.info("Other exception while adding the DPN (nodeId = "+nodeId+") to the Data store.");
+	                }
+	            }
+
+	        });
+		}
+
+	}
+
+	@Override
     public void close() throws Exception {
         if (activationManager != null) {
             activationManager.close();

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
+import org.opendaylight.fpc.activation.cache.Cache;
+import org.opendaylight.fpc.activation.cache.OpCache;
 import org.opendaylight.fpc.activation.cache.PayloadCache;
 import org.opendaylight.fpc.activation.cache.StorageCache;
 import org.opendaylight.fpc.notification.Notifier;
@@ -29,6 +31,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.ResultType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.DeleteSuccessBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPort;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,15 +138,37 @@ public class Transaction {
      * An enumeration representing the various stages of a transaction life cycle.
      */
     public enum OperationStatus {
+        /**
+         * Pending Assignment
+         */
         PENDING_ASSIGNMENT,
+        /**
+         * Pending Activation
+         */
         PENDING_ACTIVATION,
+        /**
+         * Awaiting Responses
+         */
         AWAITING_RESPONSES,
+        /**
+         * Awaiting Cache write
+         */
         AWAITING_CACHE_WRITE,
+        /**
+         * Dispatching Notification
+         */
         DISPATCHING_NOTIFICATION,
+        /**
+         * Completed
+         */
         COMPLETED,
+        /**
+         * Failed
+         */
         FAILED
     };
 
+    private short causeValue;
     private OpInput input;
     private PayloadCache pc;
     private ResultType rt;
@@ -226,6 +252,7 @@ public class Transaction {
      */
     protected Transaction(OpInput input, long startTime) throws EmptyBodyException {
         init(input, null, startTime);
+    	LOG.info(input.getClientId() + "/" + input.getOpId().toString());
         transactions.put(input.getClientId() + "/" + input.getOpId().toString(), this);
     }
 
@@ -278,11 +305,27 @@ public class Transaction {
     }
 
     /**
-     * Returns the Opeation Input associated with the Transaction.
+     * Returns the Operation Input associated with the Transaction.
      * @return OpInput
      */
     public OpInput getOpInput() {
         return this.input;
+    }
+
+    /**
+     * Returns the Cause Value associated with the Transaction.
+     * @return Short
+     */
+    public Short getCauseValue() {
+    	return this.causeValue;
+    }
+
+    /**
+     * Sets the Cause Value associated with the Transaction.
+     * @param causeValue - Value for the Transaction's cause value.
+     */
+    public void setCauseValue(byte causeValue){
+    	this.causeValue = causeValue;
     }
 
     /**
@@ -309,6 +352,18 @@ public class Transaction {
     }
 
     /**
+     * Marks a Transaction as complete
+     * @param ts - Timestamp of completion
+     * @param writeToCache - Flag to write to cache
+     */
+    public void complete(long ts, boolean writeToCache) {
+        countDown.decrement();
+        if (countDown.longValue() == 0) {
+            publish(writeToCache);
+        }
+    }
+
+    /**
      * Marks a Transaction as complete and closes it.
      * @param ts - Timestamp of completion
      */
@@ -324,21 +379,47 @@ public class Transaction {
         publish(true);
     }
 
+    private OpCache getOpCache(Cache cache) {
+        OpCache rc = new OpCache();
+        for (FpcPort port : cache.getPorts().values()) {
+            rc.addPort(port);
+        }
+        for (FpcContext context : cache.getContexts().values()) {
+            rc.addContext(context);
+        }
+        return rc;
+    }
+
     /**
      * Publishes a Transaction.
      * @param write - indicates if a cache write should occur.
      */
     public void publish(boolean write) {
-        if (write) {
-            writeToCache();
+    	if (write) {
+        	WriteToCache.addToQueue(this);
+            //writeToCache();
         }
+
         setStatusTs(OperationStatus.DISPATCHING_NOTIFICATION, System.currentTimeMillis());
+        switch (input.getOpType()) {
+        	case Create:
+        	case Update:
+        		rt = getOpCache(pc).getConfigSuccess();
+        		break;
+        	case Delete:
+        		rt = new DeleteSuccessBuilder().setTargets(((DeleteOrQuery) input.getOpBody()).getTargets()).build();
+        		break;
+        	default:
+        		break;
+        }
         Notifier.issueConfigResult(this.getClientId(),
             this.getOpId(),
             OpStatus.Ok,
             rt,
-            true); // TOOD - Make this a Config Variable
-        completeAndClose(System.currentTimeMillis());
+            true,
+            this.getCauseValue());
+
+        //completeAndClose(System.currentTimeMillis());
     }
 
     /**
@@ -349,7 +430,8 @@ public class Transaction {
         switch (input.getOpType()) {
             case Create:
             case Update:
-                rt = tenantMgr.getSc().addToCache(pc).getConfigSuccess();
+            	tenantMgr.getSc().addToCache(pc);
+                //rt = tenantMgr.getSc().addToCache(pc).getConfigSuccess();
                 break;
             case Delete:
                 StorageCache sc = tenantMgr.getSc();
@@ -361,10 +443,10 @@ public class Transaction {
                             sc.remove(target.getTarget().getInstanceIdentifier().toString());
                     } else {
                             sc.remove(((target.getTarget().getString() != null) ? target.getTarget().getString() :
-                                target.getTarget().getUint32().toString()));
+                                target.getTarget().getInt64().toString()));
                     }
                 }
-                rt = new DeleteSuccessBuilder().setTargets(doq.getTargets()).build();
+                //rt = new DeleteSuccessBuilder().setTargets(doq.getTargets()).build();
                 break;
             default:
                 break;
@@ -415,9 +497,10 @@ public class Transaction {
         setStatusTs(OperationStatus.FAILED, System.currentTimeMillis());
         Notifier.issueConfigResult(this.getClientId(),
                 this.getOpId(),
-                OpStatus.Ok,
+                OpStatus.Err,
                 rt,
-                true);
+                true,
+                this.causeValue);
         close();
     }
 
