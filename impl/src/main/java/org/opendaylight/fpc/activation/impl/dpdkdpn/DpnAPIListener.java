@@ -143,9 +143,6 @@ public class DpnAPIListener {
         return null;
     }
 
-    // Message format
-    // [ Message - 1 Byte ] [ Source DPN - 1 Byte ] [ IMSI - 8 bytes  ]
-    // [ EBI - 1 byte ] [ DSCP - 1 Byte ]
     /**
      * Decodes a DownlinkDataNotification
      * @param buf - message buffer
@@ -163,15 +160,18 @@ public class DpnAPIListener {
         		.build();
     }
 
+    /**
+     * Ensures the session id is an unsigned 64 bit integer
+     * @param sessionId - session id received from the DPN
+     * @return unsigned session id
+     */
     private BigInteger checkSessionId(BigInteger sessionId){
     	if(sessionId.compareTo(BigInteger.ZERO) < 0){
     		sessionId = sessionId.add(BigInteger.ONE.shiftLeft(64));
     	}
     	return sessionId;
     }
-    // Message format
-    // [ Topic - 1 Byte ] [ Message Type - 1 Byte ] [ Status - 1 Byte ]
-    // [ ClientId - 4 Bytes ] [ OpId - 4 Bytes ]
+
     /**
      * Decodes an acknowledgement from the DPN and completes that transaction
      * @param buf - message buffer

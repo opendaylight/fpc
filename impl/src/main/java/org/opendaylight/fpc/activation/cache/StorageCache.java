@@ -545,19 +545,14 @@ public class StorageCache implements AutoCloseable {
     /**
      * Adds a Cache to the Storage Cache.
      * @param cache - Cache to be added
-     * @return An OpCache that represents the elements added.
      */
-    public OpCache addToCache(Cache cache) {
-        OpCache rc = new OpCache();
+    public void addToCache(Cache cache) {
         for (FpcPort port : cache.getPorts().values()) {
             addPort(port);
-            rc.addPort(port);
         }
         for (FpcContext context : cache.getContexts().values()) {
             addContext(context);
-            rc.addContext(context);
         }
-        return rc;
     }
 
     /**

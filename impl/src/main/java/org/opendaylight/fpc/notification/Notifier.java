@@ -119,6 +119,8 @@ public class Notifier {
         } catch (InterruptedException e) {
             LOG.warn("Notification Service Interruption occurred while sending a Read Notification");
             ErrorLog.logError(e.getStackTrace());
+        } catch (Exception ee) {
+        	ErrorLog.logError(ee.getMessage(),ee.getStackTrace());
         }
     }
 
@@ -145,6 +147,8 @@ public class Notifier {
                                     notif));
                     } catch (InterruptedException e) {
                     	ErrorLog.logError(e.getStackTrace());
+                    } catch (Exception ee) {
+                    	ErrorLog.logError(ee.getMessage(),ee.getStackTrace());
                     }
                 }
         }

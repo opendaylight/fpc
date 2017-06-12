@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # coding: utf8
 #Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
 #
@@ -21,7 +22,7 @@ pool = ThreadPool(processes=1)
 conflict = False
 topicId = None
 nodeId = "node1"
-networkId = "network1"
+networkId = "network2"
 source = random.randrange(0,65535)
 topicId = random.randrange(4,255)
 
@@ -106,11 +107,19 @@ for update_nbr in range(900000):
         continue
 
     elif topic == 1 and msgnum == 11: #Assign_Conflict
-        top,msg,topId,src = struct.unpack('!BBBI',string[:7])
+        top,msg,topId,src,nodeIdLen = struct.unpack('!BBBIB',string[:8])
+        top,msg,topId,src,nodeIdLen,nodeId1,networkIdLen = struct.unpack('!BBBIB'+str(nodeIdLen)+'sB',string[:8+nodeIdLen+1])
+        top,msg,topId,src,nodeIdLen,nodeId1,networkIdLen,networkId1 = struct.unpack('!BBBIB'+str(nodeIdLen)+'sB'+str(networkIdLen)+'s',string[:8+nodeIdLen+1+networkIdLen])
+        
         if src != source:
-            #if(nodeRef == node):
-                #nodeRef = random.randrange(0,65535)
-            if(topId == topicId):
+            if(nodeId == nodeId1):
+                print "Received assign conflict for node id. Change the node id and restart this script."
+                exit(0)
+            if(networkId == networkId1):
+                print "Received assign conflict for network id. Change the network id and restart this script."
+                exit(0)
+            if(top == topicId):
+                print "Received assign conflict for topic id. Generating new topic id and resending Assign Topic Id Message."
                 topicId = random.randrange(0,255)
             conflict = True
         continue

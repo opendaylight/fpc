@@ -22,21 +22,9 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
  * - teid Managers use the String readable (quad notation) of the IPv4 address as key.
  */
 public class DpnHolder {
-    /**
-     * IPv4 Pool Managers
-     */
     public Map<String, IPv4RangeManager> ipv4PoolManagers;
-    /**
-     * TEID MAnagers
-     */
     public Map<String, Counter> teidManagers;
-    /**
-     * Activator
-     */
     public Activator activator;
-    /**
-     * DPN
-     */
     public Dpns dpn;
 
     /**

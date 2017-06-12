@@ -14,26 +14,14 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev16080
  * Provides basic status changes,
  */
 public class DPNStatusIndication {
-    /**
-     * DpcDpnId with value UNASSIGNED
-     */
     static public final FpcDpnId UNKNONW = new FpcDpnId("UNASSIGNED");
 
     /**
      * Basic DPN Status
      */
     public enum Status {
-        /**
-         * DPN HELLO
-         */
         HELLO,
-        /**
-         * DPN GOODBYE
-         */
         BYE,
-        /**
-         * DPN OVERLOAD INDICATION
-         */
         OVERLOAD_INDICATION
     }
 

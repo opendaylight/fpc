@@ -43,10 +43,18 @@ class BaseCache implements Cache {
         return maincache;
     }
 
+    /**
+     * Adds a port to the cache
+     * @param port - Port to be added
+     */
     public void addPort(FpcPort port) {
         ports.put(port.getPortId(), port);
     }
 
+    /**
+     * Adds a context to the cache
+     * @param context - Context to be added
+     */
     public void addContext(FpcContext context) {
         contexts.put(context.getContextId(), context);
     }

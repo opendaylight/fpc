@@ -8,18 +8,15 @@
 package org.opendaylight.fpc.impl.zeromq;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.opendaylight.fpc.activation.impl.dpdkdpn.DpnAPI2;
 import org.opendaylight.fpc.activation.impl.dpdkdpn.DpnAPIListener;
 import org.opendaylight.fpc.dpn.DPNStatusIndication;
-import org.opendaylight.fpc.monitor.EventMonitorMgr;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientSocket;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.notify.value.DownlinkDataNotification;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZContext;
@@ -32,10 +29,10 @@ import org.zeromq.ZMQ.Socket;
 public class ZMQSBListener implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ZMQSBListener.class);
     private ZMQClientSocket sock;
-    ZMQSBWorker broadcastAllSub;
-    ZMQSBWorker broadcastControllersSub;
-    ZMQSBWorker broadcastDpnsSub;
-    ZMQSBWorker subscriber;
+    private ZMQSBWorker broadcastAllSub;
+    private ZMQSBWorker broadcastControllersSub;
+    private ZMQSBWorker broadcastDpnsSub;
+    private ZMQSBWorker subscriber;
     private final String address;
     private static Short subscriberId;
     private final Short broadcastAllId;
@@ -98,7 +95,7 @@ public class ZMQSBListener implements AutoCloseable {
     }
 
     /**
-     * Gets the Source Id of the controler
+     * Gets the Source Id of the controller
      * @return - ZMQ Topic
      */
     public static Long getControllerSourceId(){
@@ -154,34 +151,11 @@ public class ZMQSBListener implements AutoCloseable {
         }
     }
 
-
-    /*private void BroadcastAllSubId(Short subscriberId) {
-    	ByteBuffer bb = ByteBuffer.allocate(4);
-        bb.put(DpnAPI2.toUint8(broadcastAllId))
-            .put(ASSIGN_ID)
-            .put(DpnAPI2.toUint8(subscriberId));
-
-        try {
-            sock.getBlockingQueue().put(bb);
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-        	if(this.conflictingTopic){
-        		this.conflictingTopic = false;
-        		Short topic = (short) ThreadLocalRandom.current().nextInt(MIN_TOPIC_VAL,MAX_TOPIC_VAL+1);
-        		BroadcastAllSubId(topic);
-        		return;
-        	}
-        	else{
-        		ErrorLog.logError(e.getStackTrace());
-        	}
-        }
-        this.subscriberId = subscriberId;
-        LOG.info("Topic Id: "+this.subscriberId.toString());
-        subscriber = new ZMQSBWorker(address, subscriberId);
-        generalWorker = new Thread(subscriber);
-        generalWorker.start();
-	}*/
-
+    /**
+     * Interrupts the BroadcastTopicworker if there is an Assign topic Conflict
+     * @param conflict - Flag to indicate conflict
+     * @param subId - Topic Id that caused the conflict
+     */
     protected void BroadcastAllSubIdCallBack(boolean conflict, Short subId){
     	if(conflict && subscriberId.equals(subId)){
     		this.conflictingTopic = true;
@@ -233,8 +207,18 @@ public class ZMQSBListener implements AutoCloseable {
 		}
     }
 
-    protected void SendAssignConflictMessage(byte topic){
-    	if(DpnAPI2.toUint8(subscriberId) == topic){
+    /**
+     * Broadcasts an Assign Conflict message
+     * @param contents - byte array received over the southbound.
+     */
+    protected void SendAssignConflictMessage(byte[] contents){
+    	byte topic = contents[2];
+    	short nodeIdLen = contents[7];
+        short networkIdLen = contents[8+nodeIdLen];
+    	String node_id = new String(Arrays.copyOfRange(contents, 8, 8+nodeIdLen));
+    	String network_id = new String(Arrays.copyOfRange(contents, 9+nodeIdLen, 9+nodeIdLen+networkIdLen));
+
+    	if(DpnAPI2.toUint8(subscriberId) == topic || nodeId.equals(node_id) || networkId.equals(network_id)){
     		ByteBuffer bb = ByteBuffer.allocate(9+nodeId.length()+networkId.length());
 	        bb.put(DpnAPI2.toUint8(broadcastAllId))
 	            .put(ASSIGN_CONFLICT)
@@ -253,13 +237,24 @@ public class ZMQSBListener implements AutoCloseable {
     	}
     }
 
+    /**
+     * Class to broadcast a topic for the controller
+     */
     protected class BroadcastTopic implements Runnable {
     	private Short topic;
 
+    	/**
+    	 * Constructor
+    	 * @param topic - Topic to broadcast
+    	 */
     	public BroadcastTopic(Short topic){
     		this.topic = topic;
     	}
 
+    	/**
+    	 * Broadcasts the topic
+    	 * @param topic - Topic to broadcast
+    	 */
     	private void broadcastTopic(Short topic){
     		ByteBuffer bb = ByteBuffer.allocate(9+nodeId.length()+networkId.length());
 	        bb.put(DpnAPI2.toUint8(broadcastAllId))
@@ -274,7 +269,6 @@ public class ZMQSBListener implements AutoCloseable {
 	        try {
 				sock.getBlockingQueue().put(bb);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				ErrorLog.logError(e.getStackTrace());
 			}
     	}
@@ -312,26 +306,6 @@ public class ZMQSBListener implements AutoCloseable {
 
     }
 
-    protected void sendHelloReply(DPNStatusIndication dpnStatus){
-    	if(DpnAPIListener.getTopicFromNode(dpnStatus.getKey()) != null){
-	    	ByteBuffer bb = ByteBuffer.allocate(9+nodeId.length()+networkId.length());
-	        bb.put(DpnAPI2.toUint8(DpnAPIListener.getTopicFromNode(dpnStatus.getKey())))
-	            .put(HELLO_REPLY)
-	            .put(DpnAPI2.toUint8(subscriberId))
-	            .put(DpnAPI2.toUint32(controllerSourceId))
-	            .put(DpnAPI2.toUint8((short)nodeId.length()))
-	            .put(nodeId.getBytes())
-	            .put(DpnAPI2.toUint8((short)networkId.length()))
-	            .put(networkId.getBytes());
-
-	        try {
-				sock.getBlockingQueue().put(bb);
-			} catch (InterruptedException e) {
-				ErrorLog.logError(e.getStackTrace());
-			}
-    	}
-    }
-
 	/**
      * Worker Class.
      */
@@ -361,11 +335,9 @@ public class ZMQSBListener implements AutoCloseable {
             Socket subscriber = ctx.createSocket(ZMQ.SUB);
             subscriber.connect(address);
             subscriber.subscribe(new byte[] {DpnAPI2.toUint8(subscriberId)});
-            LOG.info("ZMQ Subscriber Id: "+subscriberId);
             while ((!Thread.currentThread ().isInterrupted ()) &&
                     run) {
                 byte[] contents = subscriber.recv();
-                LOG.info(contents.toString());
                 byte topic = contents[0];
                 byte messageType = contents[1];
                 switch(topic){
@@ -374,29 +346,15 @@ public class ZMQSBListener implements AutoCloseable {
                 				BroadcastAllSubIdCallBack(true,(short) contents[2]);
                 			}
                 			else if(messageType==ASSIGN_ID && dpnApi.toInt(contents, 3) != controllerSourceId){
-                				SendAssignConflictMessage(contents[2]);
+                				SendAssignConflictMessage(contents);
                 			}
                 			break;
                 	default:
 							try {
-								ZMQSBMessageWorker worker = ZMQSBMessagePool.getInstance().getWorker();
-								LOG.info("Workerid - "+worker.getWorkerId());
-								worker.getBlockingQueue().put(contents);
+								ZMQSBMessagePool.getInstance().getWorker().getBlockingQueue().put(contents);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
-                		 	/*Map.Entry<FpcDpnId, Object> entry = dpnApi.decode(contents);
-                		 	if(entry!=null){
-                		 		if (entry.getValue() instanceof DownlinkDataNotification) {
-                		 			EventMonitorMgr.processEvent(entry.getKey(),(DownlinkDataNotification)entry.getValue());
-                		 		} else if (entry.getValue()  instanceof DPNStatusIndication) {
-                		 			DPNStatusIndication dpnStatus = (DPNStatusIndication)entry.getValue();
-                		 			EventMonitorMgr.processEvent(entry.getKey(),dpnStatus);
-                		 			if(dpnStatus.getStatus() == DPNStatusIndication.Status.HELLO){
-                		 	    		sendHelloReply(dpnStatus);
-                		 	    	}
-                		 		}
-                		 	}*/
                 }
 
             }
@@ -410,6 +368,9 @@ public class ZMQSBListener implements AutoCloseable {
             }
         }
 
+        /**
+         * Stops the Worker
+         */
         public void stop() {
             run = false;
         }

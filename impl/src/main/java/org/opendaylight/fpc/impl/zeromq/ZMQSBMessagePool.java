@@ -7,19 +7,16 @@
  */
 package org.opendaylight.fpc.impl.zeromq;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.fpc.utils.AbstractThreadPool;
-import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
-import org.opendaylight.fpc.utils.zeromq.ZMQClientSocket;
-import org.zeromq.ZContext;
-
 import com.google.common.base.Supplier;
 
+/**
+ * Creates a thread pool of ZMQSBMessageWorker
+ */
 public class ZMQSBMessagePool extends AbstractThreadPool<ZMQSBMessageWorker> {
 	static private ZMQSBMessagePool _instance;
 	protected String nodeId;
@@ -27,6 +24,8 @@ public class ZMQSBMessagePool extends AbstractThreadPool<ZMQSBMessageWorker> {
     /**
      * Singleton Initialization call.
      * @param poolSize - thread pool size
+     * @param nodeId - Controller Node Id
+     * @param networkId - Controller Network Id
      */
     public static void createInstance(int poolSize, String nodeId, String networkId) {
         _instance = new ZMQSBMessagePool(poolSize,nodeId,networkId);
@@ -40,6 +39,12 @@ public class ZMQSBMessagePool extends AbstractThreadPool<ZMQSBMessageWorker> {
         return _instance;
     }
 
+	/**
+	 * Constructor
+	 * @param poolSize - Number of threads in the pool
+	 * @param nodeId - Node Id of the controller
+	 * @param networkId - Network Id of the controller
+	 */
 	protected ZMQSBMessagePool(int poolSize, String nodeId, String networkId) {
 		super(null, poolSize);
 		this.nodeId = nodeId;
@@ -48,7 +53,6 @@ public class ZMQSBMessagePool extends AbstractThreadPool<ZMQSBMessageWorker> {
 
 	@Override
 	protected Supplier<? extends ZMQSBMessageWorker> getPoolFactory(DataBroker db) {
-		// TODO Auto-generated method stub
 		return new ZMQSBMessageWorkerFactory(startSignal);
 	}
 

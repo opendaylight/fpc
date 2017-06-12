@@ -247,7 +247,7 @@ public class FpcServiceImpl implements FpcService {
                             input.getClientId());
                     tenantContext = TenantManager.populateTenant(input.getTenantId());
                 }
-                TenantManager.registerClient(input.getClientId(), input.getTenantId()); // Add
+                TenantManager.registerClient(clientId, input.getTenantId()); // Add
                 FpcagentDispatcher.addStrategy(clientId, agentServiceStrategy); // Add
                 if (agentServiceStrategy.requiresAssignmentManager() &&
                         (tenantContext.getAssignmentManager() == null)) {

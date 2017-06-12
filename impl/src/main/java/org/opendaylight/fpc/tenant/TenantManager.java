@@ -343,7 +343,11 @@ public class TenantManager implements AutoCloseable {
             }
         }
     }
-
+    /**
+     * Checks if a DPN Id exists
+     * @param dpnId - DPN ID to check
+     * @return true / false
+     */
     private boolean dpnIdExists(String dpnId){
     	FpcDpnId fpcDpnId = new FpcDpnId(new FpcIdentity(dpnId));
     	if(tenant.getFpcTopology() != null && tenant.getFpcTopology().getDpns() != null){
@@ -386,7 +390,12 @@ public class TenantManager implements AutoCloseable {
     	removeDpnFromDataStore(LogicalDatastoreType.CONFIGURATION,nodeId,networkId);
     	removeDpnFromDataStore(LogicalDatastoreType.OPERATIONAL,nodeId,networkId);
     }
-
+    /**
+     * Retrieves the DPN Id
+     * @param nodeId - Node Id of the DPN
+     * @param networkId - Network Id of the DPN
+     * @return DPN Id
+     */
     private FpcDpnId getDpnId(String nodeId, String networkId){
     	Tenant dtenant = getTenant(new FpcIdentity("default"));
     	if(dtenant.getFpcTopology() != null && dtenant.getFpcTopology().getDpns() != null){
@@ -398,7 +407,12 @@ public class TenantManager implements AutoCloseable {
     	}
     	return null;
     }
-
+    /**
+     * Removes a DPN from the data store
+     * @param dsType - Data store type
+     * @param nodeId - Node Id of the DPN
+     * @param networkId - Network Id of the DPN
+     */
     private void removeDpnFromDataStore(LogicalDatastoreType dsType, String nodeId, String networkId){
     	if(dataBroker!=null){
 
@@ -473,7 +487,15 @@ public class TenantManager implements AutoCloseable {
     		}
     	}
     }
-
+    /**
+     * Write DPN to Data Store
+     * @param dsType - Data store type
+     * @param dpnId - Dpn Id
+     * @param dpnName - Dpn Name
+     * @param dpnGroupId - Dpn Group Id
+     * @param nodeId - Node Id
+     * @param networkId - Network Id
+     */
     private void writeDpnToDataStore(LogicalDatastoreType dsType, String dpnId, String dpnName, String dpnGroupId, String nodeId, String networkId) {
 		if(dataBroker != null){
 

@@ -13,6 +13,7 @@ import org.opendaylight.fpc.activation.Activator;
 import org.opendaylight.fpc.activation.ResponseManager;
 import org.opendaylight.fpc.activation.cache.Cache;
 import org.opendaylight.fpc.dpn.DpnHolder;
+import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.IPToDecimal;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
@@ -159,10 +160,13 @@ public class DpdkImpl implements Activator {
 							.getMobprofileParameters()).getTunnelIdentifier();
 				} else
 					throw new Exception("Session Create Requested but no UL Tunnel Info provided");
-
-				api.create_session(dpnTopic, threeProps.getImsi().getValue(),
+				try{
+					api.create_session(dpnTopic, threeProps.getImsi().getValue(),
 						IPToDecimal.cidrBase(assignedPrefix.getIpv4Prefix().getValue()), threeProps.getEbi().getValue(),
 						context.getUl().getTunnelLocalAddress().getIpv4Address(), s1u_sgw_gtpu_teid,clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
+				} catch (Exception e) {
+					ErrorLog.logError("Illegal Arguments - Check Configure Input values",e.getStackTrace());
+				}
 				txMessages.incrementAndGet();
 				// TODO - Mod create_session to include TFT for X2 with SGW
 				// re-selection
@@ -221,8 +225,12 @@ public class DpdkImpl implements Activator {
 				if (!isDLdelete) {
 					s1u_sgw_gtpu_teid = ((ThreeGPPTunnel) context.getUl().getMobilityTunnelParameters()
 							.getMobprofileParameters()).getTunnelIdentifier();
-					api.modify_bearer_dl(dpnTopic, context.getDl().getTunnelRemoteAddress().getIpv4Address(),
+					try {
+						api.modify_bearer_dl(dpnTopic, context.getDl().getTunnelRemoteAddress().getIpv4Address(),
 							s1u_enb_gtpu_teid, context.getDl().getTunnelLocalAddress().getIpv4Address(), null, clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
+					} catch (Exception e) {
+						ErrorLog.logError(e.getMessage(),e.getStackTrace());
+					}
 				} else {
 					s1u_enb_gtpu_lifeTime = context.getDl().getLifetime();
 					if (s1u_enb_gtpu_lifeTime == 0L)
@@ -271,7 +279,11 @@ public class DpdkImpl implements Activator {
 			} else {
 				// Bearer Delete seems odd - how does DL get deleted
 				// LOG.info("Sending Message");
-				api.delete_session(dpnTopic, threeProps.getLbi().getValue(), s1u_sgw_gtpu_teid, clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
+				try {
+					api.delete_session(dpnTopic, threeProps.getLbi().getValue(), s1u_sgw_gtpu_teid, clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
+				} catch (Exception e) {
+					ErrorLog.logError("Illegal Arguments - Check Configure Input values",e.getStackTrace());
+				}
 				txMessages.incrementAndGet();
 			}
 		}
@@ -305,7 +317,11 @@ public class DpdkImpl implements Activator {
 			txMessages.incrementAndGet();
 		} else {
 			if (context.getLbi() != null) {
-				api.delete_session(dpnTopic, context.getLbi().getValue(), teid, clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
+				try{
+					api.delete_session(dpnTopic, context.getLbi().getValue(), teid, clientIdentifier.getInt64(), opIdentifier.getValue(), context.getContextId().getInt64());
+				} catch (Exception e) {
+					ErrorLog.logError("Illegal Arguments - Check Configure Input values",e.getStackTrace());
+				}
 				txMessages.incrementAndGet();
 			}
 		}

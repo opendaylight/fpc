@@ -11,17 +11,27 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.opendaylight.fpc.impl.zeromq.ZMQSBListener;
+import org.opendaylight.fpc.utils.ErrorLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class that writes a transaction to a cache
+ */
 public class WriteToCache implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(ZMQSBListener.class);
 	public static BlockingQueue<Transaction> blockingQueue;
-
+	/**
+	 * Adds a transaction to the Blocking queue
+	 * @param t - Transaction to be added
+	 */
 	public static void addToQueue(Transaction t){
 		blockingQueue.add(t);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public WriteToCache(){
 		blockingQueue = new LinkedBlockingQueue<Transaction>();
 	}
@@ -34,11 +44,10 @@ public class WriteToCache implements Runnable {
 			t.writeToCache();
 			t.completeAndClose(System.currentTimeMillis());
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLog.logError(e.getMessage(),e.getStackTrace());
+		} catch (Exception e) {
+			ErrorLog.logError(e.getMessage(),e.getStackTrace());
 		}
-
-
 	}
 
 
