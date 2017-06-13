@@ -62,6 +62,6 @@ curl -i \
         "op-ref-scope": "op"
     }
 }' \
-http://localhost:8181/restconf/operations/ietf-dmm-fpcagent:configure
+http://10.31.14.86:8181/restconf/operations/ietf-dmm-fpcagent:configure
 
 echo ""

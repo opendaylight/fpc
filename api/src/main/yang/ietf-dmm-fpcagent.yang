@@ -439,12 +439,22 @@ module ietf-dmm-fpcagent {
       }
     }
 
+    typedef dpn-operation {
+        type enumeration {
+            enum add { value 0; }
+            enum remove { value 1; }
+        }
+    }
+
     grouping dpn-input {
       leaf abstract-dpn-id {
         type fpcbase:fpc-dpn-id;
       }
       leaf dpn-id {
         type fpcbase:fpc-dpn-id;
+      }
+      leaf operation {
+        type fpcagent:dpn-operation;
       }
     }
 
@@ -457,6 +467,7 @@ module ietf-dmm-fpcagent {
         uses fpcagent:result-body-dpn;
       }
     }
+
     rpc configure {
       input {
         uses fpcagent:op-input;
