@@ -77,6 +77,7 @@ public class FpcProvider implements AutoCloseable {
     private HTTPClientPool httpNotifierPool;
     private ZMQNBIServerPool zmqNbi;
     private ZMQSBListener zmqSbListener;
+    private WriteToCache wtc;
     private Thread writeToCache;
     /**
      * Returns the instance of the FpcProvider
@@ -143,7 +144,9 @@ public class FpcProvider implements AutoCloseable {
         TenantManager.populateTenant(defaultTenantId, cpFactories);
 
         try{
-        	writeToCache = new Thread(new WriteToCache());
+        	wtc = new WriteToCache();
+        	wtc.start();
+        	writeToCache = new Thread(wtc);
         	writeToCache.start();
         } catch (Exception e) {
         	ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
@@ -341,6 +344,10 @@ public class FpcProvider implements AutoCloseable {
         if (fpcCoreServices != null) {
             fpcCoreServices.close();
         }
+        if(wtc != null){
+        	wtc.stop();
+        }
+
         if (httpNotifierPool != null) {
             try {
                 httpNotifierPool.close();

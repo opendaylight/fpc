@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class WriteToCache implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(ZMQSBListener.class);
 	public static BlockingQueue<Transaction> blockingQueue;
+	private boolean run;
 	/**
 	 * Adds a transaction to the Blocking queue
 	 * @param t - Transaction to be added
@@ -36,17 +37,32 @@ public class WriteToCache implements Runnable {
 		blockingQueue = new LinkedBlockingQueue<Transaction>();
 	}
 
+	/**
+	 * Sets the run flag to true
+	 */
+	public void start(){
+		this.run = true;
+	}
+
+	/**
+	 * Sets the run flag to false
+	 */
+	public void stop(){
+		this.run = false;
+	}
+
 	@Override
 	public void run() {
-		try {
-			LOG.info("Starting Write To Cache Thread");
-			Transaction t = blockingQueue.take();
-			t.writeToCache();
-			t.completeAndClose(System.currentTimeMillis());
-		} catch (InterruptedException e) {
-			ErrorLog.logError(e.getMessage(),e.getStackTrace());
-		} catch (Exception e) {
-			ErrorLog.logError(e.getMessage(),e.getStackTrace());
+		while(run){
+			try {
+				Transaction t = blockingQueue.take();
+				t.writeToCache();
+				t.completeAndClose(System.currentTimeMillis());
+			} catch (InterruptedException e) {
+				ErrorLog.logError(e.getMessage(),e.getStackTrace());
+			} catch (Exception e) {
+				ErrorLog.logError(e.getMessage(),e.getStackTrace());
+			}
 		}
 	}
 
