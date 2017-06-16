@@ -79,6 +79,9 @@ module ietf-dmm-fpcbase {
     identity threegpp-tft-decriptor {
       base "fpcbase:fpc-descriptor-type";
     }
+    identity domain-descriptor {
+      base "fpcbase:fpc-descriptor-type";
+    }
 
     grouping fpc-descriptor {
         uses fpcbase:fpc-descriptor-id;
@@ -103,6 +106,9 @@ module ietf-dmm-fpcbase {
           }
           case threegpp-tft {
               uses threegpp:tft;
+          }
+          case domain-descriptor {
+              uses fpcpolicyext:domain-descriptor-list;
           }
         }
     }
@@ -133,6 +139,9 @@ module ietf-dmm-fpcbase {
     identity drop-action {
       base "fpcbase:fpc-action-type";
     }
+    identity rate-action {
+      base "fpcbase:fpc-action-type";
+    }
 
     grouping fpc-action {
         uses fpcbase:fpc-action-id;
@@ -157,6 +166,9 @@ module ietf-dmm-fpcbase {
           }
           case copy-forward {
               uses fpcbase:copy-forward;
+          }
+          case rate {
+              uses fpcpolicyext:rating-action;
           }
         }
     }
