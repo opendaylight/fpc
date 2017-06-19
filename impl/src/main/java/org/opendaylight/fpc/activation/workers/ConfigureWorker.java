@@ -146,6 +146,7 @@ public class ConfigureWorker
 	                        try {
 	                            dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
 	                                    context.getInstructions() : input.getInstructions(), context, oCache);
+	                            tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
 	                            //dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
 	                        } catch (Exception e) {
 	                            return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
@@ -165,7 +166,6 @@ public class ConfigureWorker
                 }
             }
 
-            tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
             return null;
         case Query:
             doq = (DeleteOrQuery) input.getOpBody();
@@ -219,6 +219,7 @@ public class ConfigureWorker
 	                                if (dpnInfo.activator != null) {
 	                                    try {
 	                                        dpnInfo.activator.delete(input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
+	                                        tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
 	                                        //dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
 	                                    } catch (Exception e) {
 	                                        return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
@@ -238,10 +239,11 @@ public class ConfigureWorker
 		            		ErrorLog.logError(e.getMessage(),e.getStackTrace());
 		            	}
                     }
+                } else {
+                	ErrorLog.logError("Context for delete not found. Target - "+target.getTarget().toString());
                 }
             }
 
-            tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
             return null;
         default:
             return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_WO_PAYLOAD),
@@ -264,6 +266,7 @@ public class ConfigureWorker
         if (t == null) {
             t = baseTx;
         }
+        t.setStatusTs(OperationStatus.ACTIVATION_DEQUEUE, System.currentTimeMillis());
         HierarchicalCache oCache = new HierarchicalCache((input.getOpRefScope() != null) ?
                 input.getOpRefScope() : RefScope.Unknown,
                 t.getTenantContext().getSc(),

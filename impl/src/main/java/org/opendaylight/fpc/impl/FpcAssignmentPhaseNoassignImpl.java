@@ -100,6 +100,7 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                             activationService.getQueue()
                                 .put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
                                     input));
+                            tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
                             enqueueVal = enqueues.incrementAndGet();
                             rt = new CommonSuccessBuilder( ((Payload)input.getOpBody()) ).build();
                         } catch (InterruptedException e) {
@@ -110,6 +111,7 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                         try {
                             activationService.getQueue().put(
                                     new AbstractMap.SimpleEntry<Transaction,Object>(tx,input));
+                            tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
                             rt = new DeleteSuccessBuilder((DeleteOrQuery) input.getOpBody()).build();
                         } catch (InterruptedException e) {
                             rt = activationServiceInterrupted(e,tx, System.currentTimeMillis() - startTime);

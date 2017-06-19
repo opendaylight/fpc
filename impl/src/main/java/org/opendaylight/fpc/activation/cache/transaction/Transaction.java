@@ -141,6 +141,14 @@ public class Transaction {
      * An enumeration representing the various stages of a transaction life cycle.
      */
     public enum OperationStatus {
+    	/**
+    	 * Activation Enqueue
+    	 */
+    	ACTIVATION_ENQUEUE,
+    	/**
+    	 * Activation dequeue
+    	 */
+    	ACTIVATION_DEQUEUE,
         /**
          * Pending Assignment
          */
