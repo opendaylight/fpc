@@ -15,7 +15,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
+import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
 import org.opendaylight.fpc.dpn.DPNStatusIndication;
+import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.notify.value.DownlinkDataNotification;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.notify.value.DownlinkDataNotificationBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
@@ -182,8 +184,11 @@ public class DpnAPIListener {
 		LOG.info(ClientId+"/"+OpId);
 		Transaction t = Transaction.get(ClientId+"/"+OpId.toString());
 		if(t != null){
+			t.setStatus(OperationStatus.DPN_RESPONSE_PROCESSED, System.currentTimeMillis());
 			t.setCauseValue(buf[2]);
 			t.complete(System.currentTimeMillis());
+		} else {
+			ErrorLog.logError("Transaction not found: "+ClientId+"/"+OpId);
 		}
     }
 

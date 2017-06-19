@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 
@@ -36,6 +37,7 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
     protected List<Thread> threadPool;
     protected CountDownLatch startSignal;
     protected DataBroker db;
+    protected AtomicInteger atomicInt;
 
     /**
      * Main Constructor.
@@ -49,6 +51,7 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
         this.pool = new ArrayList<T>();
         this.threadPool = new ArrayList<Thread>();
         this.it = Iterables.cycle(pool).iterator();
+        atomicInt = new AtomicInteger(0);
     }
 
     /**
@@ -120,7 +123,14 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
      * @return T - A subclass of Worker
      */
     public T getWorker() {
-        return it.next();
+    	int cur;
+    	while(true){
+    		cur = atomicInt.get();
+    		if(atomicInt.compareAndSet(cur, cur==this.poolSize-1 ? 0 : cur+1))
+    				break;
+    	}
+    	return pool.get(cur);
+        //return it.next();
     }
 
     @Override

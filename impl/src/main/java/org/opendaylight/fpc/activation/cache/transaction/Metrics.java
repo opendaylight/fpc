@@ -140,7 +140,7 @@ public class Metrics implements AutoCloseable {
         // General Transaction States
         for (Transaction.OperationStatus status : stateEntrants.keySet()) {
             if (stateEntrants.get(status) != null) {
-                States someState  = createState(new StatesBuilder(), "Total Runtime for Completed Transactions",
+                States someState  = createState(new StatesBuilder(), status.toString(),
                     stateEntrants.get(status).get(), (stateRuntimes.get(status) != null) ? stateRuntimes.get(status)
                         .get() : null);
                 if (someState != null) {

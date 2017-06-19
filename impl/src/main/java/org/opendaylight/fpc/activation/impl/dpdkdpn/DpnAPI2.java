@@ -270,9 +270,9 @@ public class DpnAPI2 {
      */
     public void modify_bearer_dl(
             Short dpn,
-            Ipv4Address s1u_sgw_gtpu_ipv4,
-            Long s1u_enb_gtpu_teid,
             Ipv4Address s1u_enb_gtpu_ipv4,
+            Long s1u_enb_gtpu_teid,
+            Ipv4Address s1u_sgw_gtpu_ipv4,
             Object dl_tft_table,
             Long clientIdentifier,
             BigInteger opIdentifier,
@@ -281,9 +281,9 @@ public class DpnAPI2 {
         ByteBuffer bb = ByteBuffer.allocate(32);
         bb.put(toUint8(dpn))
             .put(MODIFY_DL_BEARER_TYPE)
-            .put(toUint32(IPToDecimal.ipv4ToLong(s1u_enb_gtpu_ipv4.getValue())))
-            .put(toUint32(s1u_enb_gtpu_teid))
             .put(toUint32(IPToDecimal.ipv4ToLong(s1u_sgw_gtpu_ipv4.getValue())))
+            .put(toUint32(s1u_enb_gtpu_teid))
+            .put(toUint32(IPToDecimal.ipv4ToLong(s1u_enb_gtpu_ipv4.getValue())))
             .put(toUint64(BigInteger.valueOf(sessionId)))
             .put(toUint8(ZMQSBListener.getControllerTopic()))
             .put(toUint32(clientIdentifier))

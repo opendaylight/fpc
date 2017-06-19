@@ -564,13 +564,13 @@ public class StorageCache implements AutoCloseable {
     protected void write(String identKey, YangInstanceIdentifier key, NormalizedNode<?,?> value) {
         boolean isCreate = identities.contains(identKey);
         DOMStoreWriteTransaction wtrans = memoryCache.newWriteOnlyTransaction();
-        if (isCreate) {
+        if (!isCreate) {
             wtrans.write(key, value);
         } else {
             wtrans.merge(key, value);
         }
         if (commitTrans(wtrans)) {
-            if (isCreate) {
+            if (!isCreate) {
                 identities.add(identKey);
             }
         }
@@ -584,7 +584,7 @@ public class StorageCache implements AutoCloseable {
         Map.Entry<FixedType, String> entityInfo = this.resolver.extractTypeAndKey(instanceId);
         remove(resolver.toInstanceIdentifier(instanceId));
         if ((!identities.remove(instanceId)) && (entityInfo != null)) {
-            identities.remove(entityInfo.getValue());
+        	identities.remove(entityInfo.getValue());
         }
     }
 
@@ -657,4 +657,13 @@ public class StorageCache implements AutoCloseable {
             DOMDataTreeChangeListener listener) {
         return memoryCache.registerTreeChangeListener(iid, listener);
     }
+
+	/**
+	 * Checks if the Identifiers map contains an identity
+	 * @param identifier - identifier to check
+	 * @return - true if exists, false otherwise
+	 */
+	public boolean hasIdentity(String identifier) {
+		return identities.contains(identifier);
+	}
 }

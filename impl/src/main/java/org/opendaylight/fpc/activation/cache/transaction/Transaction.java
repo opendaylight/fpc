@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -22,6 +23,7 @@ import org.opendaylight.fpc.activation.cache.PayloadCache;
 import org.opendaylight.fpc.activation.cache.StorageCache;
 import org.opendaylight.fpc.notification.Notifier;
 import org.opendaylight.fpc.tenant.TenantManager;
+import org.opendaylight.fpc.utils.NameResolver;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpInput;
@@ -34,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPort;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Transaction {
     private static final Logger LOG = LoggerFactory.getLogger(Transaction.class);
-    private static Map<String, Transaction> transactions = new HashMap<String, Transaction>();
+    private static Map<String, Transaction> transactions = new ConcurrentHashMap<String, Transaction>();
 
     private static Map<Long, Map.Entry<LongAdder,List<Transaction>>> bundles =
             new HashMap<Long, Map.Entry<LongAdder,List<Transaction>>>();
@@ -150,6 +153,12 @@ public class Transaction {
          * Awaiting Responses
          */
         AWAITING_RESPONSES,
+
+        /**
+         * DPN Response Processed
+         */
+        DPN_RESPONSE_PROCESSED,
+
         /**
          * Awaiting Cache write
          */
@@ -439,6 +448,13 @@ public class Transaction {
                 DeleteOrQuery doq = (DeleteOrQuery) input.getOpBody();
                 for (Targets target : (doq.getTargets() != null) ? doq.getTargets() :
                     Collections.<Targets>emptyList()) {
+                	//workaround for instance identifier not being parsed correctly
+                	DataObject dObj = this.getTenantContext().getSc().read(NameResolver.extractString(target.getTarget()));
+                    FpcContext context =(dObj instanceof FpcContext) ? (FpcContext) dObj : null;
+                    if(context != null){
+                    	sc.remove(NameResolver.extractString(context.getContextId()));
+                    }
+                    //end of workaround
                     if (target.getTarget().getInstanceIdentifier() != null) {
                             sc.remove(target.getTarget().getInstanceIdentifier().toString());
                     } else {
@@ -494,13 +510,26 @@ public class Transaction {
      * Fails the transaction.
      */
     public void fail() {
-        setStatusTs(OperationStatus.FAILED, System.currentTimeMillis());
+    	setStatusTs(OperationStatus.DISPATCHING_NOTIFICATION, System.currentTimeMillis());
+        switch (input.getOpType()) {
+	    	case Create:
+	    	case Update:
+	    		rt = getOpCache(pc).getConfigSuccess();
+	    		break;
+	    	case Delete:
+	    		rt = new DeleteSuccessBuilder().setTargets(((DeleteOrQuery) input.getOpBody()).getTargets()).build();
+	    		break;
+	    	default:
+	    		break;
+	    }
         Notifier.issueConfigResult(this.getClientId(),
                 this.getOpId(),
                 OpStatus.Err,
                 rt,
                 true,
                 this.causeValue);
+
+        setStatusTs(OperationStatus.FAILED, System.currentTimeMillis());
         close();
     }
 

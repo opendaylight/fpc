@@ -22,7 +22,7 @@ curl -i \
             "urn:ietf:params:xml:ns:yang:fpcagent:fpc-agent-assignments",
             "urn:ietf:params:xml:ns:yang:fpcagent:instruction-bitset"
         ],
-        "endpoint-uri": "http://127.0.0.1:9997"
+        "endpoint-uri": "http://127.0.0.1:9997/"
     }
 }' \
 http://localhost:8181/restconf/operations/fpc:register_client

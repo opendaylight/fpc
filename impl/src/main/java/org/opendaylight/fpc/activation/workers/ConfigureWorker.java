@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.fpc.activation.cache.HierarchicalCache;
 import org.opendaylight.fpc.activation.cache.OpCache;
 import org.opendaylight.fpc.activation.cache.PayloadCache;
+import org.opendaylight.fpc.activation.cache.StorageCache;
 import org.opendaylight.fpc.activation.cache.StorageCacheUtils;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
@@ -35,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Payload;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.RefScope;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpHeader.OpType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.configure.bundles.input.Bundles;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.DeleteOrQuery;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
@@ -128,24 +130,38 @@ public class ConfigureWorker
         switch (input.getOpType()) {
         case Create:
         case Update:
+        	StorageCache createSC = (input.getOpType().equals(OpType.Create)) ? tx.getTenantContext().getSc() : null;
             for (Contexts context : (oCache.getPayloadContexts() == null) ? Collections.<Contexts>emptyList() : oCache.getPayloadContexts()) {
+            	if (createSC != null) {
+            		//Quick Check to ensure this is not already in the in-memory DB
+            		if (createSC.hasIdentity(NameResolver.extractString(context.getContextId()))) {
+            			tx.fail();
+            			return null;
+            		}
+            	}
                 for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
-                    dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
-                    if (dpnInfo!=null && dpnInfo.activator != null) {
-                        try {
-                            dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
-                                    context.getInstructions() : input.getInstructions(), context, oCache);
-                            //dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
-                        } catch (Exception e) {
-                            return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
-                                    e,
-                                    "PROTOCOL - operation failed - ERROR - Context Activation - ",
-                                    tx,
-                                    System.currentTimeMillis() - sysTime);
-                        }
-                    } else {
-                        LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
-                    }
+                	try{
+	                    dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
+	                    if (dpnInfo.activator != null) {
+	                        try {
+	                            dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
+	                                    context.getInstructions() : input.getInstructions(), context, oCache);
+	                            //dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
+	                        } catch (Exception e) {
+	                            return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
+	                                    e,
+	                                    "PROTOCOL - operation failed - ERROR - Context Activation - ",
+	                                    tx,
+	                                    System.currentTimeMillis() - sysTime);
+	                        }
+	                    } else {
+	                        LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
+	                    }
+                	} catch (Exception e){
+                		ErrorLog.logError("Context - "+context.toString());
+                		ErrorLog.logError("dpnInfo map - "+tx.getTenantContext().getDpnInfo().toString());
+                		ErrorLog.logError(e.getMessage(),e.getStackTrace());
+                	}
                 }
             }
 
@@ -194,27 +210,33 @@ public class ConfigureWorker
                         if (context.getDpns().size() > 1) {
                             tx.addTaskCount(context.getDpns().size()-1);
                         }
-                        for (Dpns dpn : context.getDpns()) {
-                            ident = dpn.getDpnId();
+                        try {
+	                        for (Dpns dpn : context.getDpns()) {
+	                            ident = dpn.getDpnId();
 
-                            if (ident != null) {
-                                dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
-                                if (dpnInfo.activator != null) {
-                                    try {
-                                        dpnInfo.activator.delete(input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
-                                        //dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
-                                    } catch (Exception e) {
-                                        return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
-                                                e,
-                                                "PROTOCOL - operation failed - ERROR - Delete Failed - ",
-                                                tx,
-                                                System.currentTimeMillis() - sysTime);
-                                    }
-                                }  else {
-                                    LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
-                                }
-                            }
-                        }
+	                            if (ident != null) {
+	                                dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
+	                                if (dpnInfo.activator != null) {
+	                                    try {
+	                                        dpnInfo.activator.delete(input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
+	                                        //dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
+	                                    } catch (Exception e) {
+	                                        return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
+	                                                e,
+	                                                "PROTOCOL - operation failed - ERROR - Delete Failed - ",
+	                                                tx,
+	                                                System.currentTimeMillis() - sysTime);
+	                                    }
+	                                }  else {
+	                                    LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
+	                                }
+	                            }
+	                        }
+		                } catch (Exception e){
+		            		ErrorLog.logError("Context - "+context.toString());
+		            		ErrorLog.logError("dpnInfo map - "+tx.getTenantContext().getDpnInfo().toString());
+		            		ErrorLog.logError(e.getMessage(),e.getStackTrace());
+		            	}
                     }
                 }
             }

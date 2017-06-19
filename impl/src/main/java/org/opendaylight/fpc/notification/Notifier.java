@@ -120,7 +120,7 @@ public class Notifier {
             LOG.warn("Notification Service Interruption occurred while sending a Read Notification");
             ErrorLog.logError(e.getStackTrace());
         } catch (Exception ee) {
-        	ErrorLog.logError(ee.getMessage(),ee.getStackTrace());
+        	ErrorLog.logError("Notifier Exception:   "+ee.getClass().getName()+" : "+ee.getLocalizedMessage(),ee.getStackTrace());
         }
     }
 
