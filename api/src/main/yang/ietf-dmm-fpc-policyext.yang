@@ -53,19 +53,6 @@ module ietf-dmm-fpc-policyext {
 
     grouping rating-action {
       description "Rudimentary rating action applied based upon RFC 4006 attributes";
-      leaf rating-group {
-        type uint32;
-        description "From RFC 4006 - Contains the identifier of a rating group.  All the services subject
-           to the same rating type are part of the same rating group.  The
-           specific rating group the request relates to is uniquely identified
-           by the combination of Service-Context-Id and Rating-Group AVPs.";
-      }
-      leaf service-identifier {
-        type uint32;
-        description "From RFC 4006 - Contains the identifier of a service.  The specific service the
-           request relates to is uniquely identified by the combination of
-           Service-Context-Id and Service-Identifier AVPs.";
-      }
       leaf service-context-id {
         type string;
         description "Per RFC 4006 - Contains a unique identifier of the Diameter credit-control service
@@ -78,6 +65,19 @@ module ietf-dmm-fpc-policyext {
          The Token is an arbitrary string of characters and digits.
 
          'domain' represents the entity that allocated the Service-Context-Id.";
+      }
+      leaf service-identifier {
+        type uint32;
+        description "From RFC 4006 - Contains the identifier of a service.  The specific service the
+           request relates to is uniquely identified by the combination of
+           Service-Context-Id and Service-Identifier AVPs.";
+      }
+      leaf rating-group {
+        type uint32;
+        description "From RFC 4006 - Contains the identifier of a rating group.  All the services subject
+           to the same rating type are part of the same rating group.  The
+           specific rating group the request relates to is uniquely identified
+           by the combination of Service-Context-Id and Rating-Group AVPs.";
       }
     }
 

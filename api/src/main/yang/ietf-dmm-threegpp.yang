@@ -117,6 +117,10 @@ module ietf-dmm-threegpp {
         }
     }
 
+    typedef sponsor-identity-type {
+        type string;
+    }
+
     grouping packet-filter {
       leaf direction {
           type threegpp:packet-filter-direction;

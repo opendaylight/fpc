@@ -168,6 +168,9 @@ module ietf-dmm-fpcbase {
               uses fpcbase:copy-forward;
           }
           case rate {
+              leaf sponsor-identity {
+                type threegpp:sponsor-identity-type;
+              }
               uses fpcpolicyext:rating-action;
           }
         }
