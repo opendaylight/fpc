@@ -78,6 +78,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 		<type>pom</type>
         <scope>import</scope>
 	</dependency>
+  		  
     <dependency>
 	    <groupId>org.osgi</groupId>
 	    <artifactId>org.osgi.core</artifactId>

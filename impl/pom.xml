@@ -69,6 +69,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 		<artifactId>httpasyncclient</artifactId>
 		<version>4.1.2</version>
 	</dependency>
+		<dependency>
+         <groupId>net.spy</groupId>
+         <artifactId>spymemcached</artifactId>
+         <version>2.12.2</version>
+     </dependency>
 	
 
     <!-- Testing Dependencies -->

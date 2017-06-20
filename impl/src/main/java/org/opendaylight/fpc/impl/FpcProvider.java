@@ -27,6 +27,7 @@ import org.opendaylight.fpc.activation.cache.transaction.WriteToCache;
 import org.opendaylight.fpc.activation.impl.dpdkdpn.DpdkImplFactory;
 import org.opendaylight.fpc.activation.workers.ActivationThreadPool;
 import org.opendaylight.fpc.activation.workers.MonitorThreadPool;
+import org.opendaylight.fpc.impl.memcached.MemcachedThreadPool;
 import org.opendaylight.fpc.impl.zeromq.ZMQNBIServerPool;
 import org.opendaylight.fpc.impl.zeromq.ZMQSBListener;
 import org.opendaylight.fpc.impl.zeromq.ZMQSBMessagePool;
@@ -111,6 +112,16 @@ public class FpcProvider implements AutoCloseable {
         }
 
         reportConfig();
+
+        try {
+	            MemcachedThreadPool.createInstance(config.getMemcachedThreads(),config.getMemcachedUri());
+	            MemcachedThreadPool.getInstance().start();
+	            MemcachedThreadPool.getInstance().run();
+	    } catch(Exception e) {
+	            ErrorLog.logError(e.getStackTrace());
+	        close();
+	        throw new Exception("FpcProvider - Error during start/run for Memcached Thread Pool. Exiting...");
+	    }
 
         try {
             ZMQClientPool.createInstance(new ZContext(),
@@ -368,6 +379,14 @@ public class FpcProvider implements AutoCloseable {
         if(ZMQSBMessagePool.getInstance() != null) {
             try {
             	ZMQSBMessagePool.getInstance().close();
+            } catch (Exception e) {
+            	ErrorLog.logError(e.getStackTrace());
+            }
+        }
+
+        if(MemcachedThreadPool.getInstance() != null) {
+        	try {
+        		MemcachedThreadPool.getInstance().close();
             } catch (Exception e) {
             	ErrorLog.logError(e.getStackTrace());
             }

@@ -12,6 +12,12 @@ module fpc-config {
     }
 
     container fpc-config {
+    	leaf memcached-uri{
+    	  type string;
+    	}
+    	leaf memcached-threads {
+    	  type uint16;
+    	}
         leaf scheduled-monitors-poolsize {
           type uint16;
         }

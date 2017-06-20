@@ -25,6 +25,7 @@ import org.opendaylight.fpc.activation.cache.StorageCacheUtils;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
 import org.opendaylight.fpc.dpn.DpnHolder;
+import org.opendaylight.fpc.impl.memcached.MemcachedThreadPool;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.ErrorTypeIndex;
@@ -137,6 +138,13 @@ public class ConfigureWorker
             		if (createSC.hasIdentity(NameResolver.extractString(context.getContextId()))) {
             			tx.fail();
             			return null;
+            		}else {
+                        try {
+                            	MemcachedThreadPool.getInstance().getWorker().getBlockingQueue().put(
+                                            new AbstractMap.SimpleEntry<FpcContext,OpType>(context, OpType.Create));
+                        } catch (Exception e) {
+                    		ErrorLog.logError(e.getStackTrace());
+                    	}
             		}
             	}
                 for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
@@ -206,6 +214,12 @@ public class ConfigureWorker
                 }
 
                 if (context != null) {
+                	try {
+                		MemcachedThreadPool.getInstance().getWorker().getBlockingQueue().put(
+                            new AbstractMap.SimpleEntry<FpcContext,OpType>(context, OpType.Delete));
+                	} catch (Exception e) {
+                		ErrorLog.logError(e.getStackTrace());
+                	}
                     if (context.getDpns() != null) {
                         if (context.getDpns().size() > 1) {
                             tx.addTaskCount(context.getDpns().size()-1);
