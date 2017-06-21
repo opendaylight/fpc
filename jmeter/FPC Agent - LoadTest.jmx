@@ -169,7 +169,7 @@
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Create A Context" enabled="false">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Create A Context" enabled="true">
           <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments">
@@ -245,7 +245,7 @@
           <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Update A Context" enabled="false">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Update A Context" enabled="true">
           <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments">
@@ -262,7 +262,7 @@
                 &quot;context-id&quot;: &quot;${counter3}&quot;,&#xd;
                 &quot;dpn-group&quot;: &quot;site1-l3&quot;,&#xd;
                 &quot;delegating-ip-prefixes&quot;: [&#xd;
-                    &quot;192.168.1.5/32&quot;&#xd;
+                    &quot;16.255.100.${ip}/32&quot;&#xd;
                 ],&#xd;
                 &quot;ul&quot;: {&#xd;
                     &quot;tunnel-local-address&quot;: &quot;192.168.1.1&quot;,&#xd;
@@ -289,7 +289,7 @@
                         &quot;dpn-parameters&quot;: {}&#xd;
                     }&#xd;
                 ],&#xd;
-                &quot;imsi&quot;: &quot;9135551234&quot;,&#xd;
+                &quot;imsi&quot;: &quot;${imsi}&quot;,&#xd;
                 &quot;ebi&quot;: &quot;5&quot;,&#xd;
                 &quot;lbi&quot;: &quot;5&quot;&#xd;
             }&#xd;
@@ -321,7 +321,7 @@
           <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Delete A Context" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Delete A Context" enabled="false">
           <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments">

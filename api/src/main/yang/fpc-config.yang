@@ -12,7 +12,10 @@ module fpc-config {
     }
 
     container fpc-config {
-    	leaf memcached-uri{
+    	leaf use-memcached {
+    	  type boolean;
+    	}
+    	leaf memcached-uri {
     	  type string;
     	}
     	leaf memcached-threads {

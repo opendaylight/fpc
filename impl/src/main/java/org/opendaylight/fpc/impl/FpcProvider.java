@@ -112,16 +112,17 @@ public class FpcProvider implements AutoCloseable {
         }
 
         reportConfig();
-
-        try {
-	            MemcachedThreadPool.createInstance(config.getMemcachedThreads(),config.getMemcachedUri());
-	            MemcachedThreadPool.getInstance().start();
-	            MemcachedThreadPool.getInstance().run();
-	    } catch(Exception e) {
-	            ErrorLog.logError(e.getStackTrace());
-	        close();
-	        throw new Exception("FpcProvider - Error during start/run for Memcached Thread Pool. Exiting...");
-	    }
+        if(config.isUseMemcached()){
+	        try {
+		            MemcachedThreadPool.createInstance(config.getMemcachedThreads(),config.getMemcachedUri());
+		            MemcachedThreadPool.getInstance().start();
+		            MemcachedThreadPool.getInstance().run();
+		    } catch(Exception e) {
+		            ErrorLog.logError(e.getStackTrace());
+		        close();
+		        throw new Exception("FpcProvider - Error during start/run for Memcached Thread Pool. Exiting...");
+		    }
+        }
 
         try {
             ZMQClientPool.createInstance(new ZContext(),
@@ -383,13 +384,14 @@ public class FpcProvider implements AutoCloseable {
             	ErrorLog.logError(e.getStackTrace());
             }
         }
-
-        if(MemcachedThreadPool.getInstance() != null) {
-        	try {
-        		MemcachedThreadPool.getInstance().close();
-            } catch (Exception e) {
-            	ErrorLog.logError(e.getStackTrace());
-            }
+        if(config.isUseMemcached()){
+	        if(MemcachedThreadPool.getInstance() != null) {
+	        	try {
+	        		MemcachedThreadPool.getInstance().close();
+	            } catch (Exception e) {
+	            	ErrorLog.logError(e.getStackTrace());
+	            }
+	        }
         }
         if (ZMQClientPool.getInstance() != null) {
             try {

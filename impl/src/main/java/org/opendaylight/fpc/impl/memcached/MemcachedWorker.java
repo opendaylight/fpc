@@ -14,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.opendaylight.fpc.dpn.DPNStatusIndication;
+import org.opendaylight.fpc.impl.FpcServiceImpl;
 import org.opendaylight.fpc.monitor.EventMonitorMgr;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.Worker;
@@ -25,11 +26,14 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev16080
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.MemcachedClient;
 
 public class MemcachedWorker implements Worker {
+	private static final Logger LOG = LoggerFactory.getLogger(FpcServiceImpl.class);
 	private BlockingQueue<Map.Entry<FpcContext,OpType>> blockingQueue;
 	private static Map<FpcContextId,Long> createTimestamp = new ConcurrentHashMap<FpcContextId,Long>();
 	private boolean run;
@@ -54,6 +58,7 @@ public class MemcachedWorker implements Worker {
 	public void run() {
 		this.run = true;
 		try {
+			System.setProperty("net.spy.log.LoggerImpl","java.util.logging.Logger");
 			mcc =  new MemcachedClient(AddrUtil.getAddresses(memcachedUri));
             while(run) {
             	Map.Entry<FpcContext,OpType> context = blockingQueue.take();
@@ -69,10 +74,10 @@ public class MemcachedWorker implements Worker {
         							);
             		if(context.getValue().equals(OpType.Create)){
             			createTimestamp.put(ctxt.getContextId(), timestamp);
-            			entry = entry + "," + String.valueOf(timestamp);
+            			entry = entry + "," + String.valueOf(timestamp) +",";
             			mcc.set(assignedPrefix.getIpv4Prefix().getValue().split("/")[0], 0, entry);
             		} else if(context.getValue().equals(OpType.Delete)){
-            			entry = entry + "," + createTimestamp.get(ctxt.getContextId()) +"," + String.valueOf(timestamp);
+            			entry = entry + createTimestamp.get(ctxt.getContextId()) +"," + String.valueOf(timestamp);
             			mcc.replace(assignedPrefix.getIpv4Prefix().getValue().split("/")[0], 0, entry);
             			createTimestamp.remove(ctxt.getContextId());
                     }
