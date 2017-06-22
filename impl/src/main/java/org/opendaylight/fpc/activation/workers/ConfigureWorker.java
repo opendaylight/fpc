@@ -140,8 +140,10 @@ public class ConfigureWorker
             			return null;
             		}else {
                         try {
-                            	MemcachedThreadPool.getInstance().getWorker().getBlockingQueue().put(
+                        		if(MemcachedThreadPool.getInstance() != null){
+                        			MemcachedThreadPool.getInstance().getWorker().getBlockingQueue().put(
                                             new AbstractMap.SimpleEntry<FpcContext,OpType>(context, OpType.Create));
+                        		}
                         } catch (Exception e) {
                     		ErrorLog.logError(e.getStackTrace());
                     	}
@@ -215,8 +217,10 @@ public class ConfigureWorker
 
                 if (context != null) {
                 	try {
-                		MemcachedThreadPool.getInstance().getWorker().getBlockingQueue().put(
-                            new AbstractMap.SimpleEntry<FpcContext,OpType>(context, OpType.Delete));
+                		if(MemcachedThreadPool.getInstance() != null){
+                			MemcachedThreadPool.getInstance().getWorker().getBlockingQueue().put(
+                                    new AbstractMap.SimpleEntry<FpcContext,OpType>(context, OpType.Delete));
+                		}
                 	} catch (Exception e) {
                 		ErrorLog.logError(e.getStackTrace());
                 	}
