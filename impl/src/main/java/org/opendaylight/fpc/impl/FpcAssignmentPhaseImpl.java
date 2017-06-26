@@ -21,6 +21,7 @@ import org.opendaylight.fpc.activation.cache.StorageCacheUtils;
 import org.opendaylight.fpc.activation.cache.transaction.EmptyBodyException;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
+import org.opendaylight.fpc.activation.workers.ActivationThreadPool;
 import org.opendaylight.fpc.activation.workers.ConfigureWorker;
 import org.opendaylight.fpc.activation.workers.MonitorWorker;
 import org.opendaylight.fpc.assignment.AssignmentManager;
@@ -78,7 +79,7 @@ public class FpcAssignmentPhaseImpl extends FpcagentServiceBase {
      * @param notificationService - Notification Service
      * @param conf - Fpc Configuration
      */
-    public FpcAssignmentPhaseImpl(DataBroker db, ConfigureWorker activationService,
+    public FpcAssignmentPhaseImpl(DataBroker db, ActivationThreadPool activationService,
             MonitorWorker monitorService, NotificationPublishService notificationService, FpcConfig conf) {
         super(db, activationService, monitorService, notificationService, conf);
         LOG.info("FpcAssignmentPhaseImpl has been initialized");
@@ -106,7 +107,7 @@ public class FpcAssignmentPhaseImpl extends FpcagentServiceBase {
                     case Create:
                     case Update:
                         try {
-                            activationService.getQueue()
+                            activationService.getWorker().getQueue()
                                 .put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
                                     new ConfigureInputBuilder(input)
                                         .setOpBody(new CreateOrUpdateBuilder((CreateOrUpdate)input.getOpBody())
@@ -120,7 +121,7 @@ public class FpcAssignmentPhaseImpl extends FpcagentServiceBase {
                         break;
                     default: // Delete
                         try {
-                            activationService.getQueue().put(
+                            activationService.getWorker().getQueue().put(
                                     new AbstractMap.SimpleEntry<Transaction,Object>(tx,input));
                         } catch (InterruptedException e) {
                             rt = activationServiceInterrupted(e,tx, System.currentTimeMillis() - startTime);
@@ -214,7 +215,7 @@ public class FpcAssignmentPhaseImpl extends FpcagentServiceBase {
             }
         }
         try {
-            activationService.getQueue().put(new AbstractMap.SimpleEntry<List<Transaction>,Object>(txs,
+            activationService.getWorker().getQueue().put(new AbstractMap.SimpleEntry<List<Transaction>,Object>(txs,
                     new ConfigureBundlesInputBuilder()
                         .setBundles(activationBundles)
                         .setHighestOpRefScope(input.getHighestOpRefScope())

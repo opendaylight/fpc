@@ -133,6 +133,15 @@ abstract public class AbstractThreadPool<T extends Worker> implements AutoClosea
         //return it.next();
     }
 
+    /**
+     * Retrieves the specified worker.
+     * @param index - the index of the worker within the pool
+     * @return T - A subclass of Worker. Null, if index out of bound.
+     */
+    public T getWorker(long index) {
+    	return (index >=0 && index < poolSize) ? pool.get((int) index) : null;
+    }
+
     @Override
     public void close() throws Exception {
         shutDown();

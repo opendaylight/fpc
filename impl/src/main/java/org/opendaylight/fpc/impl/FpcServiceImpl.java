@@ -218,13 +218,13 @@ public class FpcServiceImpl implements FpcService {
                 FpcagentServiceBase agentServiceStrategy = null;
                 if (!convergedFeatures.contains("urn:ietf:params:xml:ns:yang:fpcagent:fpc-client-assignments")) {
                     agentServiceStrategy = new FpcAssignmentPhaseImpl(dataBroker,
-                            activationService.getWorker(),
+                            activationService,
                             monitorService.getWorker(),
                             notificationService,
                             conf);
                 } else {
                     agentServiceStrategy = new FpcAssignmentPhaseNoassignImpl(dataBroker,
-                            activationService.getWorker(),
+                            activationService,
                             monitorService.getWorker(),
                             notificationService,
                             conf);

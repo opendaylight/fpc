@@ -83,7 +83,7 @@ public class NameResolver {
     private static final Splitter SLASH_SPLITTER = Splitter.on('/');
     private final static String URI_ENCODING_CHAR_SET = "ISO-8859-1";
     private final static String NULL_VALUE = "null";
-    private final static Map<FixedType, Map.Entry<Pattern,Integer>> entityPatterns
+    public final static Map<FixedType, Map.Entry<Pattern,Integer>> entityPatterns
         = new HashMap<FixedType, Map.Entry<Pattern,Integer>>();
 
     static {

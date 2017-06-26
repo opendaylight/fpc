@@ -18,15 +18,18 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.fpc.impl.FpcagentServiceBase;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.FpcCodecUtils;
 import org.opendaylight.fpc.utils.NameResolver;
 import org.opendaylight.fpc.utils.NameResolver.FixedType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.dom.broker.osgi.OsgiBundleScanningSchemaService;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
@@ -78,6 +81,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 
 /**
  * In-memory Storage Cache.
@@ -563,11 +569,33 @@ public class StorageCache implements AutoCloseable {
      */
     protected void write(String identKey, YangInstanceIdentifier key, NormalizedNode<?,?> value) {
         boolean isCreate = identities.contains(identKey);
-        DOMStoreWriteTransaction wtrans = memoryCache.newWriteOnlyTransaction();
+        DOMStoreReadWriteTransaction wtrans = memoryCache.newReadWriteTransaction();//.newWriteOnlyTransaction();
         if (!isCreate) {
             wtrans.write(key, value);
         } else {
             wtrans.merge(key, value);
+            /*CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future = wtrans.read(key);
+            Futures.addCallback(future, new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
+
+				@Override
+				public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
+					if(result.isPresent()) {
+						DataObject dObj = codecs.dataObjectFromNormalizedNode(key,result.get());
+						if(dObj instanceof org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts){
+							org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts context = (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts) dObj;
+							FpcagentServiceBase.sessionMap.get(context.getContextId()).getValue().add(context);
+						}
+					}
+
+				}
+
+				@Override
+				public void onFailure(Throwable t) {
+					// TODO Auto-generated method stub
+
+				}
+
+            });*/
         }
         if (commitTrans(wtrans)) {
             if (!isCreate) {
