@@ -23,4 +23,5 @@ public class ErrorTypeIndex {
     static final public Long UNKNOWN_OP_TYPE = 9L;
     static final public Long MESSAGE_WITH_NO_BODY = 10L;
     static final public Long CLIENT_ID_NOT_REGISTERED = 11L;
+    static final public Long SESSION_ALREADY_EXISTS = 12L;
 }

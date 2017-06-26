@@ -8,9 +8,12 @@
 package org.opendaylight.fpc.activation.workers;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
@@ -25,11 +28,13 @@ import org.opendaylight.fpc.activation.cache.StorageCacheUtils;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
 import org.opendaylight.fpc.dpn.DpnHolder;
+import org.opendaylight.fpc.impl.FpcagentServiceBase;
 import org.opendaylight.fpc.impl.memcached.MemcachedThreadPool;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.ErrorTypeIndex;
 import org.opendaylight.fpc.utils.NameResolver;
+import org.opendaylight.fpc.utils.NameResolver.FixedType;
 import org.opendaylight.fpc.utils.Worker;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureInput;
@@ -63,9 +68,9 @@ public class ConfigureWorker
     private static final AtomicLong entrants = new AtomicLong(0L);
     private static Pattern deleteContextHandle = Pattern.compile("^/ctxt:(.+)");
     private static Pattern deletePortHandle = Pattern.compile("^/port:(.+)");
-
     private boolean run;
     private final BlockingQueue<Object> blockingConfigureQueue;
+
     //private final DataBroker db;
 
     /**
@@ -123,6 +128,7 @@ public class ConfigureWorker
      */
     private ResultType executeOperation(PayloadCache oCache,
                                           Transaction tx) {
+    	LOG.info("Configure Worker - Execute Operation");
         long sysTime = System.currentTimeMillis();
         OpInput input = tx.getOpInput();
         DpnHolder dpnInfo = null;
@@ -131,23 +137,24 @@ public class ConfigureWorker
         switch (input.getOpType()) {
         case Create:
         case Update:
-        	StorageCache createSC = (input.getOpType().equals(OpType.Create)) ? tx.getTenantContext().getSc() : null;
             for (Contexts context : (oCache.getPayloadContexts() == null) ? Collections.<Contexts>emptyList() : oCache.getPayloadContexts()) {
-            	if (createSC != null) {
-            		//Quick Check to ensure this is not already in the in-memory DB
-            		if (createSC.hasIdentity(NameResolver.extractString(context.getContextId()))) {
-            			tx.fail();
-            			return null;
-            		}else {
-                        try {
-                        		if(MemcachedThreadPool.getInstance() != null){
-                        			MemcachedThreadPool.getInstance().getWorker().getBlockingQueue().put(
-                                            new AbstractMap.SimpleEntry<FpcContext,OpType>(context, OpType.Create));
-                        		}
-                        } catch (Exception e) {
-                    		ErrorLog.logError(e.getStackTrace());
-                    	}
-            		}
+            	if ((input.getOpType().equals(OpType.Create))) {
+                    try {
+
+                    		if(MemcachedThreadPool.getInstance() != null){
+                    			MemcachedThreadPool.getInstance().getWorker().getBlockingQueue().put(
+                                        new AbstractMap.SimpleEntry<FpcContext,OpType>(context, OpType.Create));
+                    		}
+                    } catch (Exception e) {
+                		ErrorLog.logError(e.getStackTrace());
+                	}
+            	}
+            	if(FpcagentServiceBase.sessionMap.get(NameResolver.extractString(context.getContextId())).getValue() != null) {
+            		FpcagentServiceBase.sessionMap.get(NameResolver.extractString(context.getContextId())).getValue().add(context);
+            	} else {
+            		ArrayList<Contexts> contextsArray = new ArrayList<Contexts>();
+            		contextsArray.add(context);
+            		FpcagentServiceBase.sessionMap.get(NameResolver.extractString(context.getContextId())).setValue(contextsArray);
             	}
                 for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
                 	try{
@@ -197,23 +204,29 @@ public class ConfigureWorker
             for (Targets target : (doq.getTargets() != null) ? doq.getTargets() :
                     Collections.<Targets>emptyList()) {
                 FpcDpnId ident = null;
-                DataObject dObj = tx.getTenantContext().getSc().read(NameResolver.extractString(target.getTarget()));
-                FpcContext context =(dObj instanceof FpcContext) ? (FpcContext) dObj : null;
-                FpcPort port = (dObj instanceof FpcPort) ? (FpcPort) dObj : null;
-                if ((context == null) && (port == null)) {
-                    String s = NameResolver.extractString(target.getTarget());
-                    Matcher m1 = deleteContextHandle.matcher(s);
-                    if (m1.matches()) {
-                        LOG.info("Value = {}",m1.group(0));
-                        LOG.info("Value = {}",m1.group(1));
-                        context = tx.getTenantContext().getSc().getContext(new FpcIdentity(m1.group(1)));
-                    } else {
-                        Matcher m2 = deletePortHandle.matcher(s);
-                        if (m2.matches()) {
-                            port = tx.getTenantContext().getSc().getPort(new FpcIdentity(m1.group(1)));
-                        }
-                    }
+                //DataObject dObj = tx.getTenantContext().getSc().read(NameResolver.extractString(target.getTarget()));
+                //FpcContext context =(dObj instanceof FpcContext) ? (FpcContext) dObj : null;
+                //FpcPort port = (dObj instanceof FpcPort) ? (FpcPort) dObj : null;
+                Entry<FixedType, String> entry = extractTypeAndId(NameResolver.extractString(target.getTarget()));
+                FpcContext context = null;
+                ArrayList<Contexts> cList = FpcagentServiceBase.sessionMap.get(entry.getValue()).getValue();
+                if(!cList.isEmpty()){
+                	context = cList.get(cList.size()-1);
                 }
+//                if ((context == null)) {
+//                    String s = NameResolver.extractString(target.getTarget());
+//                    Matcher m1 = deleteContextHandle.matcher(s);
+//                    if (m1.matches()) {
+//                        LOG.info("Value = {}",m1.group(0));
+//                        LOG.info("Value = {}",m1.group(1));
+//                        context = tx.getTenantContext().getSc().getContext(new FpcIdentity(m1.group(1)));
+//                    } else {
+//                        Matcher m2 = deletePortHandle.matcher(s);
+//                        if (m2.matches()) {
+//                            //port = tx.getTenantContext().getSc().getPort(new FpcIdentity(m1.group(1)));
+//                        }
+//                    }
+//                }
 
                 if (context != null) {
                 	try {
@@ -238,6 +251,7 @@ public class ConfigureWorker
 	                                    try {
 	                                        dpnInfo.activator.delete(input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
 	                                        tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
+	                                        FpcagentServiceBase.sessionMap.remove(NameResolver.extractString(context.getContextId()));
 	                                        //dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
 	                                    } catch (Exception e) {
 	                                        return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
@@ -406,4 +420,14 @@ public class ConfigureWorker
 	public boolean isOpen() {
 		return true;
 	}
+
+	public Map.Entry<FixedType, String> extractTypeAndId(String restconfPath) {
+        for (Map.Entry<FixedType, Map.Entry<Pattern,Integer>> p : NameResolver.entityPatterns.entrySet()) {
+            Matcher m = p.getValue().getKey().matcher(restconfPath);
+            if (m.matches()) {
+                return new AbstractMap.SimpleEntry<FixedType, String>(p.getKey(), m.group(1));
+            }
+        }
+        return null;
+    }
 }
