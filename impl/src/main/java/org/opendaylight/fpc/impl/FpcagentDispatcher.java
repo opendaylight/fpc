@@ -21,6 +21,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureDpnInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureDpnOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureDpnOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureDpnInput;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureDpnOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureOutputBuilder;
@@ -53,7 +55,7 @@ import com.google.common.util.concurrent.Futures;
  */
 public class FpcagentDispatcher implements IetfDmmFpcagentService {
 	private static final Logger LOG = LoggerFactory.getLogger(FpcServiceImpl.class);
-    
+
     private static final Map<String, IetfDmmFpcagentService> clientHandlerMap = new HashMap<String, IetfDmmFpcagentService>();
     private static IetfDmmFpcagentService defaultService = null;
 
@@ -227,5 +229,13 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 //	    	}
 //	    }
 	    return Futures.immediateFuture(configDpnUnknownDpnErr);
+	}
+
+	@Override
+	public Future<RpcResult<ConfigureDpnOutput>> configureDpn(ConfigureDpnInput input) {
+		// TODO Auto-generated method stub
+		//if (input == null){ return someError }
+		//if (ifc != null){ return ifc.method(input) }
+		return null;
 	}
 }
