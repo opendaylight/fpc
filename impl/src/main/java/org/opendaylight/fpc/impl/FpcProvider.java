@@ -36,7 +36,11 @@ import org.opendaylight.fpc.monitor.ScheduledMonitors;
 import org.opendaylight.fpc.notification.HTTPClientPool;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
+import org.opendaylight.fpc.utils.FpcCodecUtils;
+import org.opendaylight.fpc.utils.StringConstants;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
+import org.opendaylight.netconf.sal.rest.api.RestconfService;
+import org.opendaylight.netconf.sal.restconf.api.JSONRestconfService;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.FpcAgentInfo;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.FpcAgentInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.IetfDmmFpcagentService;
@@ -51,6 +55,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.FpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.ZmqDpnControlProtocol;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.OperationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeromq.ZContext;
@@ -110,7 +115,6 @@ public class FpcProvider implements AutoCloseable {
         if (config == null) {
             throw new Exception("FpcProvider - configuration has not been set! Exiting...");
         }
-
         reportConfig();
         if(config.isUseMemcached()){
 	        try {
@@ -212,6 +216,7 @@ public class FpcProvider implements AutoCloseable {
         fpcService = null;
         assignmentService = null;
 
+
         LOG.info("FpcProvider - Constructor Complete");
     }
 
@@ -234,6 +239,40 @@ public class FpcProvider implements AutoCloseable {
         }
     }
 
+	public void initJSON() {
+    	Object[] instances =  FpcCodecUtils.getGlobalInstances(JSONRestconfService.class, this);
+    	Object service = (instances != null) ? (JSONRestconfService) instances[0] : null;
+    	if (service == null) {
+    		ErrorLog.logError("JSONRestconfService was NOT available at the moment of the worker's constructor");
+    	} else {
+    		try {
+    			ErrorLog.logError("!!!!---!!!! These Errors are expected !!!!---!!!! ");
+				Optional<String> output = ((JSONRestconfService) service).invokeRpc("fpc:register_client", Optional.of(StringConstants.bindClient));
+				if(output.isPresent()){
+					LOG.info("Bind Client Output: "+output.get());
+				}
+				output = ((JSONRestconfService) service).invokeRpc("ietf-dmm-fpcagent:configure", Optional.of(StringConstants.context));
+				if(output.isPresent()){
+					LOG.info("Context Create Output: "+output.get());
+				}
+				output = ((JSONRestconfService) service).invokeRpc("ietf-dmm-fpcagent:configure", Optional.of(StringConstants.contextDelete));
+    			if(output.isPresent()){
+    				LOG.info("Context Delete Output: "+output.get());
+    			}
+    			output = ((JSONRestconfService) service).invokeRpc("fpc:deregister_client", Optional.of(StringConstants.unbindClient));
+    			if(output.isPresent()){
+    				LOG.info("Unbind Client Output: "+output.get());
+    			}
+			} catch (OperationFailedException e) {
+				ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
+			} catch (Exception e){
+				ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
+			}
+    		ErrorLog.logError("!!!!---!!!! End of expected errors !!!!---!!!! ");
+    	}
+
+    }
+
     /**
      * Method called when the blueprint container is created.
      */
@@ -251,6 +290,7 @@ public class FpcProvider implements AutoCloseable {
         fpcCoreServices =
                 rpcRegistryDependency.addRpcImplementation(FpcService.class,
                         new FpcServiceImpl(this.dataBroker, this.notificationService, this.monitorService, this.activationService));
+        initJSON();
     }
 
     /**
