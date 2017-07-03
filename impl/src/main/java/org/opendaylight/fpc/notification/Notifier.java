@@ -138,7 +138,7 @@ public class Notifier {
                 .build();
 
         for(Uri uri : uris) {
-            if (uri.getValue().startsWith("http") &&
+            if (uri!=null && uri.getValue().startsWith("http") &&
                     (HTTPClientPool.instance() != null)) {
                     try {
                         HTTPClientPool.instance().getWorker().getQueue().put(

@@ -166,6 +166,8 @@ public class StorageWriter implements AutoCloseable {
                     Thread.sleep(sleepTimer);
                 } catch (InterruptedException e) {
                     ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
+                } catch (Exception ee) {
+                	ErrorLog.logError(ee.getLocalizedMessage(),ee.getStackTrace());
                 }
             }
         }
