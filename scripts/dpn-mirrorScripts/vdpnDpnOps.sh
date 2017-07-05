@@ -10,20 +10,15 @@
 echo ""
 curl -i \
 --header "Content-type: application/json" \
---request $1 \
+--request POST \
 -u admin:admin \
 --data '{
-    "dpns": [
-        {
-            "dpn-id": "dpnA",
-            "dpn-name": "site1-anchor1",
-            "dpn-groups": [
-                "foo"
-            ],
-            "topic": "1"
-        }
-    ]
+    "input": {
+        "abstract-dpn-id": "'"$1"'",
+        "dpn-id": "'"$2"'",
+        "operation": "'"$3"'"
+    }
 }' \
-http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-topology/dpns/dpn1
+http://localhost:8181/restconf/operations/ietf-dmm-fpcagent:configure-dpn
 
 echo ""

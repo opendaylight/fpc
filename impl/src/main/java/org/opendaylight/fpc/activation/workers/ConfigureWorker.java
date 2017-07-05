@@ -130,22 +130,45 @@ public class ConfigureWorker
         case Update:
             for (Contexts context : (oCache.getPayloadContexts() == null) ? Collections.<Contexts>emptyList() : oCache.getPayloadContexts()) {
                 for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
-                    dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
-                    if (dpnInfo.activator != null) {
-                        try {
-                            dpnInfo.activator.activate(input.getOpType(), (context.getInstructions() != null) ?
-                                    context.getInstructions() : input.getInstructions(), context, oCache);
-                            dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
-                        } catch (Exception e) {
-                            return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
-                                    e,
-                                    "PROTOCOL - operation failed - ERROR - Context Activation - ",
-                                    tx,
-                                    System.currentTimeMillis() - sysTime);
-                        }
-                    } else {
-                        LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
-                    }
+                	// if vdn, then you send the context to both actual dpn
+                	if(TenantManager.absDpnMap.get(dpn.getDpnId()) != null){
+                		for(FpcDpnId dpnId : TenantManager.absDpnMap.get(dpn.getDpnId())){
+                			dpnInfo = tx.getTenantContext().getDpnInfo().get(dpnId.toString());
+    	                    if (dpnInfo.activator != null) {
+    	                        try {
+    	                            dpnInfo.activator.activate(input.getOpType(), (context.getInstructions() != null) ?
+    	                                    context.getInstructions() : input.getInstructions(), context, oCache);
+    	                            dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
+    	                        } catch (Exception e) {
+    	                            return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
+    	                                    e,
+    	                                    "PROTOCOL - operation failed - ERROR - Context Activation - ",
+    	                                    tx,
+    	                                    System.currentTimeMillis() - sysTime);
+    	                        }
+    	                    } else {
+    	                        LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
+    	                    }
+                		}
+                		
+                	}else {
+	                    dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
+	                    if (dpnInfo.activator != null) {
+	                        try {
+	                            dpnInfo.activator.activate(input.getOpType(), (context.getInstructions() != null) ?
+	                                    context.getInstructions() : input.getInstructions(), context, oCache);
+	                            dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
+	                        } catch (Exception e) {
+	                            return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
+	                                    e,
+	                                    "PROTOCOL - operation failed - ERROR - Context Activation - ",
+	                                    tx,
+	                                    System.currentTimeMillis() - sysTime);
+	                        }
+	                    } else {
+	                        LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
+	                    }
+	                }
                 }
             }
 
@@ -195,25 +218,50 @@ public class ConfigureWorker
                             tx.addTaskCount(context.getDpns().size()-1);
                         }
                         for (Dpns dpn : context.getDpns()) {
-                            ident = dpn.getDpnId();
-
-                            if (ident != null) {
-                                dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
-                                if (dpnInfo.activator != null) {
-                                    try {
-                                        dpnInfo.activator.delete(input.getInstructions(), target, context);
-                                        dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
-                                    } catch (Exception e) {
-                                        return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
-                                                e,
-                                                "PROTOCOL - operation failed - ERROR - Delete Failed - ",
-                                                tx,
-                                                System.currentTimeMillis() - sysTime);
-                                    }
-                                }  else {
-                                    LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
-                                }
-                            }
+                        	// if vdn, then you send the context to both actual dpn
+                        	if(TenantManager.absDpnMap.get(dpn.getDpnId()) != null){
+                        		for(FpcDpnId dpnId : TenantManager.absDpnMap.get(dpn.getDpnId())){
+	                        		ident = dpnId;
+	
+	                        		if (ident != null) {
+		                                dpnInfo = tx.getTenantContext().getDpnInfo().get(dpnId.toString());
+		                                if (dpnInfo.activator != null) {
+		                                    try {
+		                                        dpnInfo.activator.delete(input.getInstructions(), target, context);
+		                                        dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
+		                                    } catch (Exception e) {
+		                                        return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
+		                                                e,
+		                                                "PROTOCOL - operation failed - ERROR - Delete Failed - ",
+		                                                tx,
+		                                                System.currentTimeMillis() - sysTime);
+		                                    }
+		                                }  else {
+		                                    LOG.info("No activator found for DPN" + dpnId.toString());
+		                                }
+		                            }
+                        		}
+		                    }else{
+		                    	ident = dpn.getDpnId();
+		
+		                        if (ident != null) {
+		                            dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
+		                            if (dpnInfo.activator != null) {
+		                                try {
+		                                    dpnInfo.activator.delete(input.getInstructions(), target, context);
+		                                    dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
+		                                } catch (Exception e) {
+		                                    return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
+		                                            e,
+		                                            "PROTOCOL - operation failed - ERROR - Delete Failed - ",
+		                                            tx,
+		                                            System.currentTimeMillis() - sysTime);
+		                                }
+		                            }  else {
+		                                LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
+		                            }
+		                        }
+		                    }
                         }
                     }
                 }
@@ -221,8 +269,9 @@ public class ConfigureWorker
 
             tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
             return null;
-        default:
-            return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_WO_PAYLOAD),
+            
+        	default:
+        		return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_WO_PAYLOAD),
                     null,
                     "PROTOCOL - operation failed - An unknown / unsuported OpType was sent.  " +
                     "Code MUST use pre-check and did not.",

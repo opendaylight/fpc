@@ -7,14 +7,20 @@
  */
 package org.opendaylight.fpc.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
-import org.opendaylight.fpc.activation.workers.ActivationThreadPool;
-import org.opendaylight.fpc.activation.workers.MonitorThreadPool;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.fpc.tenant.TenantManager;
+import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesOutput;
@@ -23,7 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureDpnOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureOutput;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.DpnOperation;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.EventDeregisterInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.EventDeregisterOutput;
@@ -33,10 +38,17 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ProbeInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ProbeOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Result;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Tenants;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.dpn.ResultType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.FpcTopology;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpn;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcConfig;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.slf4j.Logger;
@@ -44,6 +56,9 @@ import org.slf4j.LoggerFactory;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 
 /**
@@ -52,8 +67,10 @@ import com.google.common.util.concurrent.Futures;
  * Handlers are assigned by Client bindings.
  */
 public class FpcagentDispatcher implements IetfDmmFpcagentService {
-	private static final Logger LOG = LoggerFactory.getLogger(FpcServiceImpl.class);
-    
+	private static final Logger LOG = LoggerFactory.getLogger(FpcagentDispatcher.class);
+	private static DataBroker dataBroker;
+	private static boolean done = false;
+	
     private static final Map<String, IetfDmmFpcagentService> clientHandlerMap = new HashMap<String, IetfDmmFpcagentService>();
     private static IetfDmmFpcagentService defaultService = null;
 
@@ -62,21 +79,36 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
     private static final RpcResult<EventRegisterOutput> eventRegUnknownClientErr;
     private static final RpcResult<ProbeOutput> probeUnknownClientErr;
     private static final RpcResult<EventDeregisterOutput> eventDeregUnknownClientErr;
-    private static final RpcResult<ConfigureDpnOutput> configDpnUnknownDpnErr;
     private static final RpcResult<ConfigureOutput> configMissingBodyErr;
     private static final RpcResult<ConfigureBundlesOutput> configBundlesMissingBodyErr;
     private static final RpcResult<EventRegisterOutput> eventRegMissingBodyErr;
     private static final RpcResult<ProbeOutput> probeMissingBodyErr;
     private static final RpcResult<EventDeregisterOutput> eventDeregMissingBodyErr;
     private static final RpcResult<ConfigureDpnOutput> configDpnMissingBodyErr;
+    private static final RpcResult<ConfigureDpnOutput> configDpnMissingDpnErr;
+    private static final RpcResult<ConfigureDpnOutput> configDpnVdpnNotAbstractErr;
+    private static final RpcResult<ConfigureDpnOutput> configDpnDpnNotRealErr;
+    private static final RpcResult<ConfigureDpnOutput> configDpnTooManyDpnsErr;
+    private static final RpcResult<ConfigureDpnOutput> configDpnNotEnoughDpnsError;
 
+
+
+    
     static {
         RpcError missingClientError = RpcResultBuilder.newError(ErrorType.PROTOCOL,
                 "invalid-value",
                 "The provided Client ID is NOT registered with a tenant.");
         RpcError missingDpnError = RpcResultBuilder.newError(ErrorType.PROTOCOL,
-                "invalid-value",
-                "The provided DPN ID is NOT registered with a tenant.");
+                "invalid-value", "The provided DPN ID is NOT registered with the default tenant.");
+        RpcError vdpnNotAbstractError = RpcResultBuilder.newError(ErrorType.PROTOCOL, 
+        		"invalid-value", "The provided Abstract DPN ID does NOT refer to an Abstract DPN");
+        RpcError dpnNotRealError = RpcResultBuilder.newError(ErrorType.PROTOCOL,
+        		"invalid-value", "The provided DPN ID does NOT refer to a \"Real\" DPN");
+        RpcError tooManyDpnsError = RpcResultBuilder.newError(ErrorType.PROTOCOL,
+        		"invalid-value", "The provided Operation cannot be completed, the Abstract DPN already contains the maximum DPN's");
+        RpcError notEnoughDpnsError = RpcResultBuilder.newError(ErrorType.PROTOCOL,
+        		"invalid-value", "The provided Operation cannot be completed, the Abstract DPN does NOT contain any DPN's");
+        
 
         configUnknownClientErr = RpcResultBuilder.<ConfigureOutput>failed()
                 .withRpcError(missingClientError).build();
@@ -88,8 +120,16 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
                 .withRpcError(missingClientError).build();
         eventDeregUnknownClientErr = RpcResultBuilder.<EventDeregisterOutput>failed()
                 .withRpcError(missingClientError).build();
-        configDpnUnknownDpnErr = RpcResultBuilder.<ConfigureDpnOutput>failed()
+        configDpnMissingDpnErr = RpcResultBuilder.<ConfigureDpnOutput>failed()
                 .withRpcError(missingDpnError).build();
+        configDpnVdpnNotAbstractErr = RpcResultBuilder.<ConfigureDpnOutput>failed()
+                .withRpcError(vdpnNotAbstractError).build();
+        configDpnDpnNotRealErr = RpcResultBuilder.<ConfigureDpnOutput>failed()
+                .withRpcError(dpnNotRealError).build();
+        configDpnTooManyDpnsErr = RpcResultBuilder.<ConfigureDpnOutput>failed()
+                .withRpcError(tooManyDpnsError).build();
+        configDpnNotEnoughDpnsError = RpcResultBuilder.<ConfigureDpnOutput>failed()
+                .withRpcError(notEnoughDpnsError).build();
 
         RpcError missingBodyError = RpcResultBuilder.newError(ErrorType.PROTOCOL,
                 "invalid-value",
@@ -199,33 +239,145 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
         }
         return Futures.immediateFuture(configBundlesUnknownClientErr);
     }
-
+    
+    public Dpns getDpnById(FpcDpnId dpnid) {
+    	if(dataBroker != null){
+    		ReadOnlyTransaction readtx = dataBroker.newReadOnlyTransaction();
+    		String defaultTenant = FpcProvider.getInstance().getConfig().getDefaultTenantId();
+    		FpcIdentity defaultIdentity = (defaultTenant == null) ?  new FpcIdentity(0L) :  new FpcIdentity(defaultTenant);
+	    	Optional<Dpns> dsDpn;
+	    	
+	    	try {
+	        	dsDpn = readtx.read(LogicalDatastoreType.CONFIGURATION,
+	                    InstanceIdentifier.create(Tenants.class)
+	                        .child(Tenant.class, new TenantKey(defaultIdentity))
+	                        .child(FpcTopology.class)
+	                        .child(Dpns.class, new DpnsKey(dpnid))).get();
+	        	return (dsDpn.isPresent()) ? dsDpn.get() : null;
+	    	} catch (InterruptedException e) {
+	        	LOG.warn("Dpn retrieval interrupted");
+	        	ErrorLog.logError(e.getStackTrace());
+	    	} catch (ExecutionException e) {
+	    		LOG.warn("Dpn retrieval interrupted");
+	        	ErrorLog.logError(e.getStackTrace());
+	    	}
+    	}
+    	LOG.info("Databroker couldn't be initialized");
+    	return null;
+    }
+        
 	@Override
 	public Future<RpcResult<ConfigureDpnOutput>> configureDpn(ConfigureDpnInput input) {
-		if (input == null) {
+		if (input == null)
 	        return Futures.immediateFuture(configDpnMissingBodyErr);
-	    }
-		//reach into db (cp tenantmgr) grab dpn obj tenants/tenant/default/fpc-topology/dpns/dpnX
-		//2 different reads(abstract via absid & concrete via dpnid)
-		//when solved create addDpn and removeDpn methods
-//		Dpns vDpn1 = new Dpns();
-//		FpcDpn vDpn = new FpcDpn();//FpcDpn has getDpnIds(), but its an interface no classes impl
-//        //TODO set strategy (check operation then check ids)
-//	    if (input.getOperation() == DpnOperation.Add) {
-//	    	if(getDpnIds[0] == dpn1.getId() && getDpnIds[1] == dpn2.getId()){
-//	    		LOG.info("Dpn"+dpn2.getId()+ " successfully added");
-//		    	return Futures.immediateFuture(RpcResultBuilder.<ConfigureDpnOutput>success(new ConfigureDpnOutputBuilder()
-//		    		.setResult(Result.Ok)
-//		    		.setResultType(rt)).build());//rt = DPN obj (abstract?)
-//	    	}
-//	    }else if(input.getOperation() == DpnOperation.Remove){
-//	    	if(getDpnIds[0] == dpn1.getId() && getDpnIds[1] == dpn2.getId()){
-//	    		LOG.info("Dpn"+dpn2.getId()+ " successfully removed");
-//		    	return Futures.immediateFuture(RpcResultBuilder.<ConfigureDpnOutput>success(new ConfigureDpnOutputBuilder()
-//		    		.setResult(Result.Ok)
-//		    		.setResultType(rt)).build());//rt = DPN obj (abstract?)
-//	    	}
-//	    }
-	    return Futures.immediateFuture(configDpnUnknownDpnErr);
+		
+		String defaultTenant = FpcProvider.getInstance().getConfig().getDefaultTenantId();
+		FpcIdentity defaultIdentity = (defaultTenant == null) ?  new FpcIdentity(0L) :  new FpcIdentity(defaultTenant);
+		dataBroker = FpcProvider.getInstance().getDataBroker();
+		WriteTransaction writetx = dataBroker.newWriteOnlyTransaction();
+		Dpns vdpn, dpn;
+		ResultType rt;
+		List<FpcDpnId> vdpnDpns;
+		
+		//get stuff then strategize
+		if(input.getDpnId() != null && input.getAbstractDpnId() != null){
+			dpn = getDpnById(input.getDpnId());
+			vdpn = getDpnById(input.getAbstractDpnId());
+			if(vdpn.getDpnIds() != null){
+				vdpnDpns = vdpn.getDpnIds();
+			}else{
+				LOG.info(vdpn.getDpnId()+" is empty");
+				vdpnDpns = new ArrayList<FpcDpnId>();
+			}
+		}else
+			return Futures.immediateFuture(configDpnMissingDpnErr);
+		
+		if(!vdpn.isAbstract())
+			return Futures.immediateFuture(configDpnVdpnNotAbstractErr);
+		
+		if(dpn.isAbstract())
+			return Futures.immediateFuture(configDpnDpnNotRealErr);
+		
+		if(input.getOperation() == DpnOperation.Add) {
+			if(vdpnDpns.size() == 2)
+				return Futures.immediateFuture(configDpnTooManyDpnsErr);
+			vdpnDpns.add(dpn.getDpnId());
+			if(TenantManager.absDpnMap.isEmpty())
+				TenantManager.absDpnMap.put(vdpn.getDpnId(), vdpnDpns);
+			else
+				TenantManager.absDpnMap.get(vdpn.getDpnId()).add(dpn.getDpnId());
+		}
+		
+		if(input.getOperation() == DpnOperation.Remove){
+			if(vdpnDpns.size() == 0)
+				return Futures.immediateFuture(configDpnNotEnoughDpnsError);
+			else{
+				if(vdpnDpns.contains(dpn.getDpnId())){
+					vdpnDpns.remove(dpn.getDpnId());
+					TenantManager.absDpnMap.get(vdpn.getDpnId()).remove(dpn.getDpnId());
+				}else{
+					LOG.info(dpn.getDpnId()+" is unrelated to "+vdpn.getDpnId());
+					rt = new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.dpn.result.type.CommonSuccessBuilder(vdpn).build();
+					return Futures.immediateFuture(RpcResultBuilder.<ConfigureDpnOutput>success(new ConfigureDpnOutputBuilder()
+						.setResult(Result.Ok)
+						.setResultType(rt)).build());
+				}
+			}
+		}
+		//update vdpn
+		if(dataBroker != null){
+			LOG.info("Merging DPN ids...");
+			writetx.put(LogicalDatastoreType.CONFIGURATION,
+				InstanceIdentifier.builder(Tenants.class)
+				.child(Tenant.class, new TenantKey(defaultIdentity))
+				.child(FpcTopology.class)
+					.child(Dpns.class, new DpnsKey(vdpn.getKey()))
+					.build(),
+				new DpnsBuilder(vdpn).setDpnIds(vdpnDpns).build()
+//				new DpnsBuilder()
+//				.setDpnGroups(vdpn.getDpnGroups())
+//				.setDpnName(vdpn.getDpnName())
+//				.setDpnIds(vdpnDpns)
+//				.setDpnId(vdpn.getDpnId())
+//				.build()
+					);
+			
+			CheckedFuture<Void,TransactionCommitFailedException> submitFuture = writetx.submit();
+			Futures.addCallback(submitFuture, new FutureCallback<Void>() {
+				@Override
+				public void onFailure(Throwable arg0) {
+					LOG.info("Merge failed");
+				}
+				@Override
+				public void onSuccess(Void arg0) {
+					LOG.info("Merge complete!");
+//					done = true;
+					// Do nothing
+				}
+			});
+		}else{
+	    	LOG.info("Databroker couldn't be initialized");
+		}
+//		int count = 0;
+//		while(!done){
+//			try {
+//				count++;
+//				if(count==10)
+//					LOG.info("merge took too long/failed");
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+		
+		LOG.info("vdpnDpns: "+vdpnDpns);
+		LOG.info("Map: "+TenantManager.absDpnMap);
+		LOG.info("vdpn.getDpnIds: "+vdpn.getDpnIds());
+		
+		LOG.info("Strategy met, returning RPC...");
+		rt = new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.dpn.result.type.CommonSuccessBuilder(vdpn).build();
+		return Futures.immediateFuture(RpcResultBuilder.<ConfigureDpnOutput>success(new ConfigureDpnOutputBuilder()
+			.setResult(Result.Ok)
+			.setResultType(rt)).build());
 	}
 }
