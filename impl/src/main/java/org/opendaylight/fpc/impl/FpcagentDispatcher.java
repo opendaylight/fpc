@@ -69,7 +69,6 @@ import com.google.common.util.concurrent.Futures;
 public class FpcagentDispatcher implements IetfDmmFpcagentService {
 	private static final Logger LOG = LoggerFactory.getLogger(FpcagentDispatcher.class);
 	private static DataBroker dataBroker;
-	private static boolean done = false;
 	
     private static final Map<String, IetfDmmFpcagentService> clientHandlerMap = new HashMap<String, IetfDmmFpcagentService>();
     private static IetfDmmFpcagentService defaultService = null;
@@ -333,14 +332,7 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 				.child(FpcTopology.class)
 					.child(Dpns.class, new DpnsKey(vdpn.getKey()))
 					.build(),
-				new DpnsBuilder(vdpn).setDpnIds(vdpnDpns).build()
-//				new DpnsBuilder()
-//				.setDpnGroups(vdpn.getDpnGroups())
-//				.setDpnName(vdpn.getDpnName())
-//				.setDpnIds(vdpnDpns)
-//				.setDpnId(vdpn.getDpnId())
-//				.build()
-					);
+				new DpnsBuilder(vdpn).setDpnIds(vdpnDpns).build());
 			
 			CheckedFuture<Void,TransactionCommitFailedException> submitFuture = writetx.submit();
 			Futures.addCallback(submitFuture, new FutureCallback<Void>() {
@@ -351,24 +343,12 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 				@Override
 				public void onSuccess(Void arg0) {
 					LOG.info("Merge complete!");
-//					done = true;
 					// Do nothing
 				}
 			});
 		}else{
 	    	LOG.info("Databroker couldn't be initialized");
 		}
-//		int count = 0;
-//		while(!done){
-//			try {
-//				count++;
-//				if(count==10)
-//					LOG.info("merge took too long/failed");
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
 		
 		LOG.info("vdpnDpns: "+vdpnDpns);
 		LOG.info("Map: "+TenantManager.absDpnMap);

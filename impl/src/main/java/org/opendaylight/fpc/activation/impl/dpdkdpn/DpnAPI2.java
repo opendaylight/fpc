@@ -38,6 +38,7 @@ public class DpnAPI2 {
     private static byte DELETE_BEARER_TYPE = 0b0000_0110;
     private static byte HELLO = 0b0000_1000;
     private static byte BYE = 0b0000_1001;
+    private static byte SEND_ADC_TYPE = 0b001_0001;
 
     public static String BROADCAST_TOPIC = "0";
 
@@ -401,5 +402,80 @@ public class DpnAPI2 {
         return new byte[]{value.shiftRight(56).byteValue(),value.shiftRight(48).byteValue(),value.shiftRight(40).byteValue(),
                 value.shiftRight(32).byteValue(),value.shiftRight(24).byteValue(),value.shiftRight(16).byteValue(),
                 value.shiftRight(8).byteValue(),value.and(BigInteger.valueOf(0xFF)).byteValue()};
+    }
+   
+    /**
+     * Creates the byte buffer to send ADC rules over ZMQ
+     * @param topic - DPN Topic
+     * @param selector_type - DNL, Domain Name, IP Address, IP Prefix
+     * @param DNL - Domain Name Length; included if selector type = 0
+     * @param domain_name - Included if selector type = 0
+     * @param IP_address - Included if selector type = 1,2
+     * @param IP_prefix - Included if selector type = 2
+     * @param rule_ID - Rule ID
+     * @param RNL - Rule Name Length
+     * @param rule_name - Name of Rule
+     * @param rating_group - Rating Group
+     * @param service_ID - Service ID
+     * @param gate_status - Gate Status
+     * @param SIDL - Sponsor ID Length
+     * @param sponsor_ID - Sponsor ID
+     * @param precedence - Precedence
+     * @param TGL - Tariff Group Length
+     * @param tariff_group - Name of Tariff Group
+     * @param TTL - Tariff Time Length
+     * @param tariff_time - Tariff Time
+     * @param controller_topic - Controller Topic; last byte sent
+     */
+    public void send_ADC_rules(Short topic,
+    		Short selector_type, 
+    		Short DNL, String domain_name, 
+    		long IP_address, int IP_prefix, 
+    		long rule_ID, Short RNL, 
+    		String rule_name, long rating_group, 
+    		long service_ID, Short gate_status, 
+    		Short SIDL, String sponsor_ID, 
+    		long precedence, Short TGL, 
+    		String tariff_group, Short TTL, 
+    		String tariff_time, Short controller_topic)
+    {
+    	int size = 32 + DNL + RNL + SIDL + TGL + TTL;
+    	ByteBuffer bb = ByteBuffer.allocate(size);
+    		bb.put(toUint8(topic))
+    		.put(SEND_ADC_TYPE)
+    		.put(toUint8(selector_type));
+    	if(selector_type == 0) {
+    		bb.put(toUint8(DNL))
+    		  .put(domain_name.getBytes());
+    	}
+    	if((selector_type == 1) || (selector_type == 2)){	
+    		bb.put(toUint32(IP_address));
+    	}
+    	if(selector_type == 2){
+    		bb.put(toUint32(IP_prefix));
+    	}
+    		bb.put(toUint32(rule_ID))
+    		.put(toUint8(RNL))
+    		.put(rule_name.getBytes())
+    		.put(toUint32(rating_group))
+    		.put(toUint32(service_ID))
+    		.put(toUint8(gate_status))
+    		.put(toUint8(SIDL))
+    		.put(sponsor_ID.getBytes())
+    		.put(toUint32(precedence))
+    		.put(toUint8(TGL));
+    	if(TGL > 0) {
+    		bb.put(tariff_group.getBytes());
+    	}
+    		bb.put(toUint8(TTL));
+    	if(TTL > 0) {
+    		bb.put(tariff_time.getBytes());
+    	}
+    		bb.put(toUint8(controller_topic));
+    	try {
+            sock.getBlockingQueue().put(bb);
+          } catch (InterruptedException e) {
+            	ErrorLog.logError(e.getStackTrace());
+          };	
     }
 }
