@@ -6,6 +6,8 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.fpc.tenant;
+import org.opendaylight.fpc.policy.BasePolicyManager;
+import org.opendaylight.fpc.policy.BasePortManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +63,8 @@ public class TenantManager implements AutoCloseable {
     protected final Map<String, DpnHolder> dpnInfo;
     protected AssignmentManager assignmentManager;
     protected final ActivationManager activationManager;
+    protected final BasePolicyManager BasePolicyManager;
+    protected final BasePortManager BasePortManager;
 
     /**
      * Creates a Tenant Manager.
@@ -216,6 +220,8 @@ public class TenantManager implements AutoCloseable {
                 .setFpcTopology(new FpcTopologyBuilder().build())
                 .build() : t;
         this.activationManager = new ActivationManager(this, dataBroker);
+        this.BasePolicyManager = new BasePolicyManager(this, dataBroker);
+        this.BasePortManager = new BasePortManager(this, dataBroker);
         if (cpFactories != null) {
             if (!cpFactories.isEmpty()) {
                 for (Map.Entry<Class<? extends FpcDpnControlProtocol>,ActivatorFactory> entry : cpFactories.entrySet()) {

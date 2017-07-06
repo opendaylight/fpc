@@ -230,12 +230,4 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 //	    }
 	    return Futures.immediateFuture(configDpnUnknownDpnErr);
 	}
-
-	@Override
-	public Future<RpcResult<ConfigureDpnOutput>> configureDpn(ConfigureDpnInput input) {
-		// TODO Auto-generated method stub
-		//if (input == null){ return someError }
-		//if (ifc != null){ return ifc.method(input) }
-		return null;
-	}
 }

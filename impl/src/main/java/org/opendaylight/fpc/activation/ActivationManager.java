@@ -60,7 +60,7 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
      * Assigns an {@link org.opendaylight.fpc.activation.ActivatorFactory ActivatorFactory} to a specific Control Protocol (FpcDpnControlProtocol).
      *
      * @param protocol - DPN Control Protocol
-     * @param activator - Activator Factory assigned to thr protocol
+     * @param activator - Activator Factory assigned to the protocol
      */
     public void addActivatorFactory(Class<? extends FpcDpnControlProtocol> protocol, ActivatorFactory activator) {
         LOG.info("Activation Manager - Adding Activator " + protocol + " with factory: " + activator);

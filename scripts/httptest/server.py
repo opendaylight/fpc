@@ -1,28 +1,3 @@
-#!/usr/bin/python
-
-#Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
-#
-#This program and the accompanying materials are made available under the
-#terms of the Eclipse Public License v1.0 which accompanies this distribution,
-#and is available at http://www.eclipse.org/legal/epl-v10.html
-
-"""
-Save this file as server.py
->>> python server.py 0.0.0.0 8001
-serving on 0.0.0.0:8001
-
-or simply
-
->>> python server.py
-Serving on localhost:8000
-
->>> pyhton server.py ssl
-Serving https server on localhost:8000
-
-You can use this to test GET and POST methods.
-
-"""
-
 import BaseHTTPServer, SimpleHTTPServer
 import SocketServer
 import logging
