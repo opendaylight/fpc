@@ -8,11 +8,11 @@
 package org.opendaylight.fpc.activation;
 
 import java.util.Map;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.fpc.dpn.DpnResourceManager;
 import org.opendaylight.fpc.tenant.TenantManager;
+import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnControlProtocol;
@@ -75,6 +75,13 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
         LOG.info("Activation Manager - Removing Activator " + protocol);
         factories.remove(protocol);
     }
+    
+    @Override
+    public void updateDpn(Dpns dpnBefore, Dpns dpnAfter) {
+    	if(dpnBefore.isAbstract() != dpnAfter.isAbstract()){
+    		ErrorLog.logError("Cannot change abstract value of a dpn", null);
+    	}
+    }
 
     @Override
     public void addDpn(Dpns dpn) throws Exception {
@@ -100,6 +107,12 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
                             ZmqDpnControlProtocol.class);
                 }
             }
+            if (dpnHolder.activator != null) {
+            	
+            	//TODO addDpn Logic
+            	
+            }
+            
         } else {
             LOG.info("Activation Manager - DPN from parent call was null");
         }
@@ -109,6 +122,9 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
     public void removeDpn(Dpns dpn) {
         if (dpn != null) {
             LOG.info("Activation Manager - Removing Dpn " + dpn.getDpnId());
+            
+            //TODO removeDpn Logic
+            
             tenantMgr.getDpnInfo().remove(dpn.getDpnId().toString());
         }
     }
@@ -122,5 +138,5 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
             registerListeners();
             LOG.info("Factory initialization completed");
         }
-    }
+    }    
 }

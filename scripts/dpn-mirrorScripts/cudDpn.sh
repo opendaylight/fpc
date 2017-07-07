@@ -15,15 +15,16 @@ curl -i \
 --data '{
     "dpns": [
         {
-            "dpn-id": "dpnB",
+            "dpn-id": "'"$2"'",
             "dpn-name": "site1-anchor1",
             "dpn-groups": [
                 "foo"
             ],
-            "topic": "1"
+	        "abstract": "'"$3"'",
+            "topic": "'"$4"'"
         }
     ]
 }' \
-http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-topology/dpns/dpn1
+http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-topology/dpns/$2
 
 echo ""

@@ -45,7 +45,7 @@ curl -i \
                 },
                 "dpns": [
                     {
-                        "dpn-id": "dpn1",
+                        "dpn-id": "vdpn1",
                         "direction": "uplink",
                         "dpn-parameters": {}
                     }
@@ -62,6 +62,6 @@ curl -i \
         "op-ref-scope": "op"
     }
 }' \
-http://10.31.14.86:8181/restconf/operations/ietf-dmm-fpcagent:configure
+http://localhost:8181/restconf/operations/ietf-dmm-fpcagent:configure
 
 echo ""

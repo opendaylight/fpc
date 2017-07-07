@@ -214,7 +214,11 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
 
 	@Override
 	public Future<RpcResult<ConfigureDpnOutput>> configureDpn(ConfigureDpnInput input) {
+<<<<<<< HEAD
 		// TODO Auto-generated method stub
+=======
+		// unused
+>>>>>>> 5f3b66801ef3f4898c9278ff2a0e14333b85f5c1
 		return null;
 	}
 }

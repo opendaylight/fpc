@@ -84,6 +84,10 @@ abstract public class DpnResourceManager implements AutoCloseable {
      * @param dpn - DPN to remove
      */
     abstract public void removeDpn(Dpns dpn);
+    
+    public void updateDpn(Dpns dpnBefore, Dpns dpnAfter) {
+    	// Does Nothing
+    }
 
     /**
      * Registers Change Listener for Dpns under the Tenant.
@@ -116,13 +120,19 @@ abstract public class DpnResourceManager implements AutoCloseable {
                          dpnModification.getRootPath().toString());
                  if (dpnModification.getRootNode().getModificationType() == ModificationType.DELETE) {
                      removeDpn(dpnModification.getRootNode().getDataBefore());
-                 } else {
+                 } else if (dpnModification.getRootNode().getModificationType() == ModificationType.WRITE) {
                      try {
                         addDpn(dpnModification.getRootNode().getDataAfter());
                     } catch (Exception e) {
                         ErrorLog.logError("DpnChangeManager - Error occured during DPN Create/Write - " + e.getLocalizedMessage(), e.getStackTrace());
                     }
-                 }
+                 } else if (dpnModification.getRootNode().getModificationType() == ModificationType.SUBTREE_MODIFIED) {
+                     try {
+                         updateDpn(dpnModification.getRootNode().getDataBefore(), dpnModification.getRootNode().getDataAfter());
+                     } catch (Exception e) {
+                         ErrorLog.logError("DpnChangeManager - Error occured during DPN Create/Write - " + e.getLocalizedMessage(), e.getStackTrace());
+                     }
+                  }
 
              }
          }
