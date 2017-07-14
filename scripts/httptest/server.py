@@ -1,5 +1,8 @@
+<<<<<<< HEAD
+=======
 
 
+>>>>>>> 5f3b66801ef3f4898c9278ff2a0e14333b85f5c1
 import BaseHTTPServer, SimpleHTTPServer
 import SocketServer
 import logging
