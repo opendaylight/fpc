@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -19,8 +20,12 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.fpc.activation.cache.StorageCache;
+import org.opendaylight.fpc.activation.cache.transaction.Transaction;
+import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
+import org.opendaylight.fpc.utils.ErrorTypeIndex;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesOutput;
@@ -30,15 +35,18 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.DpnOperation;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ErrorTypeId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.EventDeregisterInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.EventDeregisterOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.EventRegisterInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.EventRegisterOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.IetfDmmFpcagentService;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ProbeInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ProbeOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Result;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Tenants;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.dpn.ResultType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantKey;
@@ -46,8 +54,11 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
@@ -89,7 +100,6 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
     private static final RpcResult<ConfigureDpnOutput> configDpnDpnNotRealErr;
     private static final RpcResult<ConfigureDpnOutput> configDpnTooManyDpnsErr;
     private static final RpcResult<ConfigureDpnOutput> configDpnNotEnoughDpnsError;
-
 
 
     
@@ -297,23 +307,31 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 		if(dpn.isAbstract())
 			return Futures.immediateFuture(configDpnDpnNotRealErr);
 		
+    	int threadCount = 0;
+		
 		if(input.getOperation() == DpnOperation.Add) {
+			if(vdpn.getDpnIds()!=null && !vdpn.getDpnIds().contains(dpn.getDpnId())){
+				new Thread(new SessionThread(vdpn, dpn, input.getOperation(), false), ("sessionThread"+ ++threadCount)).start();
+				LOG.info("sessionThread"+threadCount+" started");
+			}
 			if(vdpnDpns.size() == 2)
 				return Futures.immediateFuture(configDpnTooManyDpnsErr);
 			vdpnDpns.add(dpn.getDpnId());
-			if(TenantManager.absDpnMap.isEmpty())
-				TenantManager.absDpnMap.put(vdpn.getDpnId(), vdpnDpns);
-			else
-				TenantManager.absDpnMap.get(vdpn.getDpnId()).add(dpn.getDpnId());
+			TenantManager.vdpnDpnsMap.get(vdpn.getDpnId()).add(dpn.getDpnId());
 		}
 		
 		if(input.getOperation() == DpnOperation.Remove){
+			Boolean deleteFlag = false;
+			if(vdpn.getDpnIds().size()==1)
+				deleteFlag = true;
+			new Thread(new SessionThread(vdpn, dpn, input.getOperation(),deleteFlag), ("sessionThread"+threadCount++)).start();
+			LOG.info("sessionThread"+threadCount+" started");
 			if(vdpnDpns.size() == 0)
 				return Futures.immediateFuture(configDpnNotEnoughDpnsError);
 			else{
 				if(vdpnDpns.contains(dpn.getDpnId())){
+					TenantManager.vdpnDpnsMap.get(vdpn.getDpnId()).remove(dpn.getDpnId());
 					vdpnDpns.remove(dpn.getDpnId());
-					TenantManager.absDpnMap.get(vdpn.getDpnId()).remove(dpn.getDpnId());
 				}else{
 					LOG.info(dpn.getDpnId()+" is unrelated to "+vdpn.getDpnId());
 					rt = new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.dpn.result.type.CommonSuccessBuilder(vdpn).build();
@@ -351,7 +369,8 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 		}
 		
 		LOG.info("vdpnDpns: "+vdpnDpns);
-		LOG.info("Map: "+TenantManager.absDpnMap);
+		LOG.info("DpnsMap: "+TenantManager.vdpnDpnsMap);
+		//LOG.info("ContextsMap: "+TenantManager.vdpnContextsMap);
 		LOG.info("vdpn.getDpnIds: "+vdpn.getDpnIds());
 		
 		LOG.info("Strategy met, returning RPC...");

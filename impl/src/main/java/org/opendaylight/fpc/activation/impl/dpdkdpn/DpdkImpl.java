@@ -292,7 +292,7 @@ public class DpdkImpl implements Activator {
 			throw new Exception("Downlink Create Requested but no UL Tunnel Info provided");
 		}
 
-		if (target.getTarget().toString().endsWith("ul") || target.getTarget().toString().endsWith("dl")) {
+		if (target!=null && (target.getTarget().toString().endsWith("ul") || target.getTarget().toString().endsWith("dl"))) {
 			api.delete_bearer(dpnTopic, teid);
 			txMessages.incrementAndGet();
 		} else {

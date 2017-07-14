@@ -45,7 +45,7 @@ curl -i \
                 },
                 "dpns": [
                     {
-                        "dpn-id": "dpn1",
+                        "dpn-id": "vdpn1",
                         "direction": "uplink",
                         "dpn-parameters": {}
                     }

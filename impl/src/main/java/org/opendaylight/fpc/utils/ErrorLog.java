@@ -23,9 +23,11 @@ public class ErrorLog {
 	 */
 	private static String stackTraceString(StackTraceElement[] ste){
 		StringBuilder sb = new StringBuilder();
-		for (StackTraceElement elem : ste) {
-		        sb.append(elem.toString());
-		        sb.append("\n");
+		if(ste != null){
+			for (StackTraceElement elem : ste) {
+					sb.append(elem.toString());
+					sb.append("\n");
+			}
 		}
 		return sb.toString();
 	}

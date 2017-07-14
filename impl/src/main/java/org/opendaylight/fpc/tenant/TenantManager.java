@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -20,12 +21,14 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.fpc.activation.ActivationManager;
 import org.opendaylight.fpc.activation.ActivatorFactory;
 import org.opendaylight.fpc.activation.cache.StorageCache;
+import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.assignment.AssignmentManager;
 import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.fpc.impl.FpcProvider;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Tenants;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantKey;
@@ -37,6 +40,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnControlProtocol;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
@@ -56,10 +60,10 @@ public class TenantManager implements AutoCloseable {
     private static final Map<String, TenantManager> clientIdToTenants = new HashMap<String, TenantManager>();
     private static final List<ActivatorFactory> defaultActivatorFactories = new ArrayList<ActivatorFactory>();
     private static DataBroker dataBroker;
-    //public static Map<FpcIdentity, ArrayList<FpcDpnId>> absDpnMap =
-    		//new HashMap<FpcIdentity, ArrayList<FpcIdentity>>(); *previously*
-    public static Map<FpcDpnId, List<FpcDpnId>> absDpnMap = 
-    		new HashMap<FpcDpnId, List<FpcDpnId>>();
+    public static Map<FpcDpnId, List<FpcDpnId>> vdpnDpnsMap = 
+    		new ConcurrentHashMap<FpcDpnId, List<FpcDpnId>>();
+    public static Map<FpcDpnId, Map<Contexts, Transaction>> vdpnContextsMap =
+    		new ConcurrentHashMap<FpcDpnId, Map<Contexts, Transaction>>();
 
     protected StorageCache sc;
     protected final Tenant tenant;

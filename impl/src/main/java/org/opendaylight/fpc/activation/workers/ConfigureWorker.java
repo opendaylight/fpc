@@ -8,6 +8,7 @@
 package org.opendaylight.fpc.activation.workers;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.Err;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.ErrBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPort;
@@ -123,16 +125,43 @@ public class ConfigureWorker
         long sysTime = System.currentTimeMillis();
         OpInput input = tx.getOpInput();
         DpnHolder dpnInfo = null;
-
+        
         DeleteOrQuery doq = null;
         switch (input.getOpType()) {
         case Create:
+            for (Contexts context : (oCache.getPayloadContexts() == null) ? Collections.<Contexts>emptyList() : oCache.getPayloadContexts()) {
+                for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
+            		TenantManager.vdpnContextsMap.get(dpn.getDpnId()).put(context, tx);
+                	if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()) != null){
+            			if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()).size() <= 1){
+            				ErrorLog.logError("Not ready - "+dpn.getDpnId()+" must contain 2 DPNS", null);
+            				return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
+            						null,
+                                    "PROTOCOL - operation failed - ERROR - Context Activation - ",
+                                    tx,
+                                    System.currentTimeMillis() - sysTime);
+            			}
+                	}
+                }
+            }
         case Update:
             for (Contexts context : (oCache.getPayloadContexts() == null) ? Collections.<Contexts>emptyList() : oCache.getPayloadContexts()) {
                 for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
                 	// if vdn, then you send the context to both actual dpn
-                	if(TenantManager.absDpnMap.get(dpn.getDpnId()) != null){
-                		for(FpcDpnId dpnId : TenantManager.absDpnMap.get(dpn.getDpnId())){
+                	if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()) != null){
+            			if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()).size() == 1){
+            				LOG.warn("Only one Dpn in "+dpn.getDpnId());
+            			}else if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()).size() == 0){
+            				ErrorLog.logError("No DPN's found in "+dpn.getDpnId(), null);
+            				return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
+            						null,
+                                    "PROTOCOL - operation failed - ERROR - Context Activation - ",
+                                    tx,
+                                    System.currentTimeMillis() - sysTime);
+            			}
+            			
+                		
+                		for(FpcDpnId dpnId : TenantManager.vdpnDpnsMap.get(dpn.getDpnId())){
                 			dpnInfo = tx.getTenantContext().getDpnInfo().get(dpnId.toString());
     	                    if (dpnInfo.activator != null) {
     	                        try {
@@ -219,8 +248,19 @@ public class ConfigureWorker
                         }
                         for (Dpns dpn : context.getDpns()) {
                         	// if vdn, then you send the context to both actual dpn
-                        	if(TenantManager.absDpnMap.get(dpn.getDpnId()) != null){
-                        		for(FpcDpnId dpnId : TenantManager.absDpnMap.get(dpn.getDpnId())){
+                        	if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()) != null){
+                    			if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()).size() == 1){
+                    				LOG.warn("Only one Dpn in "+dpn.getDpnId());
+                    			}else if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()).size() == 0){
+                    				ErrorLog.logError("No DPN's found in "+dpn.getDpnId(), null);
+                    				return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
+                    						null,
+                                            "PROTOCOL - operation failed - ERROR - Context Activation - ",
+                                            tx,
+                                            System.currentTimeMillis() - sysTime);
+                    			}
+                        		TenantManager.vdpnContextsMap.get(dpn.getDpnId()).remove(context);
+                        		for(FpcDpnId dpnId : TenantManager.vdpnDpnsMap.get(dpn.getDpnId())){
 	                        		ident = dpnId;
 	
 	                        		if (ident != null) {

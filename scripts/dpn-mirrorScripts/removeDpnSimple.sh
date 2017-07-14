@@ -1,0 +1,1 @@
+./vdpnDpnOps.sh vdpn1 dpn$1 remove

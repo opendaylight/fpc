@@ -7,15 +7,22 @@
  */
 package org.opendaylight.fpc.activation;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.fpc.dpn.DpnResourceManager;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnControlProtocol;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.fpc.rev150105.ZmqDpnControlProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,16 +84,24 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
     }
     
     @Override
-    public void updateDpn(Dpns dpnBefore, Dpns dpnAfter) {
-    	if(dpnBefore.isAbstract() != dpnAfter.isAbstract()){
+    public void updateDpn(Dpns dpnBefore, Dpns dpnAfter) throws Exception {
+    	if(dpnBefore.isAbstract().compareTo(dpnAfter.isAbstract()) != 0){
     		ErrorLog.logError("Cannot change abstract value of a dpn", null);
+    		throw new Exception();
     	}
     }
 
     @Override
     public void addDpn(Dpns dpn) throws Exception {
+    	LOG.info("addDpn called");
         ActivatorFactory factory = null;
         if (dpn != null) {
+        	if(dpn.isAbstract()){
+        		if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()) == null)
+        			TenantManager.vdpnDpnsMap.put(dpn.getDpnId(), new ArrayList<FpcDpnId>());
+        		if(TenantManager.vdpnContextsMap.get(dpn.getDpnId()) == null)
+        			TenantManager.vdpnContextsMap.put(dpn.getDpnId(), new HashMap<Contexts, Transaction>());
+        	}
             DpnHolder dpnHolder = tenantMgr.getDpnInfo().get(dpn.getDpnId().toString());
             if (dpnHolder == null) {
                 dpnHolder = new DpnHolder(dpn);
@@ -126,6 +141,10 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
             //TODO removeDpn Logic
             
             tenantMgr.getDpnInfo().remove(dpn.getDpnId().toString());
+            if(dpn.isAbstract()){
+            	TenantManager.vdpnDpnsMap.remove(dpn.getDpnId());
+            	TenantManager.vdpnContextsMap.remove(dpn.getDpnId());
+            }
         }
     }
 
