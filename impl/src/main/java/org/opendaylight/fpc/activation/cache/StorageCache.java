@@ -85,6 +85,8 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 
+import javassist.bytecode.Descriptor.Iterator;
+
 /**
  * In-memory Storage Cache.
  */
@@ -553,12 +555,20 @@ public class StorageCache implements AutoCloseable {
      * @param cache - Cache to be added
      */
     public void addToCache(Cache cache) {
-        for (FpcPort port : cache.getPorts().values()) {
-            addPort(port);
-        }
-        for (FpcContext context : cache.getContexts().values()) {
-            addContext(context);
-        }
+    	java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
+    	while(i.hasNext()){
+    		addPort(i.next());
+    	}
+//        for (FpcPort port : cache.getPorts().values()) {
+//            addPort(port);
+//        }
+    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
+    	while(c.hasNext()){
+    		addContext(c.next());
+    	}
+//        for (FpcContext context : cache.getContexts().values()) {
+//            addContext(context);
+//        }
     }
 
     /**

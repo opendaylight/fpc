@@ -141,6 +141,11 @@ public class Transaction {
      * An enumeration representing the various stages of a transaction life cycle.
      */
     public enum OperationStatus {
+    	CREATE,
+    	UPDATE,
+    	ERRORED_UPDATE,
+    	DELETE,
+    	ERRORED_CREATE,
     	/**
     	 * Activation Enqueue
     	 */
@@ -398,12 +403,20 @@ public class Transaction {
 
     private OpCache getOpCache(Cache cache) {
         OpCache rc = new OpCache();
-        for (FpcPort port : cache.getPorts().values()) {
-            rc.addPort(port);
-        }
-        for (FpcContext context : cache.getContexts().values()) {
-            rc.addContext(context);
-        }
+        java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
+    	while(i.hasNext()){
+    		rc.addPort(i.next());
+    	}
+//      for (FpcPort port : cache.getPorts().values()) {
+//        	rc.addPort(port);
+//    	}
+    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
+    	while(c.hasNext()){
+    		rc.addContext(c.next());
+    	}
+//      for (FpcContext context : cache.getContexts().values()) {
+//        	rc.addContext(context);
+//    	}
         return rc;
     }
 
