@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesOutput;
@@ -25,6 +26,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ProbeOutput;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
@@ -36,6 +39,8 @@ import com.google.common.util.concurrent.Futures;
  * Handlers are assigned by Client bindings.
  */
 public class FpcagentDispatcher implements IetfDmmFpcagentService {
+    private static final Logger LOG = LoggerFactory.getLogger(FpcagentDispatcher.class);
+
     private static final Map<String, IetfDmmFpcagentService> clientHandlerMap = new HashMap<String, IetfDmmFpcagentService>();
     private static IetfDmmFpcagentService defaultService = null;
 
@@ -150,6 +155,7 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 
     @Override
     public Future<RpcResult<ConfigureOutput>> configure(ConfigureInput input) {
+    	LOG.info("Configure Start: "+System.currentTimeMillis());
         if (input == null) {
             return Futures.immediateFuture(configMissingBodyErr);
         }

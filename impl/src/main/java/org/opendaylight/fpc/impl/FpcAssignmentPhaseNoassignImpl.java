@@ -27,6 +27,7 @@ import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationSt
 import org.opendaylight.fpc.activation.workers.ActivationThreadPool;
 import org.opendaylight.fpc.activation.workers.ConfigureWorker;
 import org.opendaylight.fpc.activation.workers.MonitorWorker;
+import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.ErrorTypeIndex;
 import org.opendaylight.fpc.utils.NameResolver;
 import org.opendaylight.fpc.utils.NameResolver.FixedType;
@@ -118,6 +119,12 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                         				if(entry.getKey() != null && input.getOpType().equals(OpType.Update)){
                         					entry.getKey().getQueue().put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
                                                 input));
+                            				tx.setStatusTs(OperationStatus.UPDATE, System.currentTimeMillis());
+                            				tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
+                                            enqueueVal = enqueues.incrementAndGet();
+                        				} else if(entry.getKey() != null && input.getOpType().equals(OpType.Create)) {
+                        					ErrorLog.logError("Create session received for a session that was already created. Session id - "+context.getContextId().toString());
+                        					tx.setStatusTs(OperationStatus.ERRORED_CREATE, System.currentTimeMillis());
                         				}
                         			}
 //                        			Check with Jacob - Is CP ready to receive an error on creates
@@ -131,18 +138,25 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                         	            //break;
 //                        			}
                         			else {
-                        				worker = activationService.getWorker();
-                        				sessionMap.put(NameResolver.extractString(context.getContextId()), new AbstractMap.SimpleEntry<ConfigureWorker, ArrayList<Contexts>>(worker,null));
-                        				worker.getQueue().put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
-                                                input));
+                        				if(input.getOpType().equals(OpType.Create)){
+                        					worker = activationService.getWorker();
+                        					sessionMap.put(NameResolver.extractString(context.getContextId()), new AbstractMap.SimpleEntry<ConfigureWorker, ArrayList<Contexts>>(worker,null));
+                        					worker.getQueue().put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
+                        							input));
+                        					tx.setStatusTs(OperationStatus.CREATE, System.currentTimeMillis());
+                        					tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
+                                            enqueueVal = enqueues.incrementAndGet();
+                        				}
+                        				else if(input.getOpType().equals(OpType.Update)){
+                        					tx.setStatusTs(OperationStatus.ERRORED_UPDATE, System.currentTimeMillis());
+                        					ErrorLog.logError("Update received for a session which hasn't been created yet. Session Id - "+context.getContextId().toString());
+                        				}
                         			}
                         		}
                         	}
 //                            activationService.getWorker().getQueue()
 //                                .put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
 //                                    input));
-                            tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
-                            enqueueVal = enqueues.incrementAndGet();
                             rt = new CommonSuccessBuilder( ((Payload)input.getOpBody()) ).build();
                         } catch (Exception e) {
                             rt = activationServiceInterrupted(e,tx, System.currentTimeMillis() - startTime);
@@ -158,6 +172,7 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                         				sessionMap.get(entry.getValue()).getKey().getQueue().put(
                                                 new AbstractMap.SimpleEntry<Transaction,Object>(tx,input));
                         				tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
+                        				tx.setStatusTs(OperationStatus.DELETE, System.currentTimeMillis());
                         			}
                         		}
                         	}
@@ -191,6 +206,7 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
             LOG.info("Entries = {} and enqueues = {}", entries, enqueueVal);
         }
 
+    	LOG.info("Configure Stop: "+System.currentTimeMillis());
         return Futures.immediateFuture(RpcResultBuilder.<ConfigureOutput>success(new ConfigureOutputBuilder()
                 .setOpId(input.getOpId())
                 .setResult(res)

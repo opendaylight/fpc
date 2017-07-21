@@ -80,7 +80,7 @@ public class MemcachedWorker implements Worker {
             			entry = entry + "," + String.valueOf(timestamp) +",";
             			mcc.set(assignedPrefix.getIpv4Prefix().getValue().split("/")[0], 0, entry);
             		} else if(context.getValue().equals(OpType.Delete)){
-            			entry = entry + createTimestamp.get(ctxt.getContextId()) +"," + String.valueOf(timestamp);
+            			entry = entry + "," + createTimestamp.get(ctxt.getContextId()) +"," + String.valueOf(timestamp);
             			mcc.replace(assignedPrefix.getIpv4Prefix().getValue().split("/")[0], 0, entry);
             			createTimestamp.remove(ctxt.getContextId());
                     }

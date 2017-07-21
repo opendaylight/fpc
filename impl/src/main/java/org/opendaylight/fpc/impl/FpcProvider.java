@@ -39,7 +39,6 @@ import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.FpcCodecUtils;
 import org.opendaylight.fpc.utils.StringConstants;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
-import org.opendaylight.netconf.sal.rest.api.RestconfService;
 import org.opendaylight.netconf.sal.restconf.api.JSONRestconfService;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.FpcAgentInfo;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.FpcAgentInfoBuilder;

@@ -29,7 +29,7 @@ curl -i \
                 'instructions': {
                     'instr-3gpp-mob': 'downlink'
                 },
-                'context-id': '4294967297',
+                'context-id': 202374885,
                 'dpn-group': 'site1-l3',
                 'delegating-ip-prefixes': [
                     '192.168.1.5/32'

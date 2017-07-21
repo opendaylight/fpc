@@ -9,6 +9,7 @@ package org.opendaylight.fpc.activation.cache;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
@@ -26,8 +27,8 @@ class BaseCache implements Cache {
      * Default Constructor.
      */
     protected BaseCache() {
-        contexts = new HashMap<FpcIdentity, FpcContext>();
-        ports = new HashMap<FpcIdentity, FpcPort>();
+        contexts = new ConcurrentHashMap<FpcIdentity, FpcContext>();
+        ports = new ConcurrentHashMap<FpcIdentity, FpcPort>();
     }
 
     /**

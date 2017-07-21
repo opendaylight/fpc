@@ -26,7 +26,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         binding-class="org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcConfig">
       <odl:default-config><![CDATA[
 	    <fpc-config xmlns="urn:opendaylight:fpc:config">
-	      <memcached-uri>10.78.137.160:11211</memcached-uri>
+	      <memcached-uri>127.0.0.1:11211</memcached-uri>
 	      <use-memcached>false</use-memcached>
 	      <memcached-threads>8</memcached-threads>
 	      <monitor-threads>4</monitor-threads>
