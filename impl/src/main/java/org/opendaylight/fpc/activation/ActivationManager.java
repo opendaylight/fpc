@@ -39,7 +39,6 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
     private final Map<Class<? extends FpcDpnControlProtocol>,ActivatorFactory> factories;
     private final TenantManager tenantMgr;
     private boolean initialized;
-
     /**
      * Primary Constructor.
      * @param tenantMgr - Tenant Manager Assigned to the Activation Manager.
@@ -82,7 +81,7 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
         LOG.info("Activation Manager - Removing Activator " + protocol);
         factories.remove(protocol);
     }
-    
+
     @Override
     public void updateDpn(Dpns dpnBefore, Dpns dpnAfter) throws Exception {
     	if(dpnBefore.isAbstract().compareTo(dpnAfter.isAbstract()) != 0){
@@ -90,6 +89,7 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
     		throw new Exception();
     	}
     }
+
 
     @Override
     public void addDpn(Dpns dpn) throws Exception {
@@ -122,12 +122,16 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
                             ZmqDpnControlProtocol.class);
                 }
             }
-            if (dpnHolder.activator != null) {
-            	
-            	//TODO addDpn Logic
-            	
+            if(!dpn.isAbstract()){
+            	dpnHolder.activator.send_ADC_rules(dpn);
             }
-            
+            if (dpnHolder.activator != null) {
+
+            	//TODO addDpn Logic
+
+            }
+
+
         } else {
             LOG.info("Activation Manager - DPN from parent call was null");
         }
@@ -137,9 +141,9 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
     public void removeDpn(Dpns dpn) {
         if (dpn != null) {
             LOG.info("Activation Manager - Removing Dpn " + dpn.getDpnId());
-            
+
             //TODO removeDpn Logic
-            
+
             tenantMgr.getDpnInfo().remove(dpn.getDpnId().toString());
             if(dpn.isAbstract()){
             	TenantManager.vdpnDpnsMap.remove(dpn.getDpnId());
@@ -157,5 +161,5 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
             registerListeners();
             LOG.info("Factory initialization completed");
         }
-    }    
+    }
 }

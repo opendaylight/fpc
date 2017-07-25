@@ -13,13 +13,23 @@ import org.opendaylight.fpc.activation.Activator;
 import org.opendaylight.fpc.activation.ResponseManager;
 import org.opendaylight.fpc.activation.cache.Cache;
 import org.opendaylight.fpc.dpn.DpnHolder;
+import org.opendaylight.fpc.policy.BasePolicyManager;
 import org.opendaylight.fpc.utils.IPToDecimal;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpHeader.OpType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.instructions.Instructions;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Ports;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcAction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDescriptor;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPolicy;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.action.action.value.Rate;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.descriptor.descriptor.value.DomainDescriptor;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.policy.Rules;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Actions;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Descriptors;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.threegpp.rev160803.ThreeGPPTunnel;
@@ -70,6 +80,22 @@ public class DpdkImpl implements Activator {
 		if (dpnHolder.dpn == null)
 			return false;
 		return (dpnHolder.dpn.getTopic() != null);
+	}
+
+	public void send_ADC_rules(Dpns dpn){
+		for(FpcPolicy policy : BasePolicyManager.fpcPolicyMap.values()){
+			for(Rules rule : policy.getRules()){
+				for(Descriptors descrip: rule.getDescriptors()){
+					FpcDescriptor desc = BasePolicyManager.fpcDescriptorMap.get(descrip.getDescriptorId());
+					for(Actions act: rule.getActions()){
+						FpcAction action = BasePolicyManager.fpcActionMap.get(act.getActionId());
+						String domainName = ((DomainDescriptor) desc.getDescriptorValue()).getDestinationDomains().get(0).getValue();
+						Rate theAction = ((Rate) action.getActionValue());
+						this.api.send_ADC_rules(dpn.getTopic(), ZERO_SHORT, (short)domainName.length(), domainName, null, null, 1L, null, null, theAction.getRatingGroup(), theAction.getServiceIdentifier(), null, (short) theAction.getSponsorIdentity().getValue().length(), theAction.getSponsorIdentity().getValue(), 0L, null, null, null, null);
+					}
+				}
+			}
+		}
 	}
 
 	@Override

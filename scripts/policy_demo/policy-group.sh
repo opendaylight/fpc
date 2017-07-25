@@ -4,8 +4,22 @@
 #
 #  This program and the accompanying materials are made available under the
 #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
-#  and is available at http://www.eclipse.org/legal/epl-v10.html 
+#  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
+
+if [ "$#" -ne 1 ]; then
+    echo "Illegal number of parameters"
+    exit 1
+fi
+
+arg="$1"
+case "$arg" in
+	get|put|delete)
+		;;
+        *)
+		echo "Values must be one of: 'put', 'get' or 'delete'"
+		exit 1
+esac
 
 echo ""
 curl -i \
@@ -13,18 +27,15 @@ curl -i \
 --request $1 \
 -u admin:admin \
 --data '{
-    "dpns": [
+    "policy-groups": [
         {
-            "dpn-id": "dpn1",
-            "dpn-name": "site1-anchor1",
-            "dpn-groups": [
-                "foo"
-            ],
-            "topic": "1",
-	    "abstract":false
+            "policy-group-id": "1000",
+            "policies": [
+                "1234"
+            ]
         }
     ]
 }' \
-http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-topology/dpns/dpn1
+http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/policy-groups/1000
 
 echo ""

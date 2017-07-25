@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract base class that loads Descriptors, Actions, 
+ * Abstract base class that loads Descriptors, Actions,
  * and Policies from the data store and sets up change listeners.
  */
 public abstract class PolicyManager implements AutoCloseable {
@@ -125,7 +125,7 @@ public abstract class PolicyManager implements AutoCloseable {
     /**
      * Registers Change Listener for Descriptors under the Tenant.
      */
- 
+
     public void registerListeners() {
         dataTreeChangeListenerRegistration = this.db
                    .registerDataTreeChangeListener(
@@ -183,7 +183,7 @@ public abstract class PolicyManager implements AutoCloseable {
         dataTreeChangeListenerRegistration5.close();
     }
 
-    
+
     /**
      * Private Change Listener class for Descriptors.
      */
@@ -206,7 +206,7 @@ public abstract class PolicyManager implements AutoCloseable {
              }
          }
     }
-    
+
     /**
      * Adds an Action to this manager.
      * @param act - Action to add
@@ -219,11 +219,11 @@ public abstract class PolicyManager implements AutoCloseable {
      * @param act - Action to remove
      */
     abstract public void removeAction(Actions act);
-    
+
     /**
      * Registers Change Listener for Actions under the Tenant.
      */
-    
+
     private class ActionsChangeManager implements DataTreeChangeListener<Actions> {
         @Override
         public void onDataTreeChanged(Collection<DataTreeModification<Actions>> changes) {
@@ -243,24 +243,24 @@ public abstract class PolicyManager implements AutoCloseable {
             }
         }
    }
-    
+
     /**
      * Adds a Policy to this manager.
      * @param policy - Policy to add
      * @throws Exception - If the Add violates the existing state.
      */
     abstract public void addPolicy(Policies policy) throws Exception;
-    
+
     /**
      * Removes a Policy from this manager.
      * @param policy - Policy to remove
      */
     abstract public void removePolicy(Policies policy);
-    
+
     /**
      * Registers Change Listener for Policies under the Tenant.
      */
-    
+
     private class PolicyChangeManager implements DataTreeChangeListener<Policies> {
         @Override
         public void onDataTreeChanged(Collection<DataTreeModification<Policies>> changes) {
@@ -286,17 +286,17 @@ public abstract class PolicyManager implements AutoCloseable {
      * @throws Exception - If the Add violates the existing state.
      */
     abstract public void addPolicyGroups(PolicyGroups polgro) throws Exception;
-    
+
     /**
      * Removes a Policy Group from this manager.
      * @param polgro - Policy Group to remove
      */
     abstract public void removePolicyGroups(PolicyGroups polgro);
-    
+
     /**
      * Registers Change Listener for Policies under the Tenant.
      */
-    
+
     private class PolicyGroupChangeManager implements DataTreeChangeListener<PolicyGroups> {
         @Override
         public void onDataTreeChanged(Collection<DataTreeModification<PolicyGroups>> changes) {
@@ -322,13 +322,13 @@ public abstract class PolicyManager implements AutoCloseable {
      * @throws Exception - If the Add violates the existing state.
      */
     abstract public void addPorts(Ports port) throws Exception;
-    
+
     /**
      * Removes a Port from this manager.
      * @param port - Port to remove
      */
     abstract public void removePorts(Ports port);
-    
+
     private class PortChangeManager implements DataTreeChangeListener<Ports> {
         @Override
         public void onDataTreeChanged(Collection<DataTreeModification<Ports>> changes) {

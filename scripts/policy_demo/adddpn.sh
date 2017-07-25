@@ -21,7 +21,7 @@ curl -i \
                 "foo"
             ],
             "topic": "1",
-	    "abstract":false
+	       "abstract":false
         }
     ]
 }' \
