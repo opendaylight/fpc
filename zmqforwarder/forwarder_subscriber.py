@@ -19,7 +19,7 @@ context = zmq.Context()
 socket = context.socket(zmq.SUB)
 print "Collecting updates from server..."
 socket.connect ("tcp://localhost:%s" % port)
-topicfilter = "1"
+topicfilter = str(sys.argv[1])
 socket.setsockopt(zmq.SUBSCRIBE, topicfilter)
 print "Listening to port ", port
 count = 0

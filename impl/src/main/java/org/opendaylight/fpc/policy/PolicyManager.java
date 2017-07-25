@@ -317,15 +317,15 @@ public abstract class PolicyManager implements AutoCloseable {
         }
    }
     /**
-     * Adds a Policy Group to this manager.
-     * @param polgro - PolicyGroup to add
+     * Adds a Port to this manager.
+     * @param port - Port to add
      * @throws Exception - If the Add violates the existing state.
      */
     abstract public void addPorts(Ports port) throws Exception;
     
     /**
-     * Removes a Policy Group from this manager.
-     * @param polgro - Policy Group to remove
+     * Removes a Port from this manager.
+     * @param port - Port to remove
      */
     abstract public void removePorts(Ports port);
     
@@ -333,7 +333,7 @@ public abstract class PolicyManager implements AutoCloseable {
         @Override
         public void onDataTreeChanged(Collection<DataTreeModification<Ports>> changes) {
             for (DataTreeModification<Ports> descModification : changes) {
-                LOG.info("Descriptor Change has occured for Tenant-Id {} / Descriptor-Id {}",tenantId,
+                LOG.info("Port Change has occured for Tenant-Id {} / Descriptor-Id {}",tenantId,
                         descModification.getRootPath().toString());
                 if (descModification.getRootNode().getModificationType() == ModificationType.DELETE) {
                     removePorts(descModification.getRootNode().getDataBefore());
@@ -341,7 +341,7 @@ public abstract class PolicyManager implements AutoCloseable {
                     try {
                        addPorts(descModification.getRootNode().getDataAfter());
                    } catch (Exception e) {
-                       ErrorLog.logError("DescriptorChangeManager - Error occured during Descriptor Create/Write - " + e.getLocalizedMessage(), e.getStackTrace());
+                       ErrorLog.logError("PortChangeManager - Error occured during Descriptor Create/Write - " + e.getLocalizedMessage(), e.getStackTrace());
                    }
                 }
 
