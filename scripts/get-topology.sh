@@ -8,7 +8,7 @@
 # ------------------------------------------------------------------
 
 echo ""
-curl -i \
+curl -i -s \
 --header "Content-type: application/json" \
 --request GET \
 -u admin:admin \

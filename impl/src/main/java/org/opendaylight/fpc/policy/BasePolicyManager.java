@@ -201,13 +201,13 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
 
 	@Override
 	public void addPorts(Ports port) throws Exception {
-		for (FpcPolicyGroupId polgroup : port.getPolicyGroups()) {
-			Set<FpcIdentity> s = revpointer.containsKey(polgroup) ? revpointer.get(polgroup) :
-				new HashSet<FpcIdentity>();
-			s.add(port.getPortId());
-			revpointer.put(polgroup, s);
-		}
-		portNames.add(port.getPortId());
+//		for (FpcPolicyGroupId polgroup : port.getPolicyGroups()) {
+//			Set<FpcIdentity> s = revpointer.containsKey(polgroup) ? revpointer.get(polgroup) :
+//				new HashSet<FpcIdentity>();
+//			s.add(port.getPortId());
+//			revpointer.put(polgroup, s);
+//		}
+//		portNames.add(port.getPortId());
 	}
 
 	@Override

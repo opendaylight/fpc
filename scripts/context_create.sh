@@ -9,6 +9,7 @@
 
 echo ""
 curl -i \
+--header "Expect:" \
 --header "Content-type: application/json" \
 --request POST \
 -u admin:admin \

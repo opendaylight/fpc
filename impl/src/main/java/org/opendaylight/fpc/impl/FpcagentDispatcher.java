@@ -274,7 +274,12 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
     	LOG.info("Databroker couldn't be initialized");
     	return null;
     }
-        
+    
+    /**
+     * Add/Remove a DPN onto a VDPN (abstract DPN) based on a certain strategy
+     *
+     * @param input - DPN config input
+     */
 	@Override
 	public Future<RpcResult<ConfigureDpnOutput>> configureDpn(ConfigureDpnInput input) {
 		if (input == null)
@@ -288,7 +293,6 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 		ResultType rt;
 		List<FpcDpnId> vdpnDpns;
 		
-		//get stuff then strategize
 		if(input.getDpnId() != null && input.getAbstractDpnId() != null){
 			dpn = getDpnById(input.getDpnId());
 			vdpn = getDpnById(input.getAbstractDpnId());
@@ -341,9 +345,9 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 				}
 			}
 		}
-		//update vdpn
+
 		if(dataBroker != null){
-			LOG.info("Merging DPN ids...");
+			LOG.info("Updating DPN ids...");
 			writetx.put(LogicalDatastoreType.CONFIGURATION,
 				InstanceIdentifier.builder(Tenants.class)
 				.child(Tenant.class, new TenantKey(defaultIdentity))
@@ -356,22 +360,16 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 			Futures.addCallback(submitFuture, new FutureCallback<Void>() {
 				@Override
 				public void onFailure(Throwable arg0) {
-					LOG.info("Merge failed");
+					LOG.warn("Update failed");
 				}
 				@Override
 				public void onSuccess(Void arg0) {
-					LOG.info("Merge complete!");
 					// Do nothing
 				}
 			});
 		}else{
 	    	LOG.info("Databroker couldn't be initialized");
 		}
-		
-		LOG.info("vdpnDpns: "+vdpnDpns);
-		LOG.info("DpnsMap: "+TenantManager.vdpnDpnsMap);
-		//LOG.info("ContextsMap: "+TenantManager.vdpnContextsMap);
-		LOG.info("vdpn.getDpnIds: "+vdpn.getDpnIds());
 		
 		LOG.info("Strategy met, returning RPC...");
 		rt = new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.dpn.result.type.CommonSuccessBuilder(vdpn).build();

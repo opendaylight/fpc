@@ -22,7 +22,7 @@ case "$arg" in
 esac
 
 echo ""
-curl -i \
+curl -i -s \
 --header "Content-type: application/json" \
 --request $1 \
 -u admin:admin \
