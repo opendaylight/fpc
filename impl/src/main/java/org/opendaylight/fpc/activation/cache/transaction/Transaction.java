@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
@@ -34,6 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.ResultType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.DeleteSuccessBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPort;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -403,20 +405,20 @@ public class Transaction {
 
     private OpCache getOpCache(Cache cache) {
         OpCache rc = new OpCache();
-        java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
-    	while(i.hasNext()){
-    		rc.addPort(i.next());
-    	}
-//      for (FpcPort port : cache.getPorts().values()) {
-//        	rc.addPort(port);
+//        java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
+//    	while(i.hasNext()){
+//    		rc.addPort(i.next());
 //    	}
-    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
-    	while(c.hasNext()){
-    		rc.addContext(c.next());
+        for (Entry<FpcIdentity, FpcPort> port : cache.getPorts().entrySet()) {
+        	rc.addPort(port.getValue());
     	}
-//      for (FpcContext context : cache.getContexts().values()) {
-//        	rc.addContext(context);
+//    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
+//    	while(c.hasNext()){
+//    		rc.addContext(c.next());
 //    	}
+        for (Entry<FpcIdentity, FpcContext> context : cache.getContexts().entrySet()) {
+        	rc.addContext(context.getValue());
+    	}
         return rc;
     }
 
