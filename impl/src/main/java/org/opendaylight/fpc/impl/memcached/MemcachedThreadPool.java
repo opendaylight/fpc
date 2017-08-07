@@ -18,18 +18,36 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev16080
 
 import com.google.common.base.Supplier;
 
+/**
+ * Thread pool for memcached worker threads
+ *
+ */
 public class MemcachedThreadPool extends AbstractThreadPool<MemcachedWorker>{
 	static private MemcachedThreadPool _instance;
 	protected String memcachedUri;
+	/**
+	 * Constructor
+	 * @param poolSize - Number of threads to create in the pool
+	 * @param memcachedUri - The memcached URI to connect to
+	 */
 	public MemcachedThreadPool(int poolSize, String memcachedUri) {
 		super(null, poolSize);
 		this.memcachedUri = memcachedUri;
 	}
 
+	/**
+	 * Creates a new instance of the memcached thread pool
+	 * @param poolSize - Number of threads to create in the pool
+	 * @param memcachedUri - The memcached URI to connect to
+	 */
 	public static void createInstance(int poolSize, String memcachedUri) {
 		_instance = new MemcachedThreadPool(poolSize,memcachedUri);
 	}
 
+	/**
+	 * Returns the memcached thread pool object
+	 * @return Memcached thread pool object
+	 */
 	public static MemcachedThreadPool getInstance() {
 		return _instance;
 	}
@@ -39,6 +57,9 @@ public class MemcachedThreadPool extends AbstractThreadPool<MemcachedWorker>{
 		return new MemcachedWorkerFactory(startSignal);
 	}
 
+	/**
+	 * Memcached Worker Factory Class
+	 */
 	protected class MemcachedWorkerFactory implements Supplier<MemcachedWorker> {
         protected final CountDownLatch startSignal;
 

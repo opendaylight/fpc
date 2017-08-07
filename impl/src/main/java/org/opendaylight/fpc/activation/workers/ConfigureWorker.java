@@ -66,8 +66,6 @@ public class ConfigureWorker
         implements Worker {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigureWorker.class);
     private static final AtomicLong entrants = new AtomicLong(0L);
-    private static Pattern deleteContextHandle = Pattern.compile("^/ctxt:(.+)");
-    private static Pattern deletePortHandle = Pattern.compile("^/port:(.+)");
     private boolean run;
     private final BlockingQueue<Object> blockingConfigureQueue;
 
@@ -204,29 +202,12 @@ public class ConfigureWorker
             for (Targets target : (doq.getTargets() != null) ? doq.getTargets() :
                     Collections.<Targets>emptyList()) {
                 FpcDpnId ident = null;
-                //DataObject dObj = tx.getTenantContext().getSc().read(NameResolver.extractString(target.getTarget()));
-                //FpcContext context =(dObj instanceof FpcContext) ? (FpcContext) dObj : null;
-                //FpcPort port = (dObj instanceof FpcPort) ? (FpcPort) dObj : null;
                 Entry<FixedType, String> entry = extractTypeAndId(NameResolver.extractString(target.getTarget()));
                 FpcContext context = null;
                 ArrayList<Contexts> cList = FpcagentServiceBase.sessionMap.get(entry.getValue()).getValue();
                 if(!cList.isEmpty()){
                 	context = cList.get(cList.size()-1);
                 }
-//                if ((context == null)) {
-//                    String s = NameResolver.extractString(target.getTarget());
-//                    Matcher m1 = deleteContextHandle.matcher(s);
-//                    if (m1.matches()) {
-//                        LOG.info("Value = {}",m1.group(0));
-//                        LOG.info("Value = {}",m1.group(1));
-//                        context = tx.getTenantContext().getSc().getContext(new FpcIdentity(m1.group(1)));
-//                    } else {
-//                        Matcher m2 = deletePortHandle.matcher(s);
-//                        if (m2.matches()) {
-//                            //port = tx.getTenantContext().getSc().getPort(new FpcIdentity(m1.group(1)));
-//                        }
-//                    }
-//                }
 
                 if (context != null) {
                 	try {

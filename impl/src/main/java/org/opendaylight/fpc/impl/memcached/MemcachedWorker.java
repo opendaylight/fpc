@@ -34,6 +34,10 @@ import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.compat.log.Log4JLogger;
 import net.spy.memcached.compat.log.Logger;
 
+/**
+ * @author vivekvijayan
+ * Memcached Worker Thread
+ */
 public class MemcachedWorker implements Worker {
 	//private static final Logger LOG = LoggerFactory.getLogger(FpcServiceImpl.class);
 	private BlockingQueue<Map.Entry<FpcContext,OpType>> blockingQueue;
@@ -42,6 +46,12 @@ public class MemcachedWorker implements Worker {
 	protected final CountDownLatch startSignal;
 	protected String memcachedUri;
 	protected MemcachedClient  mcc;
+	/**
+	 * Constructor
+	 * @param startSignal - Start Signal
+	 * @param linkedBlockingQueue - Blocking Queue
+	 * @param memcachedUri - Memcached URI
+	 */
 	public MemcachedWorker(CountDownLatch startSignal, LinkedBlockingQueue<Map.Entry<FpcContext, OpType>> linkedBlockingQueue, String memcachedUri){
 		this.startSignal = startSignal;
 		this.blockingQueue = linkedBlockingQueue;
