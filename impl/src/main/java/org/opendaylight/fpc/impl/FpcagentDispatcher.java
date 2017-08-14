@@ -325,25 +325,19 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 		}
 		
 		if(input.getOperation() == DpnOperation.Remove){
-			Boolean deleteFlag = false;
-			if(vdpn.getDpnIds().size()==1)
-				deleteFlag = true;
-			new Thread(new SessionThread(vdpn, dpn, input.getOperation(),deleteFlag), ("sessionThread"+threadCount++)).start();
+			new Thread(new SessionThread(vdpn, dpn, input.getOperation(), vdpn.getDpnIds().size()==1 ? true : false), ("sessionThread"+ ++threadCount)).start();
 			LOG.info("sessionThread"+threadCount+" started");
 			if(vdpnDpns.size() == 0)
 				return Futures.immediateFuture(configDpnNotEnoughDpnsError);
-			else{
-				if(vdpnDpns.contains(dpn.getDpnId())){
-					TenantManager.vdpnDpnsMap.get(vdpn.getDpnId()).remove(dpn.getDpnId());
-					vdpnDpns.remove(dpn.getDpnId());
-				}else{
-					LOG.info(dpn.getDpnId()+" is unrelated to "+vdpn.getDpnId());
-					rt = new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.dpn.result.type.CommonSuccessBuilder(vdpn).build();
-					return Futures.immediateFuture(RpcResultBuilder.<ConfigureDpnOutput>success(new ConfigureDpnOutputBuilder()
-						.setResult(Result.Ok)
-						.setResultType(rt)).build());
-				}
+			if(!vdpnDpns.contains(dpn.getDpnId())){
+				LOG.info(dpn.getDpnId()+" is unrelated to "+vdpn.getDpnId());
+				rt = new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.dpn.result.type.CommonSuccessBuilder(vdpn).build();
+				return Futures.immediateFuture(RpcResultBuilder.<ConfigureDpnOutput>success(new ConfigureDpnOutputBuilder()
+					.setResult(Result.Ok)
+					.setResultType(rt)).build());
 			}
+			TenantManager.vdpnDpnsMap.get(vdpn.getDpnId()).remove(dpn.getDpnId());
+			vdpnDpns.remove(dpn.getDpnId());
 		}
 
 		if(dataBroker != null){

@@ -20,7 +20,10 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/*
+ * When adding a DPN to a VDPN, copy sessions to new DPN
+ * When removing a DPN from a VDPN, delete sessions from that DPN (When removing the last DPN in a VDPN, delete everything)
+ */
 public class SessionThread implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(FpcagentDispatcher.class);
 	private Dpns dpn, vdpn;

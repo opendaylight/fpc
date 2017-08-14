@@ -122,9 +122,9 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
                             ZmqDpnControlProtocol.class);
                 }
             }
-            if(!dpn.isAbstract()){
-            	dpnHolder.activator.send_ADC_rules(dpn);
-            }
+//            if(!dpn.isAbstract()){
+//            	dpnHolder.activator.send_ADC_rules(dpn);
+//            }
             if (dpnHolder.activator != null) {
 
             	//TODO addDpn Logic

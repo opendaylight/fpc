@@ -112,20 +112,20 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
 	public void addPolicy(Policies policy) throws Exception {
 		LOG.info("Policy Manager - Adding Policy " + policy.getPolicyId());
 		fpcPolicyMap.put(policy.getPolicyId(), policy);
-//		for (Rules rule : policy.getRules()){
-//			for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Descriptors desc : rule.getDescriptors()) {
-//				Set<FpcIdentity> s = revpointer.containsKey(desc.getDescriptorId()) ? revpointer.get(desc.getDescriptorId()) :
-//					new HashSet<FpcIdentity>();
-//				s.add(policy.getPolicyId());
-//				revpointer.put(desc.getDescriptorId(), s);
-//			}
-//			for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Actions act : rule.getActions()) {
-//				Set<FpcIdentity> s = revpointer.containsKey(act.getActionId()) ? revpointer.get(act.getActionId()) :
-//					new HashSet<FpcIdentity>();
-//				s.add(policy.getPolicyId());
-//				revpointer.put(act.getActionId(), s);
-//			}
-//		}
+		for (Rules rule : policy.getRules()){
+			for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Descriptors desc : rule.getDescriptors()) {
+				Set<FpcIdentity> s = revpointer.containsKey(desc.getDescriptorId()) ? revpointer.get(desc.getDescriptorId()) :
+					new HashSet<FpcIdentity>();
+				s.add(policy.getPolicyId());
+				revpointer.put(desc.getDescriptorId(), s);
+			}
+			for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Actions act : rule.getActions()) {
+				Set<FpcIdentity> s = revpointer.containsKey(act.getActionId()) ? revpointer.get(act.getActionId()) :
+					new HashSet<FpcIdentity>();
+				s.add(policy.getPolicyId());
+				revpointer.put(act.getActionId(), s);
+			}
+		}
 	}
 
 	@Override
@@ -141,22 +141,22 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
 	public void addPolicyGroups(PolicyGroups polgro) throws Exception {
 		LOG.info("Policy Group Manager - Adding Policy Group " + polgro.getPolicyGroupId());
 		fpcPolicyGroupMap.put(polgro.getPolicyGroupId(), polgro);
-//		for (FpcPolicyId policy : polgro.getPolicies()){
-//			for (Rules rule : ((FpcPolicy) policy).getRules()){
-//				for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Descriptors desc : rule.getDescriptors()) {
-//					Set<FpcIdentity> s = revpointer.containsKey(desc.getDescriptorId()) ? revpointer.get(desc.getDescriptorId()) :
-//						new HashSet<FpcIdentity>();
-//					s.add(((FpcPolicy) policy).getPolicyId());
-//					revpointer.put(desc.getDescriptorId(), s);
-//				}
-//				for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Actions act : rule.getActions()) {
-//					Set<FpcIdentity> s = revpointer.containsKey(act.getActionId()) ? revpointer.get(act.getActionId()) :
-//						new HashSet<FpcIdentity>();
-//					s.add(((FpcPolicy) policy).getPolicyId());
-//					revpointer.put(act.getActionId(), s);
-//				}
-//			}
-//		}
+		for (FpcPolicyId policy : polgro.getPolicies()){
+			for (Rules rule : ((FpcPolicy) policy).getRules()){
+				for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Descriptors desc : rule.getDescriptors()) {
+					Set<FpcIdentity> s = revpointer.containsKey(desc.getDescriptorId()) ? revpointer.get(desc.getDescriptorId()) :
+						new HashSet<FpcIdentity>();
+					s.add(((FpcPolicy) policy).getPolicyId());
+					revpointer.put(desc.getDescriptorId(), s);
+				}
+				for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Actions act : rule.getActions()) {
+					Set<FpcIdentity> s = revpointer.containsKey(act.getActionId()) ? revpointer.get(act.getActionId()) :
+						new HashSet<FpcIdentity>();
+					s.add(((FpcPolicy) policy).getPolicyId());
+					revpointer.put(act.getActionId(), s);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -201,13 +201,13 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
 
 	@Override
 	public void addPorts(Ports port) throws Exception {
-//		for (FpcPolicyGroupId polgroup : port.getPolicyGroups()) {
-//			Set<FpcIdentity> s = revpointer.containsKey(polgroup) ? revpointer.get(polgroup) :
-//				new HashSet<FpcIdentity>();
-//			s.add(port.getPortId());
-//			revpointer.put(polgroup, s);
-//		}
-//		portNames.add(port.getPortId());
+		for (FpcPolicyGroupId polgroup : port.getPolicyGroups()) {
+			Set<FpcIdentity> s = revpointer.containsKey(polgroup) ? revpointer.get(polgroup) :
+				new HashSet<FpcIdentity>();
+			s.add(port.getPortId());
+			revpointer.put(polgroup, s);
+		}
+		portNames.add(port.getPortId());
 	}
 
 	@Override
