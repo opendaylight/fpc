@@ -29,10 +29,10 @@ module ietf-dmm-fpcbase {
     feature fpc-multi-dpn {
         description "The agent supports multiple DPNs.";
     }
-
+    
     typedef fpc-identity {
         type union {
-            type uint32;
+            type int64;
             type string;
             type instance-identifier;
         }
@@ -483,18 +483,10 @@ module ietf-dmm-fpcbase {
         leaf node-reference {
           type instance-identifier;
         }
-        leaf abstract {
-          type boolean;
-        }
-        leaf strategy {
+        leaf node-id {
           type string;
         }
-        leaf-list dpn-ids {
-          type fpcbase:fpc-dpn-id;
-        }
-        // WORKAROUND for OsgiBundleScanningSchemaService not picking up the
-        // fpc augments.
-        leaf topic {
+        leaf network-id {
           type string;
         }
     }

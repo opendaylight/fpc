@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -37,7 +37,7 @@ public class ErrorLog {
 	 * @param ste - array of stack trace elements
 	 */
 	public static void logError(StackTraceElement[] ste){
-		LOG.error("My Error: "+stackTraceString(ste));
+		LOG.error("StackTrace : "+stackTraceString(ste));
 	}
 
 	/**
@@ -46,6 +46,15 @@ public class ErrorLog {
 	 * @param ste - array of stack trace elements
 	 */
 	public static void logError(String msg, StackTraceElement[] ste){
-		LOG.error(msg+"\n"+stackTraceString(ste));
+		LOG.error("Erro Message - Stacktrace : "+msg+" - "+stackTraceString(ste));
+	}
+
+	/**
+	 * MEthod to print a string as error
+	 * @param msg - String to print as error
+	 */
+	public static void logError(String msg) {
+		LOG.error("Error Message : "+msg+"\n");
+
 	}
 }

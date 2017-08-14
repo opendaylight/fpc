@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,6 +9,7 @@ package org.opendaylight.fpc.activation.cache;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
@@ -26,8 +27,8 @@ class BaseCache implements Cache {
      * Default Constructor.
      */
     protected BaseCache() {
-        contexts = new HashMap<FpcIdentity, FpcContext>();
-        ports = new HashMap<FpcIdentity, FpcPort>();
+        contexts = new ConcurrentHashMap<FpcIdentity, FpcContext>();
+        ports = new ConcurrentHashMap<FpcIdentity, FpcPort>();
     }
 
     /**
@@ -43,10 +44,18 @@ class BaseCache implements Cache {
         return maincache;
     }
 
+    /**
+     * Adds a port to the cache
+     * @param port - Port to be added
+     */
     public void addPort(FpcPort port) {
         ports.put(port.getPortId(), port);
     }
 
+    /**
+     * Adds a context to the cache
+     * @param context - Context to be added
+     */
     public void addContext(FpcContext context) {
         contexts.put(context.getContextId(), context);
     }

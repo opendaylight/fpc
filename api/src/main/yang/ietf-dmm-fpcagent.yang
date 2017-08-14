@@ -513,17 +513,25 @@ module ietf-dmm-fpcagent {
           type uint64;
       }
     }
+    
+    grouping cause-values {
+      leaf cause-value {
+        type uint32;
+      }
+    }
 
     notification config-result-notification {
       uses fpcagent:notification-header;
       choice value {
         case config-result {
           uses fpcagent:op-status-value;
+          uses fpcagent:cause-values;
           uses fpcagent:result-body;
         }
         case config-bundle-result {
           list bundles {
             uses fpcagent:op-status-value;
+            uses fpcagent:cause-values;
             uses fpcagent:result-body;
           }
         }
@@ -576,6 +584,15 @@ module ietf-dmm-fpcagent {
           }
         }
     }
+    
+   grouping dpn-status-value {
+      leaf dpn-status {
+        type enumeration {
+          enum available { value 0; }
+          enum unavailable { value 1; }
+        }
+      }
+    }
 
     notification notify {
         uses fpcagent:notification-header;
@@ -601,6 +618,19 @@ module ietf-dmm-fpcagent {
                 }
               }
             }
+            
+            case dpn-availability {
+              leaf message-type {
+                type string;
+              }
+              uses fpcagent:dpn-status-value;
+              leaf load {
+              	description "A percentage value (between 0 and 100) of the system load.  This is a combined measurement.";
+              	type int8;
+              }
+              uses fpcbase:fpc-dpn;
+            }
+            
             case monitor-notification {
               choice monitor-notification-value {
                 case simple-monitor {
@@ -616,20 +646,22 @@ module ietf-dmm-fpcagent {
             // Added as part of the augment issue
             // TODO - Remove once resolved
             case downlink-data-notification {
+              leaf message-type {
+                type string;
+              }
               leaf dpn-id {
                 type fpcbase:fpc-dpn-id;
               }
-              leaf imsi {
-                type threegpp:imsi-type;
+              leaf session-id {
+                type uint64;
               }
-              leaf ebi {
-                type threegpp:ebi-type;
+              leaf client-id {
+              	type fpcagent:client-identifier;
               }
-              leaf dscp {
-                type uint8;
+              leaf op-id {
+              	type fpcagent:op-identifier;
               }
             }
-
         }
     }
 }

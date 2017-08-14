@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- vi: set et smarttab sw=4 tabstop=4: -->
 <!--
-Copyright © 2016 Copyright (c) Sprint, Inc. and others. All rights reserved.
+Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others. All rights reserved.
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,12 +26,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         binding-class="org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcConfig">
       <odl:default-config><![CDATA[
 	    <fpc-config xmlns="urn:opendaylight:fpc:config">
+	      <memcached-uri>127.0.0.1:11211</memcached-uri>
+	      <use-memcached>false</use-memcached>
+	      <memcached-threads>8</memcached-threads>
 	      <monitor-threads>4</monitor-threads>
 	      <scheduled-monitors-poolsize>4</scheduled-monitors-poolsize>
-	      <dpn-listener-uri>tcp://127.0.0.1:5569</dpn-listener-uri>
-	      <dpn-listener-id>1</dpn-listener-id>
+	      <dpn-listener-uri>tcp://127.0.0.1:5560</dpn-listener-uri>
+	      <dpn-listener-id>4</dpn-listener-id>
 	      <dpn-client-uri>tcp://127.0.0.1:5559</dpn-client-uri>
+	      <node-id>node0</node-id>
+	      <network-id>network1</network-id>
 	      <dpn-client-threads>40</dpn-client-threads>
+	      <dpn-message-processor-threads>40</dpn-message-processor-threads>
 	      <metricsupdate-ms>10000</metricsupdate-ms>
 	      <mobilityupdate-ms>30000</mobilityupdate-ms>
 	      <activation-threads>40</activation-threads>
@@ -39,13 +45,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 	      <default-tenant-id>default</default-tenant-id>
 	      <default-group-id>defaultTenant</default-group-id>
 	      <prefers-fast-clients>true</prefers-fast-clients>
-	      <http-notifier-clients>3</http-notifier-clients>
+	      <http-notifier-clients>40</http-notifier-clients>
 	      <zmq-nbi-server-poolsize>1</zmq-nbi-server-poolsize>
 		  <zmq-nbi-server-uri>tcp://127.0.0.1:5570</zmq-nbi-server-uri>
 		  <zmq-nbi-inproc-uri>inproc://backend</zmq-nbi-inproc-uri>
 		  <zmq-nbi-handler-poolsize>10</zmq-nbi-handler-poolsize>
+		  <zmq-broadcast-all>1</zmq-broadcast-all>
+		  <zmq-broadcast-controllers>2</zmq-broadcast-controllers>
+		  <zmq-broadcast-dpns>3</zmq-broadcast-dpns>
 		  <http-nio2-nb-poolsize>80</http-nio2-nb-poolsize>
-		   <http-nio2-nb-port>9292</http-nio2-nb-port>
+		  <http-nio2-nb-port>9292</http-nio2-nb-port>
 	    </fpc-config>
 	  ]]></odl:default-config>  
   </odl:clustered-app-config>

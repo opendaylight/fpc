@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,15 +18,18 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.fpc.impl.FpcagentServiceBase;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.FpcCodecUtils;
 import org.opendaylight.fpc.utils.NameResolver;
 import org.opendaylight.fpc.utils.NameResolver.FixedType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.dom.broker.osgi.OsgiBundleScanningSchemaService;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
@@ -78,6 +81,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+
+import javassist.bytecode.Descriptor.Iterator;
 
 /**
  * In-memory Storage Cache.
@@ -535,7 +543,7 @@ public class StorageCache implements AutoCloseable {
 
     /**
      * Reads Cache.
-     * @param iid- Instance Identifier
+     * @param iid - Instance Identifier
      * @return DataObject
      */
     public DataObject read(InstanceIdentifier<?> iid) {
@@ -546,19 +554,22 @@ public class StorageCache implements AutoCloseable {
     /**
      * Adds a Cache to the Storage Cache.
      * @param cache - Cache to be added
-     * @return An OpCache that represents the elements added.
      */
-    public OpCache addToCache(Cache cache) {
-        OpCache rc = new OpCache();
-        for (FpcPort port : cache.getPorts().values()) {
-            addPort(port);
-            rc.addPort(port);
-        }
-        for (FpcContext context : cache.getContexts().values()) {
-            addContext(context);
-            rc.addContext(context);
-        }
-        return rc;
+    public void addToCache(Cache cache) {
+    	java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
+    	while(i.hasNext()){
+    		addPort(i.next());
+    	}
+//        for (FpcPort port : cache.getPorts().values()) {
+//            addPort(port);
+//        }
+    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
+    	while(c.hasNext()){
+    		addContext(c.next());
+    	}
+//        for (FpcContext context : cache.getContexts().values()) {
+//            addContext(context);
+//        }
     }
 
     /**
@@ -569,14 +580,36 @@ public class StorageCache implements AutoCloseable {
      */
     protected void write(String identKey, YangInstanceIdentifier key, NormalizedNode<?,?> value) {
         boolean isCreate = identities.contains(identKey);
-        DOMStoreWriteTransaction wtrans = memoryCache.newWriteOnlyTransaction();
-        if (isCreate) {
+        DOMStoreReadWriteTransaction wtrans = memoryCache.newReadWriteTransaction();//.newWriteOnlyTransaction();
+        if (!isCreate) {
             wtrans.write(key, value);
         } else {
             wtrans.merge(key, value);
+            /*CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future = wtrans.read(key);
+            Futures.addCallback(future, new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
+
+				@Override
+				public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
+					if(result.isPresent()) {
+						DataObject dObj = codecs.dataObjectFromNormalizedNode(key,result.get());
+						if(dObj instanceof org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts){
+							org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts context = (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts) dObj;
+							FpcagentServiceBase.sessionMap.get(context.getContextId()).getValue().add(context);
+						}
+					}
+
+				}
+
+				@Override
+				public void onFailure(Throwable t) {
+					// TODO Auto-generated method stub
+
+				}
+
+            });*/
         }
         if (commitTrans(wtrans)) {
-            if (isCreate) {
+            if (!isCreate) {
                 identities.add(identKey);
             }
         }
@@ -590,7 +623,7 @@ public class StorageCache implements AutoCloseable {
         Map.Entry<FixedType, String> entityInfo = this.resolver.extractTypeAndKey(instanceId);
         remove(resolver.toInstanceIdentifier(instanceId));
         if ((!identities.remove(instanceId)) && (entityInfo != null)) {
-            identities.remove(entityInfo.getValue());
+        	identities.remove(entityInfo.getValue());
         }
     }
 
@@ -663,4 +696,13 @@ public class StorageCache implements AutoCloseable {
             DOMDataTreeChangeListener listener) {
         return memoryCache.registerTreeChangeListener(iid, listener);
     }
+
+	/**
+	 * Checks if the Identifiers map contains an identity
+	 * @param identifier - identifier to check
+	 * @return - true if exists, false otherwise
+	 */
+	public boolean hasIdentity(String identifier) {
+		return identities.contains(identifier);
+	}
 }

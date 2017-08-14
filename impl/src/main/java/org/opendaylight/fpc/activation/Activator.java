@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,7 +9,9 @@ package org.opendaylight.fpc.activation;
 
 import org.opendaylight.fpc.activation.cache.Cache;
 import org.opendaylight.fpc.dpn.DpnHolder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpHeader.OpType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.instructions.Instructions;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Ports;
@@ -26,13 +28,15 @@ public interface Activator {
     /**
      * Activates a Context.
      *
+     * @param clientIdentifier - Client Identifier
+     * @param opIdentifier - Operation Identifier
      * @param opType - Operation Type
      * @param instructions - Instructions (if they were present).
      * @param context - Context that must be activated
      * @param cache - Cache configured per the RPC operation (@see FPC Op-Reference).
      * @throws Exception - If an error occurs during the Activation
      */
-    public void activate(OpType opType, Instructions instructions, Contexts context, Cache cache) throws Exception;
+    public void activate(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, Instructions instructions, Contexts context, Cache cache) throws Exception;
 
     /**
      * Activates a Context.
@@ -49,7 +53,7 @@ public interface Activator {
      * This method provisions policy elements in storage.
      *
      * They are placed into the cache and then the appropriate operation is applied. This method is typically used
-     * to syncrhonize the policy information in the Agent with the pre-provisioned policies in the DPN.  Not all
+     * to synchronize the policy information in the Agent with the pre-provisioned policies in the DPN.  Not all
      * DPNs or DPN types support this.
      *
      * @param opType - Operation Type
@@ -61,17 +65,19 @@ public interface Activator {
     /**
      * Removes Targets from the DPN.
      *
+     * @param clientIdentifier - Client Identifier
+     * @param opIdentifier - Operation Identifier
      * @param instructions - Instructions (if they were present).
      * @param target - Target to be removed from the DPN
      * @param context - Context that is associated with the Target
      * @throws Exception - If an error occurs during the deletion
      */
-    public void delete(Instructions instructions, Targets target, FpcContext context) throws Exception;
+    public void delete(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, Instructions instructions, Targets target, FpcContext context) throws Exception;
 
     /**
      * Reads A Target from the DPN.
      * @param target - Target to be read
-     * @return The Target object reteived from the DPN.  If not present a null is returned.
+     * @return The Target object received from the DPN.  If not present a null is returned.
      * @throws Exception - If an error occurs during the read operation
      */
     public Object read(Targets target) throws Exception;

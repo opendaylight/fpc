@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -73,6 +73,16 @@ public class FpcServiceImpl implements FpcService {
      */
     public static Uri getNotificationUri(ClientIdentifier clientId) {
         Connections conn = connections.get(clientId.toString());
+        return (conn != null) ? conn.getAssignedInfo().getEndpointUri() : null;
+    }
+
+    /**
+     * Returns a Notification Uri for a specific Client.
+     * @param clientId - String Value of the Client Identifier
+     * @return Uri associated with the specified Client Identifier or null otherwise
+     */
+    public static Uri getNotificationUri(String clientId) {
+        Connections conn = connections.get(clientId);
         return (conn != null) ? conn.getAssignedInfo().getEndpointUri() : null;
     }
 
@@ -208,13 +218,13 @@ public class FpcServiceImpl implements FpcService {
                 FpcagentServiceBase agentServiceStrategy = null;
                 if (!convergedFeatures.contains("urn:ietf:params:xml:ns:yang:fpcagent:fpc-client-assignments")) {
                     agentServiceStrategy = new FpcAssignmentPhaseImpl(dataBroker,
-                            activationService.getWorker(),
+                            activationService,
                             monitorService.getWorker(),
                             notificationService,
                             conf);
                 } else {
                     agentServiceStrategy = new FpcAssignmentPhaseNoassignImpl(dataBroker,
-                            activationService.getWorker(),
+                            activationService,
                             monitorService.getWorker(),
                             notificationService,
                             conf);
@@ -237,7 +247,7 @@ public class FpcServiceImpl implements FpcService {
                             input.getClientId());
                     tenantContext = TenantManager.populateTenant(input.getTenantId());
                 }
-                TenantManager.registerClient(input.getClientId(), input.getTenantId()); // Add
+                TenantManager.registerClient(clientId, input.getTenantId()); // Add
                 FpcagentDispatcher.addStrategy(clientId, agentServiceStrategy); // Add
                 if (agentServiceStrategy.requiresAssignmentManager() &&
                         (tenantContext.getAssignmentManager() == null)) {

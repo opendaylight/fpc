@@ -12,6 +12,15 @@ module fpc-config {
     }
 
     container fpc-config {
+    	leaf use-memcached {
+    	  type boolean;
+    	}
+    	leaf memcached-uri {
+    	  type string;
+    	}
+    	leaf memcached-threads {
+    	  type uint16;
+    	}
         leaf scheduled-monitors-poolsize {
           type uint16;
         }
@@ -27,6 +36,9 @@ module fpc-config {
         leaf dpn-client-uri {
           type string;
         }
+        leaf dpn-message-processor-threads{
+          type uint16;
+        }
         leaf dpn-client-threads {
           type uint16;
         }
@@ -35,6 +47,12 @@ module fpc-config {
         }
         leaf mobilityupdate-ms {
           type uint32;
+        }
+        leaf node-id {
+          type string;
+        }
+        leaf network-id {
+          type string;
         }
         leaf activation-threads {
           type uint16;
@@ -66,6 +84,15 @@ module fpc-config {
         leaf zmq-nbi-handler-poolsize {
           type uint16;
         }
+        leaf zmq-broadcast-all {
+       	  type string;
+       	}
+       	leaf zmq-broadcast-controllers {
+       	  type string;
+       	}
+       	leaf zmq-broadcast-dpns {
+       	  type string;
+       	}
         leaf http-nio2-nb-poolsize {
           type uint16;
         }

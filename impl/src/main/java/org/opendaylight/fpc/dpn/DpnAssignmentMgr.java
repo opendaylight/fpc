@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.fpc.activation.impl.dpdkdpn.DpnAPIListener;
 import org.opendaylight.fpc.impl.FpcProvider;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
@@ -43,7 +44,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
+/**
  * Maps Remote IP addresses and Technology Types to DPN Groups
  */
 public class DpnAssignmentMgr extends DpnResourceManager implements AutoCloseable {
@@ -74,6 +75,12 @@ public class DpnAssignmentMgr extends DpnResourceManager implements AutoCloseabl
         private Class<? extends FpcAccessType> accessType;
         private Class<? extends FpcForwaridingplaneRole> accessRole;
         private String peerIpAddress;
+        /**
+         * Constructor
+         * @param accessType - Access Type
+         * @param accessRole - Access Role
+         * @param peerIpAddress - Peer IP Address
+         */
         public PeerIpAcessRoleKey(Class<? extends FpcAccessType> accessType,
                 Class<? extends FpcForwaridingplaneRole> accessRole,
                 String peerIpAddress) {
@@ -218,6 +225,7 @@ public class DpnAssignmentMgr extends DpnResourceManager implements AutoCloseabl
 
     @Override
     public void addDpn(Dpns dpn) throws Exception {
+    	DpnAPIListener.setUlDpnMapping(dpn.getNodeId()+"/"+dpn.getNetworkId(), dpn.getDpnId());
         LOG.info("DpnAssignmentMgr - Adding DPN from Groups " + dpn.getDpnName() );
         for (FpcDpnGroupId groupId : (dpn.getDpnGroups() == null) ? Collections.<FpcDpnGroupId>emptyList() :
                 dpn.getDpnGroups()) {

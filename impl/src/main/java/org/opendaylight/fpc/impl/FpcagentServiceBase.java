@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,12 +7,18 @@
  */
 package org.opendaylight.fpc.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.fpc.activation.cache.StorageCache;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
+import org.opendaylight.fpc.activation.workers.ActivationThreadPool;
 import org.opendaylight.fpc.activation.workers.ConfigureWorker;
 import org.opendaylight.fpc.activation.workers.MonitorWorker;
 import org.opendaylight.fpc.utils.ErrorLog;
@@ -30,10 +36,13 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ProbeOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ProbeOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Result;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpHeader.OpType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.CreateOrUpdate;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.DeleteOrQuery;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.Err;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.ErrBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcConfig;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -46,11 +55,12 @@ import com.google.common.util.concurrent.Futures;
  */
 abstract public class FpcagentServiceBase implements IetfDmmFpcagentService, ConfigUpdateListener {
     protected final DataBroker db;
-    protected ConfigureWorker activationService;
+    protected ActivationThreadPool activationService;
     protected MonitorWorker monitorService;
     protected NotificationPublishService notificationService;
     protected int TARGET_READ_LIMIT = 10; // Default
     protected boolean assignmentManagerRequired = true;
+    public static ConcurrentHashMap<String,Map.Entry<ConfigureWorker, ArrayList<Contexts>>> sessionMap = new ConcurrentHashMap<String,Map.Entry<ConfigureWorker, ArrayList<Contexts>>>();
 
     /**
      * Primary Constructor which initializes the common services of the plugin.
@@ -62,7 +72,7 @@ abstract public class FpcagentServiceBase implements IetfDmmFpcagentService, Con
      * @param conf - Fpc Configuration
      */
     public FpcagentServiceBase(DataBroker db,
-            ConfigureWorker activationService,
+    		ActivationThreadPool activationService,
             MonitorWorker monitorService,
             NotificationPublishService notificationService,
             FpcConfig conf) {
@@ -181,7 +191,7 @@ abstract public class FpcagentServiceBase implements IetfDmmFpcagentService, Con
      * @param duration - Duration of the activity (used for statistics)
      * @return - An Error (Result Type Error)
      */
-    protected Err activationServiceInterrupted(InterruptedException e,
+    protected Err activationServiceInterrupted(Exception e,
             Transaction tx,
             long duration) {
         tx.fail(duration);

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -54,6 +54,7 @@ public class ZMQClientSocket extends ZMQBaseSocket {
 
     @Override
 	public void close() {
+    	this.run = false;
     	socket.disconnect(address);
     	socket.close();
     	context.destroySocket(socket);

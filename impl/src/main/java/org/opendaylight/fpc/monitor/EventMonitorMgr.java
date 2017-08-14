@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.opendaylight.fpc.activation.cache.StorageCacheUtils;
 import org.opendaylight.fpc.dpn.DPNStatusIndication;
+import org.opendaylight.fpc.impl.FpcProvider;
 import org.opendaylight.fpc.impl.FpcServiceImpl;
 import org.opendaylight.fpc.notification.Notifier;
 import org.opendaylight.fpc.tenant.TenantManager;
@@ -28,21 +29,25 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev16080
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.report.config.event.config.value.EventsConfig;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.report.config.event.config.value.EventsConfigIdent;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 
 /**
  * Event Monitor Manager.
  */
 public class EventMonitorMgr {
-    private static final Logger LOG = LoggerFactory.getLogger(Events.class);
-
+    /**
+     * Map of Client Registrations
+     */
     static public Map<String, Map.Entry<ClientIdentifier, Object>> registrations =
             new HashMap<String, Map.Entry<ClientIdentifier, Object>>();
+    /**
+     * Map of Tenants to Uris
+     */
     static public Map<String, Map<Long, Map<Uri, Long>>> tenant2Uris =
             new HashMap<String, Map<Long, Map<Uri, Long>>>();
+    /**
+     * Map of imsi to Tenants
+     */
     static public Map<String, String> imsi2Tenants = new HashMap<String, String>();
 
     /**
@@ -192,16 +197,13 @@ public class EventMonitorMgr {
      * @param ddn - Downlink Data Notification
      */
     public static void processEvent(FpcDpnId dpn, DownlinkDataNotification ddn) {
-        if (imsi2Tenants.get(ddn.getImsi().toString()) != null) {
-            Collection<Uri> uris = getUris(imsi2Tenants.get(ddn.getImsi().toString()), Events.DOWNLINK_DATA_NOTIFY);
-            if (uris != null) {
-                if (uris.size() > 0) {
-                    Notifier.issueDownlinkDataNotification(uris, ddn);
-                }
-            }
-        } else {
-            LOG.info("A DDN was received for an IMSI not registered for uplink notificaiton. Event = {}\n", ddn);
-        }
+    	ArrayList<Uri> uris = new ArrayList<Uri>();
+    	if(FpcServiceImpl.getNotificationUri(ddn.getClientId()) != null){
+    		uris.add(FpcServiceImpl.getNotificationUri(ddn.getClientId()));
+        	Notifier.issueDownlinkDataNotification(uris, ddn);
+    	}
+
+
     }
 
     /**
@@ -211,5 +213,12 @@ public class EventMonitorMgr {
      */
     public static void processEvent(FpcDpnId dpn, DPNStatusIndication dpnStatus) {
         // TODO - We need further guidance DPNStatusIndication on use cases
+    	if(dpnStatus.getStatus() == DPNStatusIndication.Status.HELLO){
+            TenantManager.getTenantManager(new FpcIdentity(FpcProvider.getInstance().getConfig().getDefaultTenantId())).addDpnToDataStore(dpnStatus.getKey().split("/")[0], dpnStatus.getKey().split("/")[1]);
+    	}
+    	if(dpnStatus.getStatus() == DPNStatusIndication.Status.BYE){
+            TenantManager.getTenantManager(new FpcIdentity(FpcProvider.getInstance().getConfig().getDefaultTenantId())).removeDpnFromDataStore(dpnStatus.getKey().split("/")[0], dpnStatus.getKey().split("/")[1]);
+
+    	}
     }
 }

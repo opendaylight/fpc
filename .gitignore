@@ -18,6 +18,7 @@ impl/src/main/config/*
 impl/src/main/yang/*
 impl/src/main/yang-gen-config/*
 impl/src/main/java/org/opendaylight/*
+jmeter/jmeter.log
 
 # Except for the themes directories:
 

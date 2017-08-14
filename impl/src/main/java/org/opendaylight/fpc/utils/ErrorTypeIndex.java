@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,4 +23,5 @@ public class ErrorTypeIndex {
     static final public Long UNKNOWN_OP_TYPE = 9L;
     static final public Long MESSAGE_WITH_NO_BODY = 10L;
     static final public Long CLIENT_ID_NOT_REGISTERED = 11L;
+    static final public Long SESSION_ALREADY_EXISTS = 12L;
 }

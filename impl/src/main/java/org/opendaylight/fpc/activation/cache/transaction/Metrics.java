@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -49,7 +49,7 @@ public class Metrics implements AutoCloseable {
     static private MetricsWriter _writer;
 
     /**
-     * Initilizer.
+     * Initializer.
      * @param dataBroker - Data Broker
      * @param sleepTimer - Thread Sleep Interval
      */
@@ -83,7 +83,7 @@ public class Metrics implements AutoCloseable {
     AtomicLong completionRuntimes;
 
     /**
-     * Intializes metrics.
+     * Initializes metrics.
      */
     protected void init() {
         numTxs = new AtomicLong(0);
@@ -140,7 +140,7 @@ public class Metrics implements AutoCloseable {
         // General Transaction States
         for (Transaction.OperationStatus status : stateEntrants.keySet()) {
             if (stateEntrants.get(status) != null) {
-                States someState  = createState(new StatesBuilder(), "Total Runtime for Completed Transactions",
+                States someState  = createState(new StatesBuilder(), status.toString(),
                     stateEntrants.get(status).get(), (stateRuntimes.get(status) != null) ? stateRuntimes.get(status)
                         .get() : null);
                 if (someState != null) {
@@ -231,12 +231,16 @@ public class Metrics implements AutoCloseable {
         }
     }
 
+    /**
+     * Sets the sleep timer
+     * @param duration - duration to sleep
+     */
     public void setSleepTimer(long duration) {
         _writer.setSleepTimer(duration);
     }
 
     /**
-     * Class used to write datat to Storage.
+     * Class used to write data to Storage.
      */
     static protected class MetricsWriter implements Runnable {
         private static final Logger LOG = LoggerFactory.getLogger(MetricsWriter.class);
@@ -292,6 +296,8 @@ public class Metrics implements AutoCloseable {
                     Thread.sleep(sleepTimer);
                 } catch (InterruptedException e) {
                 	ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
+                } catch (Exception e) {
+                	//ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -48,7 +48,7 @@ public class MonitorWorker
      * @param blockingConfigureQueue - Work queue
      */
     public MonitorWorker(DataBroker db, BlockingQueue<Object> blockingConfigureQueue) {
-        this.db = db;;
+        this.db = db;
         this.blockingConfigureQueue = blockingConfigureQueue;
         LOG.info("ConfigureWorker has been initialized");
     }

@@ -1,5 +1,6 @@
+#!/usr/bin/python
 # coding: utf8
-#Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+#Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
 #
 #This program and the accompanying materials are made available under the
 #terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,7 +20,7 @@ context = zmq.Context()
 socket = context.socket(zmq.SUB)
 print "Collecting updates from server..."
 socket.connect ("tcp://localhost:%s" % port)
-topicfilter = str(sys.argv[1])
+topicfilter = ""
 socket.setsockopt(zmq.SUBSCRIBE, topicfilter)
 print "Listening to port ", port
 count = 0
@@ -37,14 +38,14 @@ while True:
     count += 1
     print 'length of message = ', len(string)
  
-    topic,msgnum = struct.unpack('!cB',string[:2])
+    topic,msgnum = struct.unpack('!BB',string[:2])
 
     print 'topic =', topic
     print 'msgnum =', msgnum
 
     if msgnum == 1:
         msgnum1count += 1
-        topic,msgnum, imsi, default_ebi, ue_ip, s1u_sgw_gtpu_teid, s1u_sgw_gtpu_ipv4 = struct.unpack('!cBQBLLL',string[:23])    
+        topic,msgnum, imsi, default_ebi, ue_ip, s1u_sgw_gtpu_teid, s1u_sgw_gtpu_ipv4, sessionid, ctopic, cid, opid = struct.unpack('!cBQBLLLQBLL',string[:40])    
         print 'imsi = ', imsi
         ipa = socketlib.inet_ntoa(struct.pack('!L',ue_ip))
         print 'ue_ip = ', ipa
@@ -52,19 +53,29 @@ while True:
         s1u_sgw_gtpu_ipv4a = socketlib.inet_ntoa(struct.pack('!L',s1u_sgw_gtpu_ipv4))
         print 's1u_sgw_gtpu_ipv4 = ', s1u_sgw_gtpu_ipv4a
         print 's1u_sgw_gtpu_teid = ', s1u_sgw_gtpu_teid
+        print 'sessionid = ', sessionid
+        print 'controller topic = ', ctopic
+        print 'cid = ', cid
+        print 'opid = ', opid
     elif msgnum == 2:
         msgnum2count += 1
-        topic, msgnum, s1u_enb_gtpu_ipv4, s1u_enb_gtpu_teid, s1u_sgw_gtpu_teid  = struct.unpack("!cBLLL",string[:14])
+        topic, msgnum, s1u_enb_gtpu_ipv4, s1u_enb_gtpu_teid, s1u_sgw_gtpu_ipv4, sessionid, ctopic, cid, opid  = struct.unpack("!cBLLLQBLL",string[:31])
         s1u_enb_gtpu_ipv4a = socketlib.inet_ntoa(struct.pack('!L',s1u_enb_gtpu_ipv4))
         print 's1u_enb_gtpu_ipv4 = ', s1u_enb_gtpu_ipv4a
         print 'dl s1u_enb_gtpu_teid = ', s1u_enb_gtpu_teid
-        print 'dl s1u_sgw_gtpu_teid = ', s1u_sgw_gtpu_teid
+        print 'dl s1u_sgw_gtpu_ipv4 = ', socketlib.inet_ntoa(struct.pack('!L',s1u_sgw_gtpu_ipv4))
+        print 'sessionid = ', sessionid
+        print 'controller topic = ', ctopic
+        print 'cid = ', cid
+        print 'opid = ', opid
     elif msgnum == 3:
         msgnum3count += 1
-        topic, msgnum, default_ebi, s1u_sgw_gtpu_teid = struct.unpack("!cBBL",string[:8])
-        print 'default_ebi = ', default_ebi
-        print 's1u_sgw_gtpu_teid = ', s1u_sgw_gtpu_teid
-    elif msgnum == 4:
+        topic, msgnum, sessionid, ctopic, cid, opid = struct.unpack("!cBQBLL",string[:19])
+        print 'sessionid = ', sessionid
+        print 'controller topic = ', ctopic
+        print 'cid = ', cid
+        print 'opid = ', opid
+    """elif msgnum == 4:
         msgnum4count += 1
         topic, msgnum, s1u_enb_gtpu_ipv4, s1u_enb_gtpu_teid, s1u_sgw_gtpu_teid  = struct.unpack("!cBLLL",string[:14])
         s1u_enb_gtpu_ipv4a = socketlib.inet_ntoa(struct.pack('!L',s1u_enb_gtpu_ipv4))
@@ -83,7 +94,7 @@ while True:
     elif msgnum == 6:
         msgnum6count += 1
         topic,msgnum, teid = struct.unpack('!cBL',string[:6])
-        print 'teid = ', teid
+        print 'teid = ', teid"""
 
     elif msgnum == 17:
         topic,msgnum,selector_type = struct.unpack('!BBB',string[:3])
@@ -111,7 +122,7 @@ while True:
         print "precedence = ", precedence
 
     print '================'
-    print 'Total = ', count, 'msgnum1 count', msgnum1count, 'msgnum2 count', msgnum2count, 'msgnum3 count', msgnum3count, 'msgnum4 count', msgnum4count,'msgnum5 count', msgnum5count, 'msgnum6 count', msgnum6count
+    print 'Total = ', count, 'msgnum1 count', msgnum1count, 'msgnum2 count', msgnum2count, 'msgnum3 count', msgnum3count
 socket.close()
 
 

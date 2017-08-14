@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Copyright (c) Sprint, Inc. and others.  All rights reserved.
+ * Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -73,7 +73,7 @@ public class StorageCacheUtils {
             DataObject dobj = (target.getTarget().getInstanceIdentifier() != null) ?
                     tenant.getSc().read(target.getTarget().getInstanceIdentifier()) :
                     tenant.getSc().read(((target.getTarget().getString() != null) ? target.getTarget().getString() :
-                        target.getTarget().getUint32().toString()));
+                        target.getTarget().getInt64().toString()));
 
             if (dobj instanceof FpcContext) {
                 bc.addContext((FpcContext) dobj);
