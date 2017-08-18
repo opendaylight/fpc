@@ -20,8 +20,9 @@ curl -i -s \
             "dpn-groups": [
                 "foo"
             ],
-	        "abstract": "'"$3"'",
-            "topic": "'"$4"'"
+	    "abstract": "'"$3"'",
+	    "node-id": "'"$4"'",
+	    "network-id": "'"$5"'"
         }
     ]
 }' \

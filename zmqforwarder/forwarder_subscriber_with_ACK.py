@@ -21,8 +21,11 @@ pool = ThreadPool(processes=1)
 
 conflict = False
 topicId = None
-nodeId = "node1"
-networkId = "network2"
+#nodeId = "node3"
+#networkId = "network4"
+nodeId = "node"+sys.argv[1]
+networkId = "network"+sys.argv[2]
+toSend = sys.argv[3]
 source = random.randrange(0,65535)
 topicId = random.randrange(4,255)
 
@@ -162,7 +165,8 @@ for update_nbr in range(900000):
         print 'cid = ', cid
         print 'opid = ', opid
         responsedata = struct.pack('!BBBLL',controller_topic,4, 16, cid, opid)
-        pub_socket.send("%s" % (responsedata))
+	if toSend:
+        	pub_socket.send("%s" % (responsedata))
         #uncomment the following lines to send a DDN for every create session message 
         #time.sleep(5)
         #pub_socket.send("%s" % (struct.pack('!BBQLLB'+str(len(nodeId))+'sB'+str(len(networkId))+'s',controller_topic,5,sessionid,cid,opid,len(nodeId),nodeId,len(networkId),networkId)))
@@ -179,7 +183,8 @@ for update_nbr in range(900000):
         print 'cid = ', cid
         print 'opid = ', opid
         responsedata = struct.pack('!BBBLL',controller_topic,4, 16, cid, opid)
-        pub_socket.send("%s" % (responsedata))
+	if toSend:
+        	pub_socket.send("%s" % (responsedata))
 
     elif msgnum == 3:
         msgnum3count += 1
@@ -189,7 +194,8 @@ for update_nbr in range(900000):
         print 'cid = ', cid
         print 'opid = ', opid
         responsedata = struct.pack('!BBBLL',controller_topic,4, 0, cid, opid)
-        pub_socket.send("%s" % (responsedata))
+	if toSend:
+        	pub_socket.send("%s" % (responsedata))
 
     elif msgnum == 6:
         if(len(string)==14):

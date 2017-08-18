@@ -265,7 +265,7 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
     }
     
     /**
-     * Add/Remove a DPN onto a VDPN (abstract DPN) based on a certain strategy
+     * Add/Remove a DPN onto a VDPN (abstract DPN)
      *
      * @param input - DPN config input
      */

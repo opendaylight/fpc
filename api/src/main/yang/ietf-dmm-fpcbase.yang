@@ -483,6 +483,15 @@ module ietf-dmm-fpcbase {
         leaf node-reference {
           type instance-identifier;
         }
+        leaf abstract {
+          type boolean;
+        }
+        leaf strategy {
+          type string;
+        }
+        leaf-list dpn-ids {
+          type fpcbase:fpc-dpn-id;
+        }
         leaf node-id {
           type string;
         }

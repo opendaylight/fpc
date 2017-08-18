@@ -54,11 +54,11 @@ public class SessionThread implements Runnable {
                 try {
                 	if(op == DpnOperation.Add){
                 		LOG.info("thread : I am copying sessions");
-                		dpnInfo.activator.activate(input.getOpType(), (context.getInstructions() != null) ?
+                		dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
                                 context.getInstructions() : input.getInstructions(), context, tx.getReadCache());
                 	}else if(op == DpnOperation.Remove){
                 		LOG.info("thread : I am deleting sessions");
-                		dpnInfo.activator.delete(input.getInstructions(), null, context);
+                		dpnInfo.activator.delete(input.getClientId(), input.getOpId(), input.getInstructions(), null, context);
                 		if(deleteFlag){
                 			tx.getTenantContext().getSc().remove(targetPrefix+context.getContextId().getString());
                 			TenantManager.vdpnContextsMap.get(vdpn.getDpnId()).remove(context);

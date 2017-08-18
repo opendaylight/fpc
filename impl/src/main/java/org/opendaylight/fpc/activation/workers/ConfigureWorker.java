@@ -15,11 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.fpc.activation.cache.HierarchicalCache;
 import org.opendaylight.fpc.activation.cache.OpCache;
 import org.opendaylight.fpc.activation.cache.PayloadCache;
@@ -28,6 +31,8 @@ import org.opendaylight.fpc.activation.cache.StorageCacheUtils;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
 import org.opendaylight.fpc.dpn.DpnHolder;
+import org.opendaylight.fpc.impl.FpcProvider;
+import org.opendaylight.fpc.impl.FpcagentDispatcher;
 import org.opendaylight.fpc.impl.FpcagentServiceBase;
 import org.opendaylight.fpc.impl.memcached.MemcachedThreadPool;
 import org.opendaylight.fpc.tenant.TenantManager;
@@ -42,6 +47,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Payload;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.RefScope;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Tenants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpHeader.OpType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.configure.bundles.input.Bundles;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.DeleteOrQuery;
@@ -49,6 +55,10 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.ResultType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.Err;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.ErrBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.FpcTopology;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
@@ -57,8 +67,11 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev16080
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.context.Dpns;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
 
 /**
  * Primary worker for CONF and CONF_BUNDLES activation.
@@ -118,7 +131,7 @@ implements Worker {
 		}
 		return rt;
 	}
-
+	
 	/**
 	 * Primary execution method for individual operations.
 	 * @param oCache - Object Cache
@@ -137,7 +150,8 @@ implements Worker {
 		case Create:
 			for (Contexts context : (oCache.getPayloadContexts() == null) ? Collections.<Contexts>emptyList() : oCache.getPayloadContexts()) {
 				for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
-					TenantManager.vdpnContextsMap.get(dpn.getDpnId()).put(context, tx);
+					if(TenantManager.vdpnContextsMap.get(dpn.getDpnId()) != null)
+						TenantManager.vdpnContextsMap.get(dpn.getDpnId()).put(context, tx);
 					if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()) != null){
 						if(TenantManager.vdpnDpnsMap.get(dpn.getDpnId()).size() <= 1){
 							ErrorLog.logError("Not ready - "+dpn.getDpnId()+" must contain 2 DPNS", null);

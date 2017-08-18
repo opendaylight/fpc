@@ -101,35 +101,36 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
         			TenantManager.vdpnDpnsMap.put(dpn.getDpnId(), new ArrayList<FpcDpnId>());
         		if(TenantManager.vdpnContextsMap.get(dpn.getDpnId()) == null)
         			TenantManager.vdpnContextsMap.put(dpn.getDpnId(), new HashMap<Contexts, Transaction>());
+        	}else{
+	            DpnHolder dpnHolder = tenantMgr.getDpnInfo().get(dpn.getDpnId().toString());
+	            if (dpnHolder == null) {
+	                dpnHolder = new DpnHolder(dpn);
+	                tenantMgr.getDpnInfo().put(dpn.getDpnId().toString(), dpnHolder);
+	            }
+	            if (dpnHolder.activator != null) {
+	                LOG.info("Activation Manager - Applying Configuration for Dpn-ID: " +  dpn.getDpnId().getString());
+	                dpnHolder.activator.applyConfiguration(dpnHolder);
+	            } else {
+	                // TODO - Determine if we need a special 'default control protocol or throw an error
+	                factory = factories.get(ZmqDpnControlProtocol.class);
+	                if (factory != null) {
+	                    LOG.info("Activation Manager - Attempting Activator creation of type " + factory.getClass().toString()
+	                                + " for Dpn-ID: " +  dpn.getDpnId().getString());
+	                    dpnHolder.activator = factory.newInstance(dpnHolder);
+	                } else {
+	                    LOG.info("Activation Manager - No activator found for Dpn-ID: " +  dpn.getDpnId().getString() + " and type " +
+	                            ZmqDpnControlProtocol.class);
+	                }
+	            }
+//            	if(!dpn.isAbstract()){
+//            		dpnHolder.activator.send_ADC_rules(dpn);
+//            	}
+	            if (dpnHolder.activator != null) {
+	
+	            	//TODO addDpn Logic
+	
+	            }
         	}
-            DpnHolder dpnHolder = tenantMgr.getDpnInfo().get(dpn.getDpnId().toString());
-            if (dpnHolder == null) {
-                dpnHolder = new DpnHolder(dpn);
-                tenantMgr.getDpnInfo().put(dpn.getDpnId().toString(), dpnHolder);
-            }
-            if (dpnHolder.activator != null) {
-                LOG.info("Activation Manager - Applying Configuration for Dpn-ID: " +  dpn.getDpnId().getString());
-                dpnHolder.activator.applyConfiguration(dpnHolder);
-            } else {
-                // TODO - Determine if we need a special 'default control protocol or throw an error
-                factory = factories.get(ZmqDpnControlProtocol.class);
-                if (factory != null) {
-                    LOG.info("Activation Manager - Attempting Activator creation of type " + factory.getClass().toString()
-                                + " for Dpn-ID: " +  dpn.getDpnId().getString());
-                    dpnHolder.activator = factory.newInstance(dpnHolder);
-                } else {
-                    LOG.info("Activation Manager - No activator found for Dpn-ID: " +  dpn.getDpnId().getString() + " and type " +
-                            ZmqDpnControlProtocol.class);
-                }
-            }
-//            if(!dpn.isAbstract()){
-//            	dpnHolder.activator.send_ADC_rules(dpn);
-//            }
-            if (dpnHolder.activator != null) {
-
-            	//TODO addDpn Logic
-
-            }
 
 
         } else {
@@ -143,12 +144,11 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
             LOG.info("Activation Manager - Removing Dpn " + dpn.getDpnId());
             
             //TODO removeDpn Logic
-
-            tenantMgr.getDpnInfo().get(dpn.getDpnId().toString()).activator.shutdown();
-            //previously
-            //tenantMgr.getDpnInfo().remove(dpn.getDpnId().toString());
             
-            if(dpn.isAbstract()){
+            if(!dpn.isAbstract())
+            	tenantMgr.getDpnInfo().get(dpn.getDpnId().toString()).activator.shutdown();
+            else{
+            	tenantMgr.getDpnInfo().remove(dpn.getDpnId().toString());
             	TenantManager.vdpnDpnsMap.remove(dpn.getDpnId());
             	TenantManager.vdpnContextsMap.remove(dpn.getDpnId());
             }

@@ -530,6 +530,7 @@ public class TenantManager implements AutoCloseable {
 					.setDpnId(new FpcDpnId(dpnId))
 					.setNetworkId(networkId)
 					.setNodeId(nodeId)
+					.setAbstract(false)
 					.build());
 			CheckedFuture<Void,TransactionCommitFailedException> submitFuture = dpnTx.submit();
 
