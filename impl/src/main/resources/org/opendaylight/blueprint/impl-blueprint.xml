@@ -36,16 +36,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 	      <dpn-client-uri>tcp://127.0.0.1:5559</dpn-client-uri>
 	      <node-id>node0</node-id>
 	      <network-id>network1</network-id>
-	      <dpn-client-threads>40</dpn-client-threads>
-	      <dpn-message-processor-threads>40</dpn-message-processor-threads>
+	      <dpn-client-threads>20</dpn-client-threads>
+	      <dpn-message-processor-threads>10</dpn-message-processor-threads>
 	      <metricsupdate-ms>10000</metricsupdate-ms>
 	      <mobilityupdate-ms>30000</mobilityupdate-ms>
-	      <activation-threads>40</activation-threads>
+	      <activation-threads>20</activation-threads>
 	      <target-read-limit>15</target-read-limit>
 	      <default-tenant-id>default</default-tenant-id>
 	      <default-group-id>defaultTenant</default-group-id>
 	      <prefers-fast-clients>true</prefers-fast-clients>
-	      <http-notifier-clients>40</http-notifier-clients>
+	      <http-notifier-clients>10</http-notifier-clients>
 	      <zmq-nbi-server-poolsize>1</zmq-nbi-server-poolsize>
 		  <zmq-nbi-server-uri>tcp://127.0.0.1:5570</zmq-nbi-server-uri>
 		  <zmq-nbi-inproc-uri>inproc://backend</zmq-nbi-inproc-uri>

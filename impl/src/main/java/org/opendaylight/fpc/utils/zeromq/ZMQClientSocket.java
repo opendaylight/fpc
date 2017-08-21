@@ -35,6 +35,7 @@ public class ZMQClientSocket extends ZMQBaseSocket {
     public ZMQClientSocket(ZContext context, String address, int socketType,
             CountDownLatch startSignal, BlockingQueue<ByteBuffer> blockingQueue) {
         super(context,address,socketType, startSignal);
+        this.context = new ZContext();
         this.blockingQueue = blockingQueue;
     }
 
@@ -49,7 +50,11 @@ public class ZMQClientSocket extends ZMQBaseSocket {
     @Override
     public void open() {
         socket = context.createSocket(socketType);
+        socket.setSndHWM(0);
         socket.connect(address);
+        LOG.info("Socket send buffer size - "+socket.getSendBufferSize());
+        LOG.info("Socket send HWM - "+socket.getSndHWM());
+        LOG.info("Socket rate - "+socket.getRate());
     }
 
     @Override
@@ -71,6 +76,7 @@ public class ZMQClientSocket extends ZMQBaseSocket {
             while(run) {
                 ByteBuffer bb = blockingQueue.take();
                 socket.send(bb.array());
+                LOG.info("Data Sent to forwarder device.");
             }
         } catch (InterruptedException e) {
         	ErrorLog.logError(e.getStackTrace());

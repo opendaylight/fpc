@@ -93,7 +93,7 @@ public class DpdkImpl implements Activator {
 	@Override
 	public boolean start() {
 		if (this.dpnHolder.dpn != null) {
-			api = new DpnAPI2(ZMQClientPool.getInstance().getWorker());
+			//api = new DpnAPI2(ZMQClientPool.getInstance().getWorker());
 			//this.dpnTopic = dpnHolder.dpn.getTopic().substring(0, 1);
 			this.dpnTopic = DpnAPIListener.getTopicFromNode(this.dpnHolder.dpn.getNodeId().toString()+"/"+this.dpnHolder.dpn.getNetworkId().toString());
 			return true;
@@ -113,11 +113,11 @@ public class DpdkImpl implements Activator {
 	}
 
 	@Override
-	public void activate(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, Instructions instructions, Contexts context, Cache cache) throws Exception {
+	public void activate(DpnAPI2 api, ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, Instructions instructions, Contexts context, Cache cache) throws Exception {
 		// Look for 3GPP Command Instructions or Error out
 		if (instructions != null) {
 			if (instructions.getInstrType() instanceof ThreegppCommandset) {
-				activate(clientIdentifier, opIdentifier, opType, (ThreegppCommandset) instructions.getInstrType(), context, cache);
+				activate(api, clientIdentifier, opIdentifier, opType, (ThreegppCommandset) instructions.getInstrType(), context, cache);
 				return;
 			}
 		}
@@ -140,7 +140,7 @@ public class DpdkImpl implements Activator {
 	 * @throws Exception
 	 *             - If an error occurs during the Activation
 	 */
-	private void activate(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, ThreegppCommandset commands, Contexts context, Cache cache) throws Exception {
+	private void activate(DpnAPI2 api, ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, ThreegppCommandset commands, Contexts context, Cache cache) throws Exception {
 		this.dpnTopic = DpnAPIListener.getTopicFromNode(this.dpnHolder.dpn.getNodeId().toString()+"/"+this.dpnHolder.dpn.getNetworkId().toString());
 		rxMessages.incrementAndGet();
 		IpPrefix assignedPrefix = (context.getDelegatingIpPrefixes() == null) ? null
@@ -290,7 +290,7 @@ public class DpdkImpl implements Activator {
 	}
 
 	@Override
-	public void activate(OpType opType, Instructions instructions, Ports context, Cache cache) throws Exception {
+	public void activate(DpnAPI2 api, OpType opType, Instructions instructions, Ports context, Cache cache) throws Exception {
 		rxMessages.incrementAndGet();
 	}
 
@@ -300,7 +300,7 @@ public class DpdkImpl implements Activator {
 	}
 
 	@Override
-	public void delete(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, Instructions instructions, Targets target, FpcContext context) throws Exception {
+	public void delete(DpnAPI2 api, ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, Instructions instructions, Targets target, FpcContext context) throws Exception {
 		this.dpnTopic = DpnAPIListener.getTopicFromNode(this.dpnHolder.dpn.getNodeId().toString()+"/"+this.dpnHolder.dpn.getNetworkId().toString());
 		rxMessages.incrementAndGet();
 		Long teid = (context.getUl().getMobilityTunnelParameters().getMobprofileParameters() instanceof ThreeGPPTunnel)

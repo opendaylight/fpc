@@ -33,6 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.DeleteOrQuery;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.ResultType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.CommonSuccessBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.DeleteSuccessBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
@@ -52,7 +53,6 @@ public class Transaction {
     private static Map<Long, Map.Entry<LongAdder,List<Transaction>>> bundles =
             new HashMap<Long, Map.Entry<LongAdder,List<Transaction>>>();
     private static AtomicLong bundleLinkId = new AtomicLong(0L);
-
     /**
      * Provides a unique Bundle Identifier
      * @return Long - Unique Bundle Identifier
@@ -437,6 +437,7 @@ public class Transaction {
         	case Create:
         	case Update:
         		rt = getOpCache(pc).getConfigSuccess();
+        		//rt = new CommonSuccessBuilder().
         		break;
         	case Delete:
         		rt = new DeleteSuccessBuilder().setTargets(((DeleteOrQuery) input.getOpBody()).getTargets()).build();

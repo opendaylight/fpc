@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Payload;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
@@ -51,7 +52,7 @@ class LazyOpCache extends OpCache {
      */
     public void addPort(FpcPort port) {
         if (ports == null) {
-            ports = new HashMap<FpcIdentity, FpcPort>();
+            ports = new ConcurrentHashMap<FpcIdentity, FpcPort>();
         }
         ports.put(port.getPortId(), port);
     }
@@ -62,7 +63,7 @@ class LazyOpCache extends OpCache {
      */
     public void addContext(FpcContext context) {
         if (contexts == null) {
-            contexts = new HashMap<FpcIdentity, FpcContext>();
+            contexts = new ConcurrentHashMap<FpcIdentity, FpcContext>();
         }
         contexts.put(context.getContextId(), context);
     }
@@ -70,7 +71,7 @@ class LazyOpCache extends OpCache {
     @Override
     public Map<FpcIdentity, FpcContext> getContexts() {
         if (contexts == null) {
-            contexts = new HashMap<FpcIdentity, FpcContext>();
+            contexts = new ConcurrentHashMap<FpcIdentity, FpcContext>();
             for (Contexts context : (model.getContexts() == null) ? Collections.<Contexts>emptyList() : model.getContexts()) {
                 contexts.put(context.getContextId(), context);
             }
@@ -81,7 +82,7 @@ class LazyOpCache extends OpCache {
     @Override
     public Map<FpcIdentity, FpcPort> getPorts() {
         if (ports == null) {
-            ports = new HashMap<FpcIdentity, FpcPort>();
+            ports = new ConcurrentHashMap<FpcIdentity, FpcPort>();
             for (Ports port : (model.getPorts() == null) ? Collections.<Ports>emptyList() : model.getPorts()) {
                 ports.put(port.getPortId(), port);
             }

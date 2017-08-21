@@ -10,6 +10,8 @@ package org.opendaylight.fpc.activation.impl.dpdkdpn;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+
 import org.json.JSONObject;
 import org.opendaylight.fpc.impl.zeromq.ZMQSBListener;
 import org.opendaylight.fpc.utils.ErrorLog;
@@ -33,7 +35,6 @@ public class DpnAPI2 {
     private static byte HELLO = 0b0000_1000;
     private static byte BYE = 0b0000_1001;
     private static byte DDN_ACK = 0b0000_0110;
-
     /**
      * Topic for broadcasting
      */

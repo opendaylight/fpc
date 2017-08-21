@@ -9,6 +9,7 @@ package org.opendaylight.fpc.activation.workers;
 
 import java.util.AbstractMap;
 import java.util.Comparator;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -22,7 +23,7 @@ import com.google.common.base.Supplier;
  * Activation Threadpool Manager / Factory.
  */
 public class ActivationThreadPool extends AbstractThreadPool<ConfigureWorker> {
-    static private int DEFAULT_Q_SIZE = 1024;
+    static private int DEFAULT_Q_SIZE = 2048;
 
     /**
      * Constructor.
@@ -54,7 +55,8 @@ public class ActivationThreadPool extends AbstractThreadPool<ConfigureWorker> {
 
         @Override
         public ConfigureWorker get() {
-            return new ConfigureWorker(db, new PriorityBlockingQueue<Object>(DEFAULT_Q_SIZE, new QComparator()));
+            //return new ConfigureWorker(db, new PriorityBlockingQueue<Object>(DEFAULT_Q_SIZE, new QComparator()));
+            return new ConfigureWorker(db, new LinkedBlockingQueue<Object>());
         }
     }
 

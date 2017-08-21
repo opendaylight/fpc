@@ -118,6 +118,7 @@ public class DpnAPIListener {
     public Map.Entry<FpcDpnId, Object> decode(byte[] buf) {
         if(buf[1] == DPN_REPLY){
         	processReply(buf);
+        	return null;
         }
         else if (buf[1] == DOWNLINK_DATA_NOTIFICATION) {
         	short nodeIdLen = buf[18];

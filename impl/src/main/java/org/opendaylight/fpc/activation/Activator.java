@@ -8,6 +8,7 @@
 package org.opendaylight.fpc.activation;
 
 import org.opendaylight.fpc.activation.cache.Cache;
+import org.opendaylight.fpc.activation.impl.dpdkdpn.DpnAPI2;
 import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpHeader.OpType;
@@ -26,6 +27,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev16080
 public interface Activator {
     /**
      * Activates a Context.
+     * @param api - Dpn API object to use
      *
      * @param clientIdentifier - Client Identifier
      * @param opIdentifier - Operation Identifier
@@ -35,10 +37,11 @@ public interface Activator {
      * @param cache - Cache configured per the RPC operation (@see FPC Op-Reference).
      * @throws Exception - If an error occurs during the Activation
      */
-    public void activate(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, Instructions instructions, Contexts context, Cache cache) throws Exception;
+    public void activate(DpnAPI2 api, ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, OpType opType, Instructions instructions, Contexts context, Cache cache) throws Exception;
 
     /**
      * Activates a Context.
+     * @param api - Dpn API object to use
      *
      * @param opType - Operation Type
      * @param instructions - Instructions (if they were present).
@@ -46,7 +49,7 @@ public interface Activator {
      * @param cache - Cache configured to the specifics of the RPC operation (@see FPC Op-Reference).
      * @throws Exception - If an error occurs during the Activation
      */
-    public void activate(OpType opType, Instructions instructions, Ports port, Cache cache) throws Exception;
+    public void activate(DpnAPI2 api, OpType opType, Instructions instructions, Ports port, Cache cache) throws Exception;
 
     /**
      * This method provisions policy elements in storage.
@@ -63,6 +66,7 @@ public interface Activator {
 
     /**
      * Removes Targets from the DPN.
+     * @param api - Dpn API object to use
      *
      * @param clientIdentifier - Client Identifier
      * @param opIdentifier - Operation Identifier
@@ -71,7 +75,7 @@ public interface Activator {
      * @param context - Context that is associated with the Target
      * @throws Exception - If an error occurs during the deletion
      */
-    public void delete(ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, Instructions instructions, Targets target, FpcContext context) throws Exception;
+    public void delete(DpnAPI2 api, ClientIdentifier clientIdentifier, OpIdentifier opIdentifier, Instructions instructions, Targets target, FpcContext context) throws Exception;
 
     /**
      * Reads A Target from the DPN.
@@ -147,4 +151,5 @@ public interface Activator {
      * @return - Response Manager of the assigned DPN.
      */
     public ResponseManager getResponseManager();
+
 }

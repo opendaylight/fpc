@@ -21,11 +21,14 @@ import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientSocket;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.notify.value.DownlinkDataNotification;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements a Worker to process replies from DPN
  */
 public class ZMQSBMessageWorker implements Worker {
+	protected static final Logger LOG = LoggerFactory.getLogger(ZMQSBMessageWorker.class);
 	private BlockingQueue<byte[]> blockingQueue;
 	private boolean run;
 	protected final CountDownLatch startSignal;

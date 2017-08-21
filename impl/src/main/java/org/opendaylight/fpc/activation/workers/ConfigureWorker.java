@@ -27,6 +27,7 @@ import org.opendaylight.fpc.activation.cache.StorageCache;
 import org.opendaylight.fpc.activation.cache.StorageCacheUtils;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
+import org.opendaylight.fpc.activation.impl.dpdkdpn.DpnAPI2;
 import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.fpc.impl.FpcagentServiceBase;
 import org.opendaylight.fpc.impl.memcached.MemcachedThreadPool;
@@ -36,6 +37,7 @@ import org.opendaylight.fpc.utils.ErrorTypeIndex;
 import org.opendaylight.fpc.utils.NameResolver;
 import org.opendaylight.fpc.utils.NameResolver.FixedType;
 import org.opendaylight.fpc.utils.Worker;
+import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ErrorTypeId;
@@ -68,7 +70,7 @@ public class ConfigureWorker
     private static final AtomicLong entrants = new AtomicLong(0L);
     private boolean run;
     private final BlockingQueue<Object> blockingConfigureQueue;
-
+    private DpnAPI2 api;
     //private final DataBroker db;
 
     /**
@@ -78,6 +80,7 @@ public class ConfigureWorker
      */
     protected ConfigureWorker(DataBroker db, BlockingQueue<Object> blockingConfigureQueue) {
         //this.db = db;
+    	api = new DpnAPI2(ZMQClientPool.getInstance().getWorker());
         this.blockingConfigureQueue = blockingConfigureQueue;
         LOG.info("ConfigureWorker has been initialized");
     }
@@ -159,7 +162,7 @@ public class ConfigureWorker
 	                    dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
 	                    if (dpnInfo.activator != null) {
 	                        try {
-	                            dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
+	                            dpnInfo.activator.activate(api,input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
 	                                    context.getInstructions() : input.getInstructions(), context, oCache);
 	                            tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
 	                            //dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
@@ -198,13 +201,18 @@ public class ConfigureWorker
                         System.currentTimeMillis() - sysTime);
             }
         case Delete:
+        	try
+        	{
             doq = (DeleteOrQuery) input.getOpBody();
             for (Targets target : (doq.getTargets() != null) ? doq.getTargets() :
                     Collections.<Targets>emptyList()) {
                 FpcDpnId ident = null;
                 Entry<FixedType, String> entry = extractTypeAndId(NameResolver.extractString(target.getTarget()));
                 FpcContext context = null;
+                if(entry == null)
+                	LOG.error("Unable to extract context ID - "+target.getTarget().toString());
                 ArrayList<Contexts> cList = FpcagentServiceBase.sessionMap.get(entry.getValue()).getValue();
+
                 if(!cList.isEmpty()){
                 	context = cList.get(cList.size()-1);
                 }
@@ -230,7 +238,7 @@ public class ConfigureWorker
 	                                dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
 	                                if (dpnInfo.activator != null) {
 	                                    try {
-	                                        dpnInfo.activator.delete(input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
+	                                        dpnInfo.activator.delete(api,input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
 	                                        tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
 	                                        FpcagentServiceBase.sessionMap.remove(NameResolver.extractString(context.getContextId()));
 	                                        //dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
@@ -256,6 +264,10 @@ public class ConfigureWorker
                 	ErrorLog.logError("Context for delete not found. Target - "+target.getTarget().toString());
                 }
             }
+        	}
+        	catch(Exception e){
+        		ErrorLog.logError("Error during delete - "+e.getLocalizedMessage(),e.getStackTrace());
+        	}
 
             return null;
         default:

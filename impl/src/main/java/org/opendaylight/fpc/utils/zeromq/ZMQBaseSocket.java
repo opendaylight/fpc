@@ -17,7 +17,7 @@ import org.zeromq.ZMQ;
  * ZMQ Socket base.
  */
 abstract public class ZMQBaseSocket implements Worker {
-    protected final ZContext context;
+    protected ZContext context;
     protected final String address;
     protected final int socketType;
     protected final CountDownLatch startSignal;
@@ -27,7 +27,7 @@ abstract public class ZMQBaseSocket implements Worker {
 
     /**
      * Worker Constructor.
-     * 
+     *
      * @param context - ZConext
      * @param address - ZMQ Address
      * @param socketType - ZMQ Socket Type

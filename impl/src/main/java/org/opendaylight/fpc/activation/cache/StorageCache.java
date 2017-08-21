@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -555,20 +556,20 @@ public class StorageCache implements AutoCloseable {
      * @param cache - Cache to be added
      */
     public void addToCache(Cache cache) {
-    	java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
-    	while(i.hasNext()){
-    		addPort(i.next());
-    	}
-//        for (FpcPort port : cache.getPorts().values()) {
-//            addPort(port);
-//        }
-    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
-    	while(c.hasNext()){
-    		addContext(c.next());
-    	}
-//        for (FpcContext context : cache.getContexts().values()) {
-//            addContext(context);
-//        }
+//    	java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
+//    	while(i.hasNext()){
+//    		addPort(i.next());
+//    	}
+        for (Entry<FpcIdentity, FpcPort> port : cache.getPorts().entrySet()) {
+            addPort(port.getValue());
+        }
+//    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
+//    	while(c.hasNext()){
+//    		addContext(c.next());
+//    	}
+        for (Entry<FpcIdentity, FpcContext> context : cache.getContexts().entrySet()) {
+            addContext(context.getValue());
+        }
     }
 
     /**

@@ -153,7 +153,7 @@ class HTTPNotifier implements Worker {
                         client.execute((HttpUriRequest) post, new FutureCallback<HttpResponse>() {
                             @Override
                             public void cancelled() {
-                                LOG.debug(post.getRequestLine() + "-> Cancelled");
+                                LOG.error(post.getRequestLine() + "-> Cancelled");
                             }
 
                             @Override

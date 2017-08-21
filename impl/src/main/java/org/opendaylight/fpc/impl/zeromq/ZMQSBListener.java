@@ -45,7 +45,6 @@ public class ZMQSBListener implements AutoCloseable {
     private Thread broadcastTopicWorker;
     private final String nodeId;
     private final String networkId;
-
     private boolean conflictingTopic;
 
     private static int MIN_TOPIC_VAL = 4;
@@ -356,7 +355,6 @@ public class ZMQSBListener implements AutoCloseable {
 								e.printStackTrace();
 							}
                 }
-
             }
             subscriber.disconnect(address);
             subscriber.close();

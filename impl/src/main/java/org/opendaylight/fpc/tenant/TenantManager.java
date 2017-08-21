@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -224,7 +225,7 @@ public class TenantManager implements AutoCloseable {
                 .setPortId(ident)
                 .setKey(new PortsKey(ident))
                 .build());
-        this.dpnInfo = new HashMap<String, DpnHolder>();
+        this.dpnInfo = new ConcurrentHashMap<String, DpnHolder>();
         this.tenant = (t == null) ? new TenantBuilder()
                 .setTenantId(tenantId)
                 .setKey(new TenantKey(tenantId))
