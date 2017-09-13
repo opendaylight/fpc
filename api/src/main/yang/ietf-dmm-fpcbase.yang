@@ -157,6 +157,10 @@ module ietf-dmm-fpcbase {
             leaf drop {
               type empty;
             }
+            leaf sponsor-identity {
+              type threegpp:sponsor-identity-type;
+            }
+            uses fpcpolicyext:rating-action;
           }
           case simple-nat {
               uses fpcpolicyext:simple-nat;
