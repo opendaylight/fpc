@@ -450,4 +450,23 @@ public class FpcProvider implements AutoCloseable {
     public DataBroker getDataBroker() {
         return this.dataBroker;
     }
+    
+    //osgi ConfigAdmin
+    //alternative - CSS config subsystem, using netconf
+//    private ConfigurationAdmin cfgAdmin;
+//    public void setConfigAdmin(ConfigurationAdmin cfgAdmin) {
+//        this.cfgAdmin = cfgAdmin;
+//        try {
+//            Configuration cfg =   (Configuration) cfgAdmin.getConfiguration("org.opendaylight.fpc.impl");
+//            Dictionary<String, Object> properties = ((org.osgi.service.cm.Configuration) cfg).getProperties();
+//            Enumeration<String> en = properties.keys();
+//            while(en.hasMoreElements()) {
+//                String key = en.nextElement();
+//
+//                System.out.println("KEY: " + key + " VAL: " + properties.get(key));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

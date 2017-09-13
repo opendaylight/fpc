@@ -10,6 +10,7 @@ package org.opendaylight.fpc.policy;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
@@ -17,6 +18,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.fpc.activation.impl.dpdkdpn.DpdkImpl;
 /*
 import org.opendaylight.fpc.policy.PolicyManager.ActionsChangeManager;
 import org.opendaylight.fpc.policy.PolicyManager.DescriptorChangeManager;
@@ -24,15 +26,20 @@ import org.opendaylight.fpc.policy.PolicyManager.PolicyChangeManager;
 */
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Tenants;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Ports;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.FpcMobility;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.FpcPolicy;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.Contexts;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.policy.Actions;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.policy.Descriptors;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.policy.Policies;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPolicyGroupId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.context.Dpns;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.context.profile.Nexthop;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -43,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * Base class that loads DPNs from the data store and sets up change listeners.
  * ??
  */
-public class PortManager implements AutoCloseable {
+public abstract class PortManager implements AutoCloseable {
     protected static final Logger LOG = LoggerFactory.getLogger(PortManager.class);
 
     protected FpcIdentity tenantId;
@@ -95,15 +102,13 @@ public class PortManager implements AutoCloseable {
      * @param cntx - Context to add
      * @throws Exception - If the Add violates the existing state.
      */
-    public void addContext(Contexts cntx) throws Exception {
-	}
+    abstract public void addContext(Contexts cntx) throws Exception;
 
     /**
      * Removes a Context from this manager.
      * @param cntx - Context to remove
      */
-    public void removeContext(Contexts cntx) {
-	}
+    abstract public void removeContext(Contexts cntx);
 
     /**
      * Registers Change Listener for Descriptors under the Tenant.
@@ -112,7 +117,7 @@ public class PortManager implements AutoCloseable {
     public void registerListeners() {
         dataTreeChangeListenerRegistration = this.db
                    .registerDataTreeChangeListener(
-                           new DataTreeIdentifier<Contexts>(LogicalDatastoreType.CONFIGURATION,
+                           new DataTreeIdentifier<Contexts>(LogicalDatastoreType.OPERATIONAL,
                                   InstanceIdentifier.builder(Tenants.class)
                                     .child(Tenant.class, new TenantKey( tenantId ))
                                     .child(FpcMobility.class)

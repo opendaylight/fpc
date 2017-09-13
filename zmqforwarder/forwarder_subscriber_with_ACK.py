@@ -165,7 +165,7 @@ for update_nbr in range(900000):
         print 'cid = ', cid
         print 'opid = ', opid
         responsedata = struct.pack('!BBBLL',controller_topic,4, 16, cid, opid)
-	if toSend:
+	if toSend == "true":
         	pub_socket.send("%s" % (responsedata))
         #uncomment the following lines to send a DDN for every create session message 
         #time.sleep(5)
@@ -183,7 +183,7 @@ for update_nbr in range(900000):
         print 'cid = ', cid
         print 'opid = ', opid
         responsedata = struct.pack('!BBBLL',controller_topic,4, 16, cid, opid)
-	if toSend:
+	if  toSend == "true":
         	pub_socket.send("%s" % (responsedata))
 
     elif msgnum == 3:
@@ -194,7 +194,7 @@ for update_nbr in range(900000):
         print 'cid = ', cid
         print 'opid = ', opid
         responsedata = struct.pack('!BBBLL',controller_topic,4, 0, cid, opid)
-	if toSend:
+	if toSend == "true":
         	pub_socket.send("%s" % (responsedata))
 
     elif msgnum == 6:
@@ -206,6 +206,47 @@ for update_nbr in range(900000):
             print "Controller Topic = ",controller_topic
             print "Client id = ", cid
             print "Op Id = ", opid
+
+    elif msgnum == 17:
+        print "-------------------------------------------------------------"
+        print "ADC Rule received. Details:"
+        topic,msgnum,selector_type = struct.unpack('!BBB',string[:3])
+
+        #Domain
+        if(selector_type == 1):
+            domain_name_length, = struct.unpack('!B',string[3:4])
+            domain_name, = struct.unpack('!'+str(domain_name_length)+'s',string[4:4+int(domain_name_length)])
+            next_index = 4+int(domain_name_length)
+            print "Domain Name = ",domain_name
+
+        #IP Address
+        if(selector_type == 2 or selector_type == 3):
+            ip_address, = struct.unpack('!L',string[3:7])
+            ip_addressa = socketlib.inet_ntoa(struct.pack('!L',ip_address))
+            next_index = 7
+            print "IP Address = ",ip_addressa
+
+        #IP Prefix
+        if selector_type == 3:
+            ip_prefix, = struct.unpack('!H',string[7:9])
+            next_index += 2
+            print "IP Prefix = ",ip_prefix
+
+        #rule_id, = struct.unpack('!L',string[rule_id_index:rule_id_index+4])
+        #print "Rule Id = ", rule_id
+
+        #rating_group,service_id,sponsor_id_length = struct.unpack('!LLB', string[rule_id_index+4:rule_id_index+4+9])
+        drop,rating_group,service_id,sponsor_id_length = struct.unpack('!BLLB', string[next_index:next_index+10])
+        print "Drop = ", drop
+        print "Rating Group = ", rating_group
+        print "Service Id = ", service_id
+        #print "Sponsor Length = ", sponsor_id_length
+        #sponsor_id, = struct.unpack('!'+str(sponsor_id_length)+'s',string[rule_id_index+4+9:rule_id_index+4+9+int(sponsor_id_length)])
+        sponsor_id, = struct.unpack('!'+str(sponsor_id_length)+'s',string[next_index+10:next_index+10+int(sponsor_id_length)])
+        print "Sponsor = ", sponsor_id 
+        print "-------------------------------------------------------------"
+        #precedence, = struct.unpack('!L',string[rule_id_index+4+9+int(sponsor_id_length):rule_id_index+4+9+int(sponsor_id_length)+4])
+        #print "precedence = ", precedence
 
     print '================'
     print 'Total = ', count, 'msgnum1 count', msgnum1count, 'msgnum2 count', msgnum2count, 'msgnum3 count', msgnum3count, 'msgnum4 count', msgnum4count,'msgnum5 count', msgnum5count, 'msgnum6 count', msgnum6count

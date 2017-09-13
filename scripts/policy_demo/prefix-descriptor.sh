@@ -26,16 +26,15 @@ curl -i -s \
 --header "Content-type: application/json" \
 --request $1 \
 -u admin:admin \
---data '{
-    "policy-groups": [
+--data '{ 
+    "descriptors": [
         {
-            "policy-group-id": "3",
-            "policies": [
-                "1234"
-            ]
+            "descriptor-type": "ietf-dmm-fpcbase:prefix-descriptor",
+    	    "destination-ip": "127.0.0.1/32",
+    	    "descriptor-id": "1"
         }
     ]
 }' \
-http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/policy-groups/3
+http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/descriptors/1
 
 echo ""

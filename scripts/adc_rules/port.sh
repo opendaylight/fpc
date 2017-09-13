@@ -7,35 +7,29 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-if [ "$#" -ne 1 ]; then
-    echo "Illegal number of parameters"
-    exit 1
-fi
-
-arg="$1"
-case "$arg" in
-	get|put|delete)
-		;;
-        *)
-		echo "Values must be one of: 'put', 'get' or 'delete'"
-		exit 1
-esac
-
 echo ""
-curl -i -s \
+curl -i \
 --header "Content-type: application/json" \
 --request $1 \
 -u admin:admin \
---data '{
-    "policy-groups": [
-        {
-            "policy-group-id": "3",
-            "policies": [
-                "1234"
-            ]
-        }
-    ]
-}' \
-http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/policy-groups/3
+--data "{
+    'input': {
+        'ports': [
+            {
+                'port-id': '2345',
+                'policy-groups': [
+                    '3'
+                ]
+            }
+        ],
+        'op-id': '1',
+        'client-id': '1',
+        'session-state': 'complete',
+        'admin-state': 'enabled',
+        'op-type': 'create',
+        'op-ref-scope': 'op'
+    }
+}" \
+http://localhost:8181/restconf/operations/ietf-dmm-fpcagent:configure
 
 echo ""

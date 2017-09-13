@@ -11,3 +11,4 @@
 ./rate-action.sh put
 ./policy.sh put
 ./policy-group.sh put
+./port.sh post

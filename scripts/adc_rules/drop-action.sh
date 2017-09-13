@@ -7,8 +7,9 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-if [ "$#" -ne 1 ]; then
-    echo "Illegal number of parameters"
+if [ "$#" -ne 2 ]; then
+    echo "Params incorrect, refer to the following template:"
+    echo "./drop-action.sh request id"
     exit 1
 fi
 
@@ -26,16 +27,14 @@ curl -i -s \
 --header "Content-type: application/json" \
 --request $1 \
 -u admin:admin \
---data '{
-    "policy-groups": [
+--data '{ 
+    "actions": [
         {
-            "policy-group-id": "3",
-            "policies": [
-                "1234"
-            ]
+            "drop": "true",
+    	    "action-id": "'"$2"'"
         }
     ]
 }' \
-http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/policy-groups/3
+http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/actions/$2
 
 echo ""

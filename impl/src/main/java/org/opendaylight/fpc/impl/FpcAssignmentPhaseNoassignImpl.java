@@ -21,12 +21,16 @@ import java.util.regex.Pattern;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.fpc.activation.cache.transaction.EmptyBodyException;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
 import org.opendaylight.fpc.activation.workers.ActivationThreadPool;
 import org.opendaylight.fpc.activation.workers.ConfigureWorker;
 import org.opendaylight.fpc.activation.workers.MonitorWorker;
+import org.opendaylight.fpc.policy.BasePolicyManager;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.ErrorTypeIndex;
 import org.opendaylight.fpc.utils.NameResolver;
@@ -38,6 +42,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureDpnInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureDpnOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureInput;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ErrorTypeId;
@@ -45,25 +50,42 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Payload;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Result;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Tenants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.configure.bundles.input.Bundles;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.configure.bundles.output.BundlesBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.configure.bundles.output.BundlesKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.OpBody;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.CreateOrUpdate;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.CreateOrUpdateBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.DeleteOrQuery;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.ResultType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.CommonSuccess;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.CommonSuccessBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.DeleteSuccessBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.Err;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.ErrBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.FpcMobility;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.FpcTopology;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.Ports;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcConfig;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 
 /**
@@ -115,6 +137,43 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                         try {
                         	OpBody opBody = ((OpInput)input).getOpBody();
                         	if( opBody instanceof CreateOrUpdate){
+                        		//IF port - write port to db (TODO move this to a better location)
+                        		if(((CreateOrUpdate) opBody).getPorts() != null){
+                        			String defaultTenant = FpcProvider.getInstance().getConfig().getDefaultTenantId();
+                        			FpcIdentity defaultIdentity = (defaultTenant == null) ?  new FpcIdentity(0L) :  new FpcIdentity(defaultTenant);
+                        			DataBroker dataBroker = FpcProvider.getInstance().getDataBroker();
+                        			WriteTransaction writetx = dataBroker.newWriteOnlyTransaction();
+                        			org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Ports payloadPort = ((CreateOrUpdate) opBody).getPorts().get(((CreateOrUpdate) opBody).getPorts().size()-1);
+                        			Ports port = new PortsBuilder().setPortId(payloadPort.getPortId())
+                        					.setPolicyGroups(payloadPort.getPolicyGroups())
+                        					.setKey(new PortsKey(payloadPort.getPortId())).build();
+                        			
+                        			if(dataBroker != null){
+                        				LOG.info("Creating Port...");
+                        				writetx.put(LogicalDatastoreType.OPERATIONAL,
+                        					InstanceIdentifier.builder(Tenants.class)
+                        					.child(Tenant.class, new TenantKey(defaultIdentity))
+                        					.child(FpcMobility.class)
+                        						.child(Ports.class, new PortsKey(port.getPortId()))
+                        						.build(),
+                        					new PortsBuilder(port).build());
+                        				
+                        				CheckedFuture<Void,TransactionCommitFailedException> submitFuture = writetx.submit();
+                                        rt = new CommonSuccessBuilder( ((Payload)input.getOpBody()) ).build();
+
+                        				Futures.addCallback(submitFuture, new FutureCallback<Void>() {
+                        					@Override
+                        					public void onFailure(Throwable arg0) {
+                        						LOG.warn("Port create failed");
+                        					}
+                        					@Override
+                        					public void onSuccess(Void arg0) {
+                        						// Do nothing
+                        					}
+                        				});
+                        			}
+                                    break;
+                        		}
                         		for(Contexts context : ((CreateOrUpdate)opBody).getContexts()){
                         			Entry<ConfigureWorker, ArrayList<Contexts>> entry = sessionMap.get(NameResolver.extractString(context.getContextId()));
                         			if(entry != null){

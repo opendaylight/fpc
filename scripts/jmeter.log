@@ -1,53 +1,77 @@
-2017/07/21 11:25:10 INFO  - jmeter.util.JMeterUtils: Setting Locale to en_US 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: Loading user properties from: /usr/local/Cellar/jmeter/3.1/libexec/bin/user.properties 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: Loading system properties from: /usr/local/Cellar/jmeter/3.1/libexec/bin/system.properties 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: Copyright (c) 1998-2016 The Apache Software Foundation 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: Version 3.1 r1770033 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: java.version=1.8.0_74 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: os.name=Mac OS X 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: os.arch=x86_64 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: os.version=10.12.3 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: file.encoding=UTF-8 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: Max memory     =5726797824 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: Available Processors =8 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: Default Locale=English (United States) 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: JMeter  Locale=English (United States) 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: JMeterHome=/usr/local/Cellar/jmeter/3.1/libexec 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: user.dir  =/Users/vivekvijayan/fpc2/fpc/scripts 
-2017/07/21 11:25:10 INFO  - jmeter.JMeter: PWD       =/Users/vivekvijayan/fpc2/fpc/scripts 
-2017/07/21 11:25:45 INFO  - jmeter.JMeter: IP: 10.215.252.51 Name: MacBook-Pro.local FullName: 10.215.252.51 
-2017/07/21 11:25:45 INFO  - jmeter.gui.action.LookAndFeelCommand: Using look and feel: com.apple.laf.AquaLookAndFeel [Mac OS X, System] 
-2017/07/21 11:25:45 INFO  - jmeter.JMeter: Loaded icon properties from org/apache/jmeter/images/icon.properties 
-2017/07/21 11:25:47 INFO  - jmeter.engine.util.CompoundVariable: Note: Function class names must contain the string: '.functions.' 
-2017/07/21 11:25:47 INFO  - jmeter.engine.util.CompoundVariable: Note: Function class names must not contain the string: '.gui.' 
-2017/07/21 11:25:48 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.assertions.BSFAssertion 
-2017/07/21 11:25:48 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.extractor.BSFPostProcessor 
-2017/07/21 11:25:48 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.modifiers.BSFPreProcessor 
-2017/07/21 11:25:48 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser 
-2017/07/21 11:25:48 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser 
-2017/07/21 11:25:48 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser 
-2017/07/21 11:25:48 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser 
-2017/07/21 11:25:48 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser 
-2017/07/21 11:25:48 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser 
-2017/07/21 11:25:49 INFO  - jorphan.exec.KeyToolUtils: keytool found at 'keytool' 
-2017/07/21 11:25:49 INFO  - jmeter.protocol.http.proxy.ProxyControl: HTTP(S) Test Script Recorder SSL Proxy will use keys that support embedded 3rd party resources in file /usr/local/Cellar/jmeter/3.1/libexec/bin/proxyserver.jks 
-2017/07/21 11:25:49 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.protocol.java.sampler.BSFSampler 
-2017/07/21 11:25:49 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.protocol.mongodb.config.MongoSourceElement 
-2017/07/21 11:25:49 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.protocol.mongodb.sampler.MongoScriptSampler 
-2017/07/21 11:25:49 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.timers.BSFTimer 
-2017/07/21 11:25:49 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.visualizers.BSFListener 
-2017/07/21 11:25:49 INFO  - jmeter.gui.util.MenuFactory: Skipping org.apache.jmeter.visualizers.MonitorHealthVisualizer 
-2017/07/21 11:25:49 INFO  - jmeter.samplers.SampleResult: Note: Sample TimeStamps are START times 
-2017/07/21 11:25:49 INFO  - jmeter.samplers.SampleResult: sampleresult.default.encoding is set to ISO-8859-1 
-2017/07/21 11:25:49 INFO  - jmeter.samplers.SampleResult: sampleresult.useNanoTime=true 
-2017/07/21 11:25:49 INFO  - jmeter.samplers.SampleResult: sampleresult.nanoThreadSleep=5000 
-2017/07/21 11:26:04 INFO  - jmeter.services.FileServer: Default base='/Users/vivekvijayan/fpc2/fpc/scripts' 
-2017/07/21 11:26:04 INFO  - jmeter.gui.action.Load: Loading file: /Users/vivekvijayan/fpc2/fpc/jmeter/FPC Agent - LoadTest.jmx 
-2017/07/21 11:26:04 INFO  - jmeter.services.FileServer: Set new base='/Users/vivekvijayan/fpc2/fpc/jmeter' 
-2017/07/21 11:26:04 INFO  - jmeter.save.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2 
-2017/07/21 11:26:04 INFO  - jmeter.save.SaveService: Using SaveService properties file encoding UTF-8 
-2017/07/21 11:26:04 INFO  - jmeter.save.SaveService: Using SaveService properties version 3.1 
-2017/07/21 11:26:04 INFO  - jmeter.save.SaveService: All converter versions present and correct 
-2017/07/21 11:26:04 INFO  - jmeter.save.SaveService: Loading file: /Users/vivekvijayan/fpc2/fpc/jmeter/FPC Agent - LoadTest.jmx 
-2017/07/21 11:26:04 INFO  - jmeter.services.FileServer: Set new base='/Users/vivekvijayan/fpc2/fpc/jmeter' 
+2017-09-12 11:19:00,915 INFO o.a.j.u.JMeterUtils: Setting Locale to en_US
+2017-09-12 11:19:00,928 INFO o.a.j.JMeter: Loading user properties from: /usr/local/Cellar/jmeter/3.2/libexec/bin/user.properties
+2017-09-12 11:19:00,929 INFO o.a.j.JMeter: Loading system properties from: /usr/local/Cellar/jmeter/3.2/libexec/bin/system.properties
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: Copyright (c) 1998-2017 The Apache Software Foundation
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: Version 3.2 r1790748
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: java.version=1.8.0_131
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: os.name=Mac OS X
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: os.arch=x86_64
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: os.version=10.12.5
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: file.encoding=UTF-8
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: Max memory     =536870912
+2017-09-12 11:19:00,934 INFO o.a.j.JMeter: Available Processors =4
+2017-09-12 11:19:00,940 INFO o.a.j.JMeter: Default Locale=English (United States)
+2017-09-12 11:19:00,941 INFO o.a.j.JMeter: JMeter  Locale=English (United States)
+2017-09-12 11:19:00,941 INFO o.a.j.JMeter: JMeterHome=/usr/local/Cellar/jmeter/3.2/libexec
+2017-09-12 11:19:00,941 INFO o.a.j.JMeter: user.dir  =/Users/ryanbrady/fpc-2/fpc/scripts
+2017-09-12 11:19:00,941 INFO o.a.j.JMeter: PWD       =/Users/ryanbrady/fpc-2/fpc/scripts
+2017-09-12 11:19:05,943 INFO o.a.j.JMeter: IP: 10.215.225.89 Name: Ryans-MacBook-Pro.local FullName: 10.215.225.89
+2017-09-12 11:19:08,071 INFO o.a.j.g.a.LookAndFeelCommand: Using look and feel: com.apple.laf.AquaLookAndFeel [Mac OS X, System]
+2017-09-12 11:19:08,079 INFO o.a.j.JMeter: Loaded icon properties from org/apache/jmeter/images/icon.properties
+2017-09-12 11:19:08,824 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2017-09-12 11:19:08,824 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2017-09-12 11:19:10,090 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.assertions.BSFAssertion
+2017-09-12 11:19:11,007 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.extractor.BSFPostProcessor
+2017-09-12 11:19:11,052 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.modifiers.BSFPreProcessor
+2017-09-12 11:19:11,095 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2017-09-12 11:19:11,095 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2017-09-12 11:19:11,096 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2017-09-12 11:19:11,096 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2017-09-12 11:19:11,096 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
+2017-09-12 11:19:11,096 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
+2017-09-12 11:19:11,521 INFO o.a.j.e.KeyToolUtils: keytool found at 'keytool'
+2017-09-12 11:19:11,522 INFO o.a.j.p.h.p.ProxyControl: HTTP(S) Test Script Recorder SSL Proxy will use keys that support embedded 3rd party resources in file /usr/local/Cellar/jmeter/3.2/libexec/bin/proxyserver.jks
+2017-09-12 11:19:11,664 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.protocol.java.sampler.BSFSampler
+2017-09-12 11:19:11,717 INFO o.a.j.s.FileServer: Default base='/Users/ryanbrady/fpc-2/fpc/scripts'
+2017-09-12 11:19:11,858 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.protocol.mongodb.config.MongoSourceElement
+2017-09-12 11:19:11,859 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.protocol.mongodb.sampler.MongoScriptSampler
+2017-09-12 11:19:11,998 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.timers.BSFTimer
+2017-09-12 11:19:12,034 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.visualizers.BSFListener
+2017-09-12 11:19:12,192 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2017-09-12 11:19:12,192 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to ISO-8859-1
+2017-09-12 11:19:12,192 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2017-09-12 11:19:12,193 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2017-09-12 11:19:18,390 INFO o.a.j.g.a.Load: Loading file: /Users/ryanbrady/fpc-2/fpc/jmeter/FPC Agent - LoadTest.jmx
+2017-09-12 11:19:18,390 INFO o.a.j.s.FileServer: Set new base='/Users/ryanbrady/fpc-2/fpc/jmeter'
+2017-09-12 11:19:18,519 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2017-09-12 11:19:18,536 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2017-09-12 11:19:18,538 INFO o.a.j.s.SaveService: Using SaveService properties version 3.2
+2017-09-12 11:19:18,542 INFO o.a.j.s.SaveService: Loading file: /Users/ryanbrady/fpc-2/fpc/jmeter/FPC Agent - LoadTest.jmx
+2017-09-12 11:19:18,783 INFO o.a.j.s.FileServer: Set new base='/Users/ryanbrady/fpc-2/fpc/jmeter'
+2017-09-12 11:19:37,002 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2017-09-12 11:19:37,004 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2017-09-12 11:19:37,005 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2017-09-12 11:19:37,026 INFO o.a.j.g.u.JMeterMenuBar: setRunning(true, *local*)
+2017-09-12 11:19:37,203 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 1 : 3GPP Contexts
+2017-09-12 11:19:37,203 INFO o.a.j.e.StandardJMeterEngine: Starting 4 threads for group 3GPP Contexts.
+2017-09-12 11:19:37,203 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2017-09-12 11:19:37,204 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=4 ramp-up=1 perThread=250.0 delayedStart=false
+2017-09-12 11:19:37,217 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2017-09-12 11:19:37,217 INFO o.a.j.e.StandardJMeterEngine: All thread groups have been started
+2017-09-12 11:19:37,219 INFO o.a.j.t.JMeterThread: Thread started: 3GPP Contexts 1-1
+2017-09-12 11:19:37,333 INFO o.a.j.p.h.s.HTTPHCAbstractImpl: Local host = Ryans-MacBook-Pro.local
+2017-09-12 11:19:37,337 INFO o.a.j.p.h.s.HTTPHC4Impl: HTTP request retry count = 0
+2017-09-12 11:19:37,475 INFO o.a.j.t.JMeterThread: Thread started: 3GPP Contexts 1-2
+2017-09-12 11:19:37,722 INFO o.a.j.t.JMeterThread: Thread started: 3GPP Contexts 1-3
+2017-09-12 11:19:37,969 INFO o.a.j.t.JMeterThread: Thread started: 3GPP Contexts 1-4
+2017-09-12 11:19:39,053 INFO o.a.j.t.JMeterThread: Thread is done: 3GPP Contexts 1-2
+2017-09-12 11:19:39,053 INFO o.a.j.t.JMeterThread: Thread finished: 3GPP Contexts 1-2
+2017-09-12 11:19:39,284 INFO o.a.j.t.JMeterThread: Thread is done: 3GPP Contexts 1-1
+2017-09-12 11:19:39,284 INFO o.a.j.t.JMeterThread: Thread finished: 3GPP Contexts 1-1
+2017-09-12 11:19:39,316 INFO o.a.j.t.JMeterThread: Thread is done: 3GPP Contexts 1-3
+2017-09-12 11:19:39,316 INFO o.a.j.t.JMeterThread: Thread finished: 3GPP Contexts 1-3
+2017-09-12 11:19:39,348 INFO o.a.j.t.JMeterThread: Thread is done: 3GPP Contexts 1-4
+2017-09-12 11:19:39,349 INFO o.a.j.t.JMeterThread: Thread finished: 3GPP Contexts 1-4
+2017-09-12 11:19:39,349 INFO o.a.j.e.StandardJMeterEngine: Notifying test listeners of end of test
+2017-09-12 11:19:39,350 INFO o.a.j.g.u.JMeterMenuBar: setRunning(false, *local*)

@@ -7,8 +7,9 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-if [ "$#" -ne 1 ]; then
-    echo "Illegal number of parameters"
+if [ "$#" -ne 3 ]; then
+    echo "Params incorrect, refer to the following template:"
+    echo "./prefix-descriptor.sh request id ip"
     exit 1
 fi
 
@@ -26,16 +27,15 @@ curl -i -s \
 --header "Content-type: application/json" \
 --request $1 \
 -u admin:admin \
---data '{
-    "policy-groups": [
+--data '{ 
+    "descriptors": [
         {
-            "policy-group-id": "3",
-            "policies": [
-                "1234"
-            ]
+            "descriptor-type": "ietf-dmm-fpcbase:prefix-descriptor",
+    	    "destination-ip": "'"$3"'",
+    	    "descriptor-id": "'"$2"'"
         }
     ]
 }' \
-http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/policy-groups/3
+http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/descriptors/$2
 
 echo ""

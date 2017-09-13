@@ -10,6 +10,7 @@ package org.opendaylight.fpc.policy;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -40,7 +41,7 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
 
 	private final TenantManager tenantMgr;
     private boolean initialized;
-    private final Map<FpcIdentity, Set<FpcIdentity>> revpointer;
+    private static Map<FpcIdentity, Set<FpcIdentity>> revpointer;
     private final Set<FpcIdentity> portNames;
     public static Map<FpcPolicyGroupId, FpcPolicyGroup> fpcPolicyGroupMap = new ConcurrentHashMap<>();
     public static Map<FpcPolicyId, FpcPolicy> fpcPolicyMap = new ConcurrentHashMap<>();
@@ -68,7 +69,7 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
      *
      * @return A Map of FpcIdentity instances mapped to the Set of Pointers to FpcIdentity.
      */
-    public Map<FpcIdentity, Set<FpcIdentity>> getRevPointer() {
+    public static Map<FpcIdentity, Set<FpcIdentity>> getRevPointer() {
         return revpointer;
     }
 
@@ -79,7 +80,7 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
        LOG.info("Descriptor Manager - Adding Descriptor " + desc.getDescriptorId());
        fpcDescriptorMap.put(desc.getDescriptorId(), desc);
        if (!revpointer.containsKey(desc.getDescriptorId()))
-    	   revpointer.put(desc.getDescriptorId(), null);
+    	   revpointer.put(desc.getDescriptorId(), new HashSet<FpcIdentity>());
 	}
 
 	@Override
@@ -96,7 +97,7 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
 		LOG.info("Action Manager - Adding Action " + act.getActionId());
 		fpcActionMap.put(act.getActionId(), act);
 		if (!revpointer.containsKey(act.getActionId()))
-	    	   revpointer.put(act.getActionId(), null);
+	    	   revpointer.put(act.getActionId(), new HashSet<FpcIdentity>());
 	}
 
 	@Override
@@ -141,8 +142,11 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
 	public void addPolicyGroups(PolicyGroups polgro) throws Exception {
 		LOG.info("Policy Group Manager - Adding Policy Group " + polgro.getPolicyGroupId());
 		fpcPolicyGroupMap.put(polgro.getPolicyGroupId(), polgro);
-		for (FpcPolicyId policy : polgro.getPolicies()){
-			for (Rules rule : ((FpcPolicy) policy).getRules()){
+		for (FpcPolicyId policyId : polgro.getPolicies()){
+			if(!BasePolicyManager.fpcPolicyMap.containsKey(policyId))
+				continue;
+			FpcPolicy policy = BasePolicyManager.fpcPolicyMap.get(policyId);
+			for (Rules rule : (policy).getRules()){
 				for (org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Descriptors desc : rule.getDescriptors()) {
 					Set<FpcIdentity> s = revpointer.containsKey(desc.getDescriptorId()) ? revpointer.get(desc.getDescriptorId()) :
 						new HashSet<FpcIdentity>();
@@ -201,13 +205,19 @@ public class BasePolicyManager extends PolicyManager implements AutoCloseable {
 
 	@Override
 	public void addPorts(Ports port) throws Exception {
-		for (FpcPolicyGroupId polgroup : port.getPolicyGroups()) {
-			Set<FpcIdentity> s = revpointer.containsKey(polgroup) ? revpointer.get(polgroup) :
-				new HashSet<FpcIdentity>();
-			s.add(port.getPortId());
-			revpointer.put(polgroup, s);
+		LOG.info("Updating maps...");
+		if(port.getPolicyGroups() != null){
+			for (FpcPolicyGroupId polgroup : port.getPolicyGroups()) {
+				Set<FpcIdentity> s = revpointer.containsKey(polgroup) ? revpointer.get(polgroup) :
+					new HashSet<FpcIdentity>();
+				s.add(port.getPortId());
+				revpointer.put(polgroup, s);
+			}
+			portNames.add(port.getPortId());
+			LOG.info("revpointer: "+revpointer.toString());
+		}else{
+			LOG.warn("Port "+port.getPortId()+" does not contain any policy groups");
 		}
-		portNames.add(port.getPortId());
 	}
 
 	@Override

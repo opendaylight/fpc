@@ -93,7 +93,6 @@ public class ActivationManager extends DpnResourceManager implements AutoCloseab
 
     @Override
     public void addDpn(Dpns dpn) throws Exception {
-    	LOG.info("addDpn called");
         ActivatorFactory factory = null;
         if (dpn != null) {
         	if(dpn.isAbstract()){

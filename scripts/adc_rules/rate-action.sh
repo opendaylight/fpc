@@ -7,8 +7,9 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-if [ "$#" -ne 1 ]; then
-    echo "Illegal number of parameters"
+if [ "$#" -ne 5 ]; then
+    echo "Params incorrect, refer to the following template:"
+    echo "./rate-action.sh request id sponsorId serviceId ratingGrp"
     exit 1
 fi
 
@@ -26,16 +27,19 @@ curl -i -s \
 --header "Content-type: application/json" \
 --request $1 \
 -u admin:admin \
---data '{
-    "policy-groups": [
+--data '{ 
+    "actions": [
         {
-            "policy-group-id": "3",
-            "policies": [
-                "1234"
-            ]
+            "action-type": "ietf-dmm-fpcbase:rate-action",
+            "rating-group": "'"$5"'",
+   	        "service-identifier": "'"$4"'",
+    	    "service-context-id": "111@example.org",
+    	    "action-id": "'"$2"'",
+            "sponsor-identity": "'"$3"'"
+          
         }
     ]
 }' \
-http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/policy-groups/3
+http://localhost:8181/restconf/config/ietf-dmm-fpcagent:tenants/tenant/default/fpc-policy/actions/$2
 
 echo ""

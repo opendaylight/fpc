@@ -10,6 +10,8 @@ package org.opendaylight.fpc.activation.impl.dpdkdpn;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.List;
+
 import org.json.JSONObject;
 import org.opendaylight.fpc.impl.zeromq.ZMQSBListener;
 import org.opendaylight.fpc.utils.ErrorLog;
@@ -17,7 +19,10 @@ import org.opendaylight.fpc.utils.IPToDecimal;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientSocket;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DPDK DPN API over ZeroMQ.
@@ -34,6 +39,7 @@ public class DpnAPI2 {
     private static byte BYE = 0b0000_1001;
     private static byte SEND_ADC_TYPE = 0b001_0001;
     private static byte DDN_ACK = 0b0000_0110;
+	protected static final Logger LOG = LoggerFactory.getLogger(DpnAPI2.class);
 
     /**
      * Topic for broadcasting
@@ -479,80 +485,61 @@ public class DpnAPI2 {
     /**
      * Creates the byte buffer to send ADC rules over ZMQ
      * @param topic - DPN Topic
-     * @param selector_type - DNL, Domain Name, IP Address, IP Prefix
-     * @param DNL - Domain Name Length; included if selector type = 0
-     * @param domain_name - Included if selector type = 0
-     * @param IP_address - Included if selector type = 1,2
-     * @param IP_prefix - Included if selector type = 2
-     * @param rule_ID - Rule ID
-     * @param RNL - Rule Name Length
-     * @param rule_name - Name of Rule
+     * @param domain_name - domain
+     * @param ip - ipaddress/ipprefix (i.e. 127.0.0.1/32)
+     * @param drop - Drop if 1
      * @param rating_group - Rating Group
      * @param service_ID - Service ID
-     * @param gate_status - Gate Status
-     * @param SIDL - Sponsor ID Length
      * @param sponsor_ID - Sponsor ID
-     * @param precedence - Precedence
-     * @param TGL - Tariff Group Length
-     * @param tariff_group - Name of Tariff Group
-     * @param TTL - Tariff Time Length
-     * @param tariff_time - Tariff Time
      */
-    public void send_ADC_rules(String topic,
-    		Short selector_type,
-    		Short DNL, String domain_name,
-    		Long IP_address, Short IP_prefix,
-    		Long rule_ID, Short RNL,
-    		String rule_name, Long rating_group,
-    		Long service_ID, Short gate_status,
-    		Short SIDL, String sponsor_ID,
-    		Long precedence, Short TGL,
-    		String tariff_group, Short TTL,
-    		String tariff_time)
+    public void send_ADC_rules(Short topic,
+    		String domain_name, String ip, 
+    		Short drop, Long rating_group,
+    		Long service_ID, String sponsor_ID)
     {
+    	Ipv4Address ip_address = null;
+    	Short ip_prefix = null;
+    	if(ip!=null){
+    		String[] ip_split = ip.split("/");
+    		ip_address = new Ipv4Address(ip_split[0]);
+    		ip_prefix = Short.parseShort(ip_split[1]);
+    	}
+    	Short selector_type = (short) (domain_name!=null?1:ip_prefix!=null?3:ip_address!=null?2:0);
+    	if(selector_type == 0){
+    		LOG.warn("Domain/IP not found, failed to send rules");
+    		return;
+    	}
     	ByteBuffer bb = ByteBuffer.allocate(200);
-    		bb.put((topic.getBytes()))
-    		.put(SEND_ADC_TYPE)
-    		.put(toUint8(selector_type));
-    	if(selector_type == 0) {
-    		bb.put(toUint8(DNL))
-    		  .put(domain_name.getBytes());
+    	bb.put(toUint8(topic))
+    	.put(SEND_ADC_TYPE)
+    	.put(toUint8(selector_type));
+    	if(selector_type == 1) {
+    		LOG.info("Sending via domain");
+			bb.put(toUint8((short)domain_name.length()))
+			.put(domain_name.getBytes());
     	}
-    	if((selector_type == 1) || (selector_type == 2)){
-    		bb.put(toUint32(IP_address));
+    	if((selector_type == 2) || (selector_type == 3)){
+    		Long ip_address_long = IPToDecimal.ipv4ToLong(ip_address.getValue());
+    		LOG.info("Sending via IP address");
+    		bb.put(toUint32(ip_address_long));
     	}
-    	if(selector_type == 2){
-    		bb.put(toUint16(IP_prefix));
+    	if(selector_type == 3){
+    		LOG.info("Sending via IP prefix");
+    		bb.put(toUint16(ip_prefix));
     	}
-    	if(rule_ID!=null)
-    		bb.put(toUint32(rule_ID));
-    	if(RNL!=null)
-    		bb.put(toUint8(RNL));
-    	if(rule_name!=null)
-    		bb.put(rule_name.getBytes());
+    	if(drop!=null)
+    		bb.put(toUint8(drop));
     	if(rating_group!=null)
     		bb.put(toUint32(rating_group));
     	if(service_ID!=null)
     		bb.put(toUint32(service_ID));
-    	if(gate_status!=null)
-    		bb.put(toUint8(gate_status));
-    	if(SIDL!=null)
-    		bb.put(toUint8(SIDL));
-    	if(sponsor_ID!=null)
-    		bb.put(sponsor_ID.getBytes());
-    	if(precedence!=null)
-    		bb.put(toUint32(precedence));
-    	if(TGL!=null)
-    		bb.put(toUint8(TGL));
-    	if((TGL!=null) && TGL > 0) {
-    		bb.put(tariff_group.getBytes());
+    	if(sponsor_ID!=null && (short)sponsor_ID.length()>0){
+    		bb.put(toUint8((short)sponsor_ID.length()))
+    		.put(sponsor_ID.getBytes());
     	}
-    	if(TTL!=null)
-    		bb.put(toUint8(TTL));
-    	if((TTL!=null) && TTL > 0) {
-    		bb.put(tariff_time.getBytes());
-    	}
+    	bb.put(toUint8(ZMQSBListener.getControllerTopic()));
     	try {
+    		LOG.info("Sending rules...");
             sock.getBlockingQueue().put(bb);
           } catch (InterruptedException e) {
             	ErrorLog.logError(e.getStackTrace());

@@ -199,14 +199,13 @@ implements Worker {
 										System.currentTimeMillis() - sysTime);
 							}
 
-
+							tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
 							for(FpcDpnId dpnId : TenantManager.vdpnDpnsMap.get(dpn.getDpnId())){
 								dpnInfo = tx.getTenantContext().getDpnInfo().get(dpnId.toString());
 								if (dpnInfo.activator != null) {
 									try {
 										dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
-												context.getInstructions() : input.getInstructions(), context, oCache);
-										tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
+												context.getInstructions() : input.getInstructions(), context, oCache);										
 										//dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
 									} catch (Exception e) {
 										return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
@@ -222,7 +221,7 @@ implements Worker {
 
 						}else {
 							dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
-							if (dpnInfo.activator != null) {
+							if (dpnInfo!=null && dpnInfo.activator != null) {
 								try {
 									dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
 											context.getInstructions() : input.getInstructions(), context, oCache);
@@ -270,7 +269,7 @@ implements Worker {
 					Collections.<Targets>emptyList()) {
 					FpcDpnId ident = null;
 					Entry<FixedType, String> entry = extractTypeAndId(NameResolver.extractString(target.getTarget()));
-					FpcContext context = null;
+					Contexts context = null;
 					ArrayList<Contexts> cList = FpcagentServiceBase.sessionMap.get(entry.getValue()).getValue();
 					if(!cList.isEmpty()){
 						context = cList.get(cList.size()-1);
@@ -303,7 +302,8 @@ implements Worker {
 													tx,
 													System.currentTimeMillis() - sysTime);
 										}
-										TenantManager.vdpnContextsMap.get(dpn.getDpnId()).remove(context);
+										TenantManager.vdpnContextsMap.get(dpn.getDpnId()).remove(cList.get(0));
+										tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
 										for(FpcDpnId dpnId : TenantManager.vdpnDpnsMap.get(dpn.getDpnId())){
 											ident = dpnId;
 
@@ -312,7 +312,6 @@ implements Worker {
 												if (dpnInfo.activator != null) {
 													try {
 														dpnInfo.activator.delete(input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
-														tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
 														FpcagentServiceBase.sessionMap.remove(NameResolver.extractString(context.getContextId()));
 														//dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
 													} catch (Exception e) {
@@ -332,7 +331,7 @@ implements Worker {
 
 										if (ident != null) {
 											dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
-											if (dpnInfo.activator != null) {
+											if (dpnInfo!=null && dpnInfo.activator != null) {
 												try {
 													dpnInfo.activator.delete(input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
 													tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);

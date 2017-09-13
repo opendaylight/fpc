@@ -7,8 +7,9 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-if [ "$#" -ne 1 ]; then
-    echo "Illegal number of parameters"
+if [ "$#" -ne 9 ]; then
+    echo "Params incorrect, refer to the following template:"
+    echo "./policy-group.sh request policyid(x8)"
     exit 1
 fi
 
@@ -31,7 +32,14 @@ curl -i -s \
         {
             "policy-group-id": "3",
             "policies": [
-                "1234"
+                "'"$2"'",
+                "'"$3"'",
+                "'"$4"'",
+                "'"$5"'",
+                "'"$6"'",
+                "'"$7"'",
+                "'"$8"'",
+                "'"$9"'"
             ]
         }
     ]

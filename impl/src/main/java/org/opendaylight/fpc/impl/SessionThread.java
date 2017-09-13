@@ -7,17 +7,21 @@
  */
 package org.opendaylight.fpc.impl;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
+import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
 import org.opendaylight.fpc.dpn.DpnHolder;
 import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.DpnOperation;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpInput;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.op.input.op_body.DeleteOrQuery;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /*
@@ -39,7 +43,6 @@ public class SessionThread implements Runnable {
 	
 	@Override
 	public void run() {
-		LOG.info("in thread!");
 		DpnHolder dpnInfo;
 		Contexts context;
 		Iterator<Entry<Contexts, Transaction>> it = TenantManager.vdpnContextsMap.get(vdpn.getDpnId()).entrySet().iterator();
@@ -50,20 +53,22 @@ public class SessionThread implements Runnable {
     		context = cMap.getKey();
 			dpnInfo = tx.getTenantContext().getDpnInfo().get(dpn.getDpnId().toString());
 			
-			if (dpnInfo.activator != null) {
+			if (dpnInfo != null && dpnInfo.activator != null) {
                 try {
                 	if(op == DpnOperation.Add){
-                		LOG.info("thread : I am copying sessions");
+                		LOG.info("Copying existing sessions to newly added DPN");
                 		dpnInfo.activator.activate(input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
                                 context.getInstructions() : input.getInstructions(), context, tx.getReadCache());
                 	}else if(op == DpnOperation.Remove){
-                		LOG.info("thread : I am deleting sessions");
-                		dpnInfo.activator.delete(input.getClientId(), input.getOpId(), input.getInstructions(), null, context);
-                		if(deleteFlag){
-                			tx.getTenantContext().getSc().remove(targetPrefix+context.getContextId().getString());
-                			TenantManager.vdpnContextsMap.get(vdpn.getDpnId()).remove(context);
-                			it = TenantManager.vdpnContextsMap.get(vdpn.getDpnId()).entrySet().iterator();
-                		}
+                		LOG.info("Deleting existing sessions from removed DPN");
+	                	if(deleteFlag){	
+	                		dpnInfo.activator.delete(input.getClientId(), input.getOpId(), input.getInstructions(), null, context);
+	                		tx.getTenantContext().getSc().remove(targetPrefix+context.getContextId().getString());
+	                		TenantManager.vdpnContextsMap.get(vdpn.getDpnId()).remove(context);
+	               			it = TenantManager.vdpnContextsMap.get(vdpn.getDpnId()).entrySet().iterator();
+	               		}else{ 
+	                		dpnInfo.activator.delete(input.getClientId(), input.getOpId(), input.getInstructions(), null, context);
+	                	}
                 	}
                 } catch (Exception e) {
                     ErrorLog.logError(e.getStackTrace());
@@ -72,11 +77,6 @@ public class SessionThread implements Runnable {
                 LOG.info("No activator found for DPN" + dpn.getDpnId().toString());
             }
 		}
-		//for(Entry<Contexts, Transaction> cMap : TenantManager.vdpnContextsMap.get(vdpn.getDpnId()).entrySet()){
-			
-		//}
-		LOG.info("ContextsMap in SessionThread: "+TenantManager.vdpnContextsMap);
-		
 	}
 	
 }

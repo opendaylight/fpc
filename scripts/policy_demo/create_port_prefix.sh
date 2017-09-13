@@ -7,7 +7,8 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-./domain-descriptor.sh put
+./prefix-descriptor.sh put
 ./rate-action.sh put
 ./policy.sh put
 ./policy-group.sh put
+./port.sh post

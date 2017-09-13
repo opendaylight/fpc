@@ -1,3 +1,4 @@
+./../get-topology.sh;
 echo "create vdpn?";
 read;
 ./cudVdpn.sh put;
@@ -22,13 +23,11 @@ read;
 echo "remove dpns? wait 3 sec";
 read;
 cd dpn-mirrorScripts;
-./removeDpnSimple.sh 1;
-sleep 3;
 ./removeDpnSimple.sh 2;
+sleep 3;
+./removeDpnSimple.sh 1;
 echo "delete vdpn?";
 read;
 ./cudVdpn.sh delete;
-echo "check topology?";
-read;
 ./../get-topology.sh;
-echo "doThings is done :)"
+echo "vdpnDemo is done :)"

@@ -238,7 +238,7 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
         return Futures.immediateFuture(configBundlesUnknownClientErr);
     }
     
-    public Dpns getDpnById(FpcDpnId dpnid) {
+    public static Dpns getDpnById(FpcDpnId dpnid) {
     	if(dataBroker != null){
     		ReadOnlyTransaction readtx = dataBroker.newReadOnlyTransaction();
     		String defaultTenant = FpcProvider.getInstance().getConfig().getDefaultTenantId();
@@ -285,7 +285,7 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 		if(input.getDpnId() != null && input.getAbstractDpnId() != null){
 			dpn = getDpnById(input.getDpnId());
 			vdpn = getDpnById(input.getAbstractDpnId());
-			if(vdpn.getDpnIds() != null){
+			if(vdpn !=null && vdpn.getDpnIds() != null){
 				vdpnDpns = vdpn.getDpnIds();
 			}else{
 				LOG.info(vdpn.getDpnId()+" is empty");
@@ -301,11 +301,9 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 			return Futures.immediateFuture(configDpnDpnNotRealErr);
 		
     	int threadCount = 0;
-		
 		if(input.getOperation() == DpnOperation.Add) {
 			if(vdpn.getDpnIds()!=null && !vdpn.getDpnIds().contains(dpn.getDpnId())){
-				new Thread(new SessionThread(vdpn, dpn, input.getOperation(), false), ("sessionThread"+ ++threadCount)).start();
-				LOG.info("sessionThread"+threadCount+" started");
+				new Thread(new SessionThread(vdpn, dpn, input.getOperation(), false), ("SessionThread"+ ++threadCount)).start();
 			}
 			if(vdpnDpns.size() == 2)
 				return Futures.immediateFuture(configDpnTooManyDpnsErr);
@@ -315,7 +313,6 @@ public class FpcagentDispatcher implements IetfDmmFpcagentService {
 		
 		if(input.getOperation() == DpnOperation.Remove){
 			new Thread(new SessionThread(vdpn, dpn, input.getOperation(), vdpn.getDpnIds().size()==1 ? true : false), ("sessionThread"+ ++threadCount)).start();
-			LOG.info("sessionThread"+threadCount+" started");
 			if(vdpnDpns.size() == 0)
 				return Futures.immediateFuture(configDpnNotEnoughDpnsError);
 			if(!vdpnDpns.contains(dpn.getDpnId())){
