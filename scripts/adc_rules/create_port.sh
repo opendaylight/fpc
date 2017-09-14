@@ -8,19 +8,24 @@
 # ------------------------------------------------------------------
 
 
+./../bindclient.sh 0;
+sleep 1;
+
 # 13.1.1.111 Sprint Internet Zero-Rat
 # 13.1.1.114 Google Internet Zero-Rate
-# 13.1.1.112/31 Sprint Management Zero-Rate
-# sprint.com Sprint Internet Zero-Rate
-# www.fcc.gov Sprint Internet Zero-Rate
-# csd-01.sprinspectrum.com Sprint Internet Zero-Rate
-# ns.sprintlabs.com Sprint-Labs Internet Zero-Rate
-# 13.1.1.121 Sprint Provisioning Zero-Rate
-# 13.1.1.122 Sprint Provisioning Zero-Rate
-# 13.1.1.124/30 Intel      Management       Fake-Rate
+# 13.1.1.112/31 Sprint Management Zero-Rate -- DROP
+# sprint.com Sprint Internet Zero-Rate  -- DROP
 
+# creates a descriptor using an ip (prefix-descriptor)
+# params: http method, descriptor-id, ip address/prefix
 ./prefix-descriptor.sh put 1 13.1.1.111/32;
+
+# creates an action for rating (rate-action)
+# params: http method, action-id, sponsor-id, service-id, rating-group
 ./rate-action.sh put 1 Sprint 1 0;
+
+# creates a policy holding a certain rule (descriptor/action)
+# params: http method, policy-id, action-id, descriptor-id
 ./policy.sh put 1 1 1;
 
 ./prefix-descriptor.sh put 2 13.1.1.114/32;
@@ -28,36 +33,35 @@
 ./policy.sh put 2 2 2;
 
 ./prefix-descriptor.sh put 3 13.1.1.112/31;
-./rate-action.sh put 3 Sprint 2 0;
+# same as rate-action but is used for dropping packets
+./drop-action.sh put 3 Sprint 2 0;
 ./policy.sh put 3 3 3;
 
+# same as prefix-descriptor but uses a domain
 ./domain-descriptor.sh put 4 sprint.com;
-./rate-action.sh put 4 Sprint 1 0;
+./drop-action.sh put 4 Sprint 1 0;
 ./policy.sh put 4 4 4;
 
-./domain-descriptor.sh put 5 www.fcc.gov;
-./rate-action.sh put 5 Sprint 1 0;
-./policy.sh put 5 5 5;
-
-./domain-descriptor.sh put 6 csd-01.sprinspectrum.com;
-./rate-action.sh put 6 Sprint 1 0;
-./policy.sh put 6 6 6;
-
-./domain-descriptor.sh put 7 ns.sprintlabs.com;
-./rate-action.sh put 7 Sprint-Labs 1 0;
-./policy.sh put 7 7 7;
-
-./prefix-descriptor.sh put 8 13.1.1.121/32;
-./rate-action.sh put 8 Sprint 3 0;
-./policy.sh put 8 8 8;
-
 echo "policies created";
-sleep 3;
+sleep 1;
 
-./policy-group.sh put 1 2 3 4 5 6 7 8;
+# creates a policy group storing multiple policies
+# params: http method, policy-id x4
+./policy-group.sh put 1 2 3 4;
 echo "policy-group created"
 sleep 1;
 
+# creates a port that stores policy groups
+# params: http method
 ./port.sh post;
-echo "port created (all done)";
+echo "port created";
+sleep 1;
+
+./context_create.sh;
+echo "context created (all done)"
+# cd ..;
+# sleep 3;
+# ./unbindclient.sh 0;
+# ./bindclient.sh 1;
+# ./context_create.sh
 

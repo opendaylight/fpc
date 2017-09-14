@@ -23,7 +23,7 @@ curl -i \
             }
         ],
         'op-id': '1',
-        'client-id': '1',
+        'client-id': '0',
         'session-state': 'complete',
         'admin-state': 'enabled',
         'op-type': 'create',

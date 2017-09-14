@@ -155,12 +155,15 @@ module ietf-dmm-fpcbase {
         choice action-value {
           case drop {
             leaf drop {
+              mandatory true;
               type empty;
             }
-            leaf sponsor-identity {
-              type threegpp:sponsor-identity-type;
+            container rate-info{
+              leaf sponsor-identity {
+                type threegpp:sponsor-identity-type;
+              }
+              uses fpcpolicyext:rating-action;
             }
-            uses fpcpolicyext:rating-action;
           }
           case simple-nat {
               uses fpcpolicyext:simple-nat;

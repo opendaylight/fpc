@@ -8,7 +8,7 @@
 # ------------------------------------------------------------------
 
 
-dpnIdFile="./DpnId.txt"
+dpnIdFile="./../DpnId.txt"
 while IFS='' read -r line || [[ -n "$line" ]];
 do
     IFS='=' read -a myarray <<< "$line"
@@ -25,33 +25,14 @@ curl -i \
 -u admin:admin \
 --data "{
     'input': {
-        'op-id': '1',
+        'op-id': '2',
         'contexts': [
             {
-                'instructions': {
-                    'instr-3gpp-mob': 'session uplink'
-                },
-                'context-id': 202374885,
-                'dpn-group': 'foo',
-                'delegating-ip-prefixes': [
-                    '192.168.1.5/32'
-                ],
+                'context-id': 86,
                 'ul': {
-                    'tunnel-local-address': '192.168.1.1',
-                    'tunnel-remote-address': '10.1.1.1',
-                    'mobility-tunnel-parameters': {
-                        'tunnel-type': 'ietf-dmm-threegpp:gtpv1',
-                        'tunnel-identifier': '1111'
-                    },
                     'dpn-parameters': {}
                 },
                 'dl': {
-                    'tunnel-local-address': '192.168.1.1',
-                    'tunnel-remote-address': '10.1.1.1',
-                    'mobility-tunnel-parameters': {
-                        'tunnel-type': 'ietf-dmm-threegpp:gtpv1',
-                        'tunnel-identifier': '2222'
-                    },
                     'dpn-parameters': {}
                 },
 		        'ports': [
@@ -63,17 +44,11 @@ curl -i \
                         'direction': 'uplink',
                         'dpn-parameters': {}
                     }
-                ],
-                'imsi': '9135551234',
-                'ebi': '5',
-                'lbi': '5'
+                ]
             }
         ],
-        'client-id': '1',
-        'session-state': 'complete',
-        'admin-state': 'enabled',
-        'op-type': 'create',
-        'op-ref-scope': 'op'
+        'client-id': '0',
+        'op-type': 'create'
     }
 }" \
 http://localhost:8181/restconf/operations/ietf-dmm-fpcagent:configure

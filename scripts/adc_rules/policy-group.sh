@@ -7,9 +7,9 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-if [ "$#" -ne 9 ]; then
+if [ "$#" -ne 5 ]; then
     echo "Params incorrect, refer to the following template:"
-    echo "./policy-group.sh request policyid(x8)"
+    echo "./policy-group.sh request policyid(x4)"
     exit 1
 fi
 
@@ -35,11 +35,7 @@ curl -i -s \
                 "'"$2"'",
                 "'"$3"'",
                 "'"$4"'",
-                "'"$5"'",
-                "'"$6"'",
-                "'"$7"'",
-                "'"$8"'",
-                "'"$9"'"
+                "'"$5"'"
             ]
         }
     ]

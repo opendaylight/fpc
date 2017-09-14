@@ -14,7 +14,7 @@ curl -i -s \
 -u admin:admin \
 --data '{
     "input": {
-        "client-id": "1",
+        "client-id": "'"$1"'",
         "tenant-id": "default",
         "supported-features": [
             "urn:ietf:params:xml:ns:yang:fpcagent:fpc-bundles",

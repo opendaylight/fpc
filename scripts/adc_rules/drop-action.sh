@@ -7,9 +7,9 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 5 ]; then
     echo "Params incorrect, refer to the following template:"
-    echo "./drop-action.sh request id"
+    echo "./drop-action.sh request id sponsorId serviceId ratingGrp"
     exit 1
 fi
 
@@ -30,7 +30,14 @@ curl -i -s \
 --data '{ 
     "actions": [
         {
-            "drop": "true",
+            "action-type": "ietf-dmm-fpcbase:drop-action",
+            "drop": {},
+            "rate-info": {
+                "rating-group": "'"$5"'",
+                "service-identifier": "'"$4"'",
+                "service-context-id": "111@example.org",
+                "sponsor-identity": "'"$3"'"
+            },
     	    "action-id": "'"$2"'"
         }
     ]

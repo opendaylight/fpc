@@ -54,9 +54,6 @@ curl -i \
                     },
                     'dpn-parameters': {}
                 },
-		        'ports': [
-			        '2345'
-		        ],
                 'dpns': [
                     {
                         'dpn-id': $dpnId,

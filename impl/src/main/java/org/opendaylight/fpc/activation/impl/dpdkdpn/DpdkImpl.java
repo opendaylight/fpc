@@ -122,26 +122,22 @@ public class DpdkImpl implements Activator {
 							FpcAction action = BasePolicyManager.fpcActionMap.get(act.getActionId());
 							Short drop = 0;
 							String ip = null, domainName = null;
-							Rate theAction = ((Rate) action.getActionValue());
 						
 							if(desc.getDescriptorValue() instanceof PrefixDescriptor)
 								ip = new String(((PrefixDescriptor) desc.getDescriptorValue()).getDestinationIp().getValue());
 							else if(desc.getDescriptorValue() instanceof DomainDescriptor)
 								domainName = ((DomainDescriptor) desc.getDescriptorValue()).getDestinationDomains().get(0).getValue();
 
-							this.api.send_ADC_rules(topic, domainName, ip,  drop, theAction.getRatingGroup(), theAction.getServiceIdentifier(), theAction.getSponsorIdentity().getValue());
-							
-							// Drop Logic
-//							if(action.getActionValue() instanceof Rate){
-//								Rate theAction = ((Rate) action.getActionValue());
-//								this.api.send_ADC_rules(topic, domainName, ip,  drop, theAction.getRatingGroup(), theAction.getServiceIdentifier(), theAction.getSponsorIdentity().getValue());
-//							}else if(action.getActionValue() instanceof Drop){
-//								if(((Drop) action.getActionValue()).isDrop()){
-//									drop = 1;
-//								}
-//								//drop action doesn't have rategrp,serviceid,sponsorid
-//								this.api.send_ADC_rules(topic, domainName, ip,  drop, null, null, null);
-//							}
+							if(action.getActionValue() instanceof Rate){
+								Rate theAction = ((Rate) action.getActionValue());
+								this.api.send_ADC_rules(topic, domainName, ip,  drop, theAction.getRatingGroup(), theAction.getServiceIdentifier(), theAction.getSponsorIdentity().getValue());
+							}else if(action.getActionValue() instanceof Drop){
+								Drop theAction = ((Drop) action.getActionValue());
+								if(theAction.isDrop()){
+									drop = 1;
+								}
+								this.api.send_ADC_rules(topic, domainName, ip,  drop, theAction.getRateInfo().getRatingGroup(), theAction.getRateInfo().getServiceIdentifier(), theAction.getRateInfo().getSponsorIdentity().getValue());
+							}
 						}
 					}
 				}

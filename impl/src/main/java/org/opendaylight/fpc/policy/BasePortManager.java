@@ -62,6 +62,8 @@ public class BasePortManager extends PortManager implements AutoCloseable{
     public void addContext(Contexts cntx) throws Exception {
     	LOG.info("Connecting Port and DPN...");
     	if(cntx.getPorts()!=null && cntx.getDpns()!=null){
+    		LOG.info("Contextid: "+cntx.getContextId());
+    		LOG.info("cntx.getPorts(): "+cntx.getPorts());
     		FpcPortId portId = cntx.getPorts().get(0);
     		List<FpcPolicyGroupId> polgrpIdList = new ArrayList<FpcPolicyGroupId>();
     		Map<FpcIdentity, Set<FpcIdentity>> revptr = BasePolicyManager.getRevPointer();
