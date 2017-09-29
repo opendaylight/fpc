@@ -148,10 +148,11 @@ public class FpcAssignmentPhaseImpl extends FpcagentServiceBase {
         if ((entries % 100) == 0) {
             LOG.info("Entries = {} and enqueues = {}", entries, enqueueVal);
         }
-        return Futures.immediateFuture(RpcResultBuilder.<ConfigureOutput>success(new ConfigureOutputBuilder()
-                .setOpId(input.getOpId())
-                .setResult(res)
-                .setResultType(rt)).build());
+        return null;
+//        return Futures.immediateFuture(RpcResultBuilder.<ConfigureOutput>success(new ConfigureOutputBuilder()
+//                .setOpId(input.getOpId())
+//                .setResult(res)
+//                .setResultType(rt)).build());
     }
 
     @Override

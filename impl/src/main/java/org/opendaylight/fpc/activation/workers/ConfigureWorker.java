@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,6 +53,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.Err;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.ErrBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPort;
@@ -71,7 +73,7 @@ public class ConfigureWorker
     private boolean run;
     private final BlockingQueue<Object> blockingConfigureQueue;
     private DpnAPI2 api;
-    //private final DataBroker db;
+    private Map<String,ArrayList<Contexts>> sessionContextsMap;
 
     /**
      * Constructor.
@@ -79,9 +81,9 @@ public class ConfigureWorker
      * @param blockingConfigureQueue - Work queue
      */
     protected ConfigureWorker(DataBroker db, BlockingQueue<Object> blockingConfigureQueue) {
-        //this.db = db;
     	api = new DpnAPI2(ZMQClientPool.getInstance().getWorker());
         this.blockingConfigureQueue = blockingConfigureQueue;
+        sessionContextsMap = new ConcurrentHashMap<String,ArrayList<Contexts>>();
         LOG.info("ConfigureWorker has been initialized");
     }
 
@@ -128,7 +130,7 @@ public class ConfigureWorker
      * @return a ResultType if an error occurs otherwise null
      */
     private ResultType executeOperation(PayloadCache oCache,
-                                          Transaction tx) {
+                                          Transaction tx, ConfigureInput configureInput) {
     	LOG.info("Configure Worker - Execute Operation");
         long sysTime = System.currentTimeMillis();
         OpInput input = tx.getOpInput();
@@ -150,12 +152,12 @@ public class ConfigureWorker
                 		ErrorLog.logError(e.getStackTrace());
                 	}
             	}
-            	if(FpcagentServiceBase.sessionMap.get(NameResolver.extractString(context.getContextId())).getValue() != null) {
-            		FpcagentServiceBase.sessionMap.get(NameResolver.extractString(context.getContextId())).getValue().add(context);
+            	if(sessionContextsMap.get(NameResolver.extractString(context.getContextId())) != null) {
+            		sessionContextsMap.get(NameResolver.extractString(context.getContextId())).add(context);
             	} else {
             		ArrayList<Contexts> contextsArray = new ArrayList<Contexts>();
             		contextsArray.add(context);
-            		FpcagentServiceBase.sessionMap.get(NameResolver.extractString(context.getContextId())).setValue(contextsArray);
+            		sessionContextsMap.put(NameResolver.extractString(context.getContextId()),contextsArray);
             	}
                 for (Dpns dpn : (context.getDpns() == null) ? Collections.<Dpns>emptyList() : context.getDpns() ) {
                 	try{
@@ -165,7 +167,6 @@ public class ConfigureWorker
 	                            dpnInfo.activator.activate(api,input.getClientId(), input.getOpId(), input.getOpType(), (context.getInstructions() != null) ?
 	                                    context.getInstructions() : input.getInstructions(), context, oCache);
 	                            tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
-	                            //dpnInfo.activator.getResponseManager().enqueueChange(context, oCache, tx);
 	                        } catch (Exception e) {
 	                            return processActivationError(new ErrorTypeId(ErrorTypeIndex.CONTEXT_ACTIVATION_FAIL),
 	                                    e,
@@ -191,7 +192,6 @@ public class ConfigureWorker
                 OpCache result = StorageCacheUtils.read(doq.getTargets(), tx.getTenantContext());
                 tx.setResultType(result.getConfigSuccess());
                 tx.complete(System.currentTimeMillis(),false);
-                //tx.publish(false);
                 return null;
             } catch (Exception e) {
                 return processActivationError(new ErrorTypeId(ErrorTypeIndex.QUERY_FAILURE),
@@ -211,7 +211,7 @@ public class ConfigureWorker
                 FpcContext context = null;
                 if(entry == null)
                 	LOG.error("Unable to extract context ID - "+target.getTarget().toString());
-                ArrayList<Contexts> cList = FpcagentServiceBase.sessionMap.get(entry.getValue()).getValue();
+                ArrayList<Contexts> cList = sessionContextsMap.get(entry.getValue());
 
                 if(!cList.isEmpty()){
                 	context = cList.get(cList.size()-1);
@@ -240,8 +240,7 @@ public class ConfigureWorker
 	                                    try {
 	                                        dpnInfo.activator.delete(api,input.getClientId(),input.getOpId(),input.getInstructions(), target, context);
 	                                        tx.setStatus(OperationStatus.AWAITING_RESPONSES, System.currentTimeMillis() - sysTime);
-	                                        FpcagentServiceBase.sessionMap.remove(NameResolver.extractString(context.getContextId()));
-	                                        //dpnInfo.activator.getResponseManager().enqueueDelete(target, tx);
+	                                        sessionContextsMap.remove(NameResolver.extractString(context.getContextId()));
 	                                    } catch (Exception e) {
 	                                        return processActivationError(new ErrorTypeId(ErrorTypeIndex.DELETE_FAILURE),
 	                                                e,
@@ -300,7 +299,7 @@ public class ConfigureWorker
             oCache.newOpCache((Payload)input.getOpBody());
             t.setPayloadCache(oCache.getOpCache());
         }
-        executeOperation(oCache, t);
+        executeOperation(oCache, t, input);
     }
 
     /**
@@ -362,7 +361,7 @@ public class ConfigureWorker
                     break;
                 }
             }
-            ResultType rt = executeOperation(workingOpCache, t);
+            ResultType rt = executeOperation(workingOpCache, t, null);
 
             if ((rt != null) && (rt instanceof Err)) {
                 // TODO - Flag a cleanup call here
@@ -414,6 +413,11 @@ public class ConfigureWorker
 		return true;
 	}
 
+	/**
+	 * Extract type and ID of an entity
+	 * @param restconfPath - Instance identifier of the entity
+	 * @return - Map Entry with Type as key and Id as value
+	 */
 	public Map.Entry<FixedType, String> extractTypeAndId(String restconfPath) {
         for (Map.Entry<FixedType, Map.Entry<Pattern,Integer>> p : NameResolver.entityPatterns.entrySet()) {
             Matcher m = p.getValue().getKey().matcher(restconfPath);

@@ -11,6 +11,7 @@ package org.opendaylight.fpc.activation.impl.dpdkdpn;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONObject;
 import org.opendaylight.fpc.impl.zeromq.ZMQSBListener;
@@ -18,6 +19,7 @@ import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.IPToDecimal;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientSocket;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
 

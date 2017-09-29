@@ -197,13 +197,12 @@ public class EventMonitorMgr {
      * @param ddn - Downlink Data Notification
      */
     public static void processEvent(FpcDpnId dpn, DownlinkDataNotification ddn) {
-    	ArrayList<Uri> uris = new ArrayList<Uri>();
-    	if(FpcServiceImpl.getNotificationUri(ddn.getClientId()) != null){
-    		uris.add(FpcServiceImpl.getNotificationUri(ddn.getClientId()));
-        	Notifier.issueDownlinkDataNotification(uris, ddn);
-    	}
-
-
+    	Notifier.issueDownlinkDataNotification(ddn);
+//    	ArrayList<Uri> uris = new ArrayList<Uri>();
+//    	if(FpcServiceImpl.getNotificationUri(ddn.getClientId()) != null){
+//    		uris.add(FpcServiceImpl.getNotificationUri(ddn.getClientId()));
+//        	Notifier.issueDownlinkDataNotification(uris, ddn);
+//    	}
     }
 
     /**

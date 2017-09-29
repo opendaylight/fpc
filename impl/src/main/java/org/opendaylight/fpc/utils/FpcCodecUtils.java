@@ -7,16 +7,31 @@
  */
 package org.opendaylight.fpc.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.opendaylight.fpc.impl.FpcagentDispatcher;
 import org.opendaylight.fpc.utils.yangtools.SchemaManager;
+import org.opendaylight.netconf.sal.rest.api.RestconfNormalizedNodeWriter;
+import org.opendaylight.netconf.sal.rest.impl.RestconfDelegatingNormalizedNodeWriter;
+import org.opendaylight.netconf.sal.restconf.api.JSONRestconfService;
+import org.opendaylight.netconf.sal.restconf.impl.ControllerContext;
+import org.opendaylight.netconf.sal.restconf.impl.InstanceIdentifierContext;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureInput;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.IetfDmmFpcagentData;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ResultBody;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
@@ -24,13 +39,17 @@ import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeConte
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.yang.binding.BindingStreamEventWriter;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
@@ -42,6 +61,8 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeS
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.osgi.framework.BundleContext;
@@ -55,6 +76,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.gson.stream.JsonReader;
 //import org.apache.aries.spifly.client.jar.Consumer;
+import com.google.gson.stream.JsonWriter;
 
 import javassist.ClassPool;
 
@@ -102,6 +124,8 @@ public class FpcCodecUtils {
     private BindingRuntimeContext bindingContext;
     private BindingNormalizedNodeCodecRegistry codecRegistry;
     private final YangInstanceIdentifier TOP_PATH;
+    private SchemaPath CONFIGURE_OUTPUT_PATH;
+	private Object service;
 
     /**
      * Primary Constructor
@@ -129,6 +153,14 @@ public class FpcCodecUtils {
         final BindingNormalizedNodeCodecRegistry bindingStreamCodecs = new BindingNormalizedNodeCodecRegistry(StreamWriterGenerator.create(JavassistUtils.forClassPool(ClassPool.getDefault())));
         bindingStreamCodecs.onBindingRuntimeContextUpdated(bindingContext);
         codecRegistry = bindingStreamCodecs;
+        Module fpcagent = context.findModuleByName("ietf-dmm-fpcagent", null);
+        Set<RpcDefinition> rpcList = fpcagent.getRpcs();
+        for(RpcDefinition rpc : rpcList){
+        	if(rpc.getQName().getLocalName().equals("configure")){
+        		CONFIGURE_OUTPUT_PATH = rpc.getOutput().getPath();
+        		break;
+        	}
+        }
         LOG.info("Mapping service built");
     }
 
@@ -206,6 +238,40 @@ public class FpcCodecUtils {
     }
 
     /**
+     * Convert ConfigureOutput object to JSON String
+     * @param object - ConfigureOutput object
+     * @return - JSON string of ConfigureOutput
+     */
+    public final String jsonStringFromConfigureOutput(DataObject object) {
+        final Writer writer = new StringWriter();
+        JsonWriter jsonWriter = JsonWriterFactory.createJsonWriter(writer);
+        final NormalizedNodeStreamWriter domWriter = JSONNormalizedNodeStreamWriter.createExclusiveWriter(JSONCodecFactory.create(context), CONFIGURE_OUTPUT_PATH, CONFIGURE_OUTPUT_PATH.getLastComponent().getNamespace(), jsonWriter);
+        RestconfNormalizedNodeWriter restConfWriter = null;
+        try {
+        	jsonWriter.beginObject();
+        	restConfWriter = (RestconfNormalizedNodeWriter) RestconfDelegatingNormalizedNodeWriter.forStreamWriter(domWriter);
+			jsonWriter.name("output");
+			for (DataContainerChild<? extends org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument, ?> child : codecRegistry.toNormalizedNodeRpcData((DataContainer)object).getValue()) {
+	        	try {
+					restConfWriter.write(child);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e2){
+					e2.printStackTrace();
+				}
+	        }
+			jsonWriter.endObject();
+	        restConfWriter.flush();
+	        jsonWriter.flush();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+        return writer.toString();
+}
+
+
+    /**
      * Converts a YANG Notification to a JSON String
      * @param clz - Notification subclass
      * @param notification - Notification instance
@@ -251,10 +317,11 @@ public class FpcCodecUtils {
     public String normalizedNodeToJsonStreamTransformation(final Writer writer,
             SchemaPath scPath,
             final NormalizedNode<?, ?> inputStructure) throws IOException {
-
+    	QName lastcomp = scPath.getLastComponent();
+    	URI ns = lastcomp.getNamespace();
         final NormalizedNodeStreamWriter jsonStream = JSONNormalizedNodeStreamWriter.
                 createExclusiveWriter(JSONCodecFactory.create(context), scPath, scPath.getLastComponent().getNamespace(),
-                    JsonWriterFactory.createJsonWriter(writer, 2));
+                    JsonWriterFactory.createJsonWriter(writer));
         final NormalizedNodeWriter nodeWriter = NormalizedNodeWriter.forStreamWriter(jsonStream);
         nodeWriter.write(inputStructure);
 

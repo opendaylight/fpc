@@ -29,8 +29,12 @@ import org.opendaylight.fpc.activation.workers.ConfigureWorker;
 import org.opendaylight.fpc.activation.workers.MonitorWorker;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.ErrorTypeIndex;
+import org.opendaylight.fpc.utils.FpcCodecUtils;
 import org.opendaylight.fpc.utils.NameResolver;
 import org.opendaylight.fpc.utils.NameResolver.FixedType;
+import org.opendaylight.fpc.utils.eventStream.ConfigureService;
+import org.opendaylight.fpc.utils.eventStream.NBEventWorker;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigResultNotification;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigureBundlesOutput;
@@ -57,11 +61,15 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.result.type.ErrBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.fpc.config.rev160927.FpcConfig;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
 
 /**
@@ -74,6 +82,22 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
     private static AtomicLong entrants = new AtomicLong(0L);
     private static AtomicLong enqueues = new AtomicLong(0L);
     private static final Pattern pattern = Pattern.compile("/ietf-dmm-fpcagent:tenants/tenant/[^ /]+/fpc-mobility/contexts/([^ /]+)");
+
+    public static final QName TOP_ODL_FPC_QNAME =
+            QName.create("urn:ietf:params:xml:ns:yang:fpcagent", "2016-08-03","output").intern();
+    static final YangInstanceIdentifier outputYII =
+            YangInstanceIdentifier.of(TOP_ODL_FPC_QNAME);
+    static final InstanceIdentifier<ConfigureOutput> outputII =
+            InstanceIdentifier.create(ConfigureOutput.class);
+    static final FpcCodecUtils fpcCodecUtils;
+    static {
+        try {
+            fpcCodecUtils = FpcCodecUtils.get(ConfigureOutput.class, outputYII);
+        } catch (Exception e) {
+            LOG.error("Exception occured during FpcCodecUtilsInitialization");
+            throw Throwables.propagate(e);
+        }
+    }
     /**
      * Constructor initializing the primary services.
      *
@@ -99,8 +123,9 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
         ConfigureWorker worker = null;
         ResultType rt = null;
         Result res  = null;
+        Transaction tx = null;
         try {
-            Transaction tx  = Transaction.newTransaction((OpInput) input, startTime);
+            tx  = Transaction.newTransaction((OpInput) input, startTime);
             rt = immediateChecks((OpInput) input, tx);
             res = (rt != null) ? ((rt instanceof Err) ? Result.Err : Result.OkNotifyFollows) :
                             Result.OkNotifyFollows;
@@ -114,49 +139,52 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                         	OpBody opBody = ((OpInput)input).getOpBody();
                         	if( opBody instanceof CreateOrUpdate){
                         		for(Contexts context : ((CreateOrUpdate)opBody).getContexts()){
-                        			Entry<ConfigureWorker, ArrayList<Contexts>> entry = sessionMap.get(NameResolver.extractString(context.getContextId()));
+                        			ConfigureWorker entry = sessionMap.get(NameResolver.extractString(context.getContextId()));
                         			if(entry != null){
-                        				if(entry.getKey() != null && input.getOpType().equals(OpType.Update)){
-                        					entry.getKey().getQueue().put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
+                        				if(input.getOpType().equals(OpType.Update)){
+                        					entry.getQueue().put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
                                                 input));
                             				tx.setStatusTs(OperationStatus.UPDATE, System.currentTimeMillis());
                             				tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
                                             enqueueVal = enqueues.incrementAndGet();
-                        				} else if(entry.getKey() != null && input.getOpType().equals(OpType.Create)) {
+                        				} else if(input.getOpType().equals(OpType.Create)) {
                         					ErrorLog.logError("Create session received for a session that was already created. Session id - "+context.getContextId().toString());
                         					tx.setStatusTs(OperationStatus.ERRORED_CREATE, System.currentTimeMillis());
                         				}
                         			}
-//                        			Check with Jacob - Is CP ready to receive an error on creates
-//                        			else if(workerQueue != null && input.getOpType().equals(OpType.Create)) {
-                        				//tx.fail(System.currentTimeMillis());
-                        				//res = Result.Err;
-//                        	            rt = new ErrBuilder()
-//                        	                    .setErrorTypeId(new ErrorTypeId(ErrorTypeIndex.SESSION_ALREADY_EXISTS))
-//                        	                    .setErrorInfo("SYSTEM - operation failed - This session has already been created.")
-//                        	                    .build();
-                        	            //break;
-//                        			}
                         			else {
                         				if(input.getOpType().equals(OpType.Create)){
                         					worker = activationService.getWorker();
-                        					sessionMap.put(NameResolver.extractString(context.getContextId()), new AbstractMap.SimpleEntry<ConfigureWorker, ArrayList<Contexts>>(worker,null));
                         					worker.getQueue().put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
                         							input));
+                        					sessionMap.put(NameResolver.extractString(context.getContextId()), worker);
                         					tx.setStatusTs(OperationStatus.CREATE, System.currentTimeMillis());
                         					tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
                                             enqueueVal = enqueues.incrementAndGet();
                         				}
                         				else if(input.getOpType().equals(OpType.Update)){
-                        					tx.setStatusTs(OperationStatus.ERRORED_UPDATE, System.currentTimeMillis());
-                        					ErrorLog.logError("Update received for a session which hasn't been created yet. Session Id - "+context.getContextId().toString());
+                        					for(int i = 0; i < 1500; i++){
+                        						Thread.sleep(1);
+                        						entry = sessionMap.get(NameResolver.extractString(context.getContextId()));
+                        						if(entry != null){
+                                    				if(input.getOpType().equals(OpType.Update)){
+                                    					entry.getQueue().put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
+                                                            input));
+                                        				tx.setStatusTs(OperationStatus.UPDATE, System.currentTimeMillis());
+                                        				tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
+                                                        enqueueVal = enqueues.incrementAndGet();
+                                                        break;
+                                    				}
+                        						}
+                        					}
+                        					if(entry == null){
+                        						tx.setStatusTs(OperationStatus.ERRORED_UPDATE, System.currentTimeMillis());
+                        						ErrorLog.logError("Update received for a session which hasn't been created yet. Session Id - "+context.getContextId().toString());
+                        					}
                         				}
                         			}
                         		}
                         	}
-//                            activationService.getWorker().getQueue()
-//                                .put(new AbstractMap.SimpleEntry<Transaction,Object>(tx,
-//                                    input));
                             rt = new CommonSuccessBuilder( ((Payload)input.getOpBody()) ).build();
                         } catch (Exception e) {
                             rt = activationServiceInterrupted(e,tx, System.currentTimeMillis() - startTime);
@@ -169,15 +197,14 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                         			Entry<FixedType, String> entry = extractTypeAndId(NameResolver.extractString(target.getTarget()));
                         			if(entry.getKey().equals(FixedType.CONTEXT))
                         			if(sessionMap.get(entry.getValue()) != null){
-                        				sessionMap.get(entry.getValue()).getKey().getQueue().put(
+                        				sessionMap.get(entry.getValue()).getQueue().put(
                                                 new AbstractMap.SimpleEntry<Transaction,Object>(tx,input));
                         				tx.setStatusTs(OperationStatus.ACTIVATION_ENQUEUE, System.currentTimeMillis());
                         				tx.setStatusTs(OperationStatus.DELETE, System.currentTimeMillis());
+                        				sessionMap.remove(entry.getValue());
                         			}
                         		}
                         	}
-//                            activationService.getWorker().getQueue().put(
-//                                    new AbstractMap.SimpleEntry<Transaction,Object>(tx,input));
 
                             rt = new DeleteSuccessBuilder((DeleteOrQuery) input.getOpBody()).build();
                         } catch (InterruptedException e) {
@@ -207,10 +234,19 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
         }
 
     	LOG.info("Configure Stop: "+System.currentTimeMillis());
-        return Futures.immediateFuture(RpcResultBuilder.<ConfigureOutput>success(new ConfigureOutputBuilder()
+    	ConfigureOutput configureOutput = new ConfigureOutputBuilder()
                 .setOpId(input.getOpId())
                 .setResult(res)
-                .setResultType(rt)).build());
+                .setResultType(rt).build();
+
+
+    	String outputString = fpcCodecUtils.jsonStringFromConfigureOutput(configureOutput);
+    	String clientUri = NBEventWorker.clientIdToUri.get(input.getClientId().getInt64().intValue());
+
+    	if(clientUri != null && outputString != null)
+    		ConfigureService.blockingQueue.add(new AbstractMap.SimpleEntry(clientUri, new AbstractMap.SimpleEntry(tx,"event:application/json;/restconf/operations/ietf-dmm-fpcagent:configure\ndata:"+outputString+"\r\n")));
+
+        return Futures.immediateFuture(RpcResultBuilder.<ConfigureOutput>success().build());
     }
 
     @Override
@@ -280,6 +316,11 @@ public class FpcAssignmentPhaseNoassignImpl extends FpcagentServiceBase {
                 .build()).build());
     }
 
+    /**
+     * Extract the type and Id of the entity
+     * @param restconfPath - Instance id of the entity
+     * @return - Map Entry of the Type and Id of the entity
+     */
     public Map.Entry<FixedType, String> extractTypeAndId(String restconfPath) {
         for (Map.Entry<FixedType, Map.Entry<Pattern,Integer>> p : NameResolver.entityPatterns.entrySet()) {
             Matcher m = p.getValue().getKey().matcher(restconfPath);

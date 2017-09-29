@@ -38,6 +38,10 @@ import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.FpcCodecUtils;
 import org.opendaylight.fpc.utils.StringConstants;
+import org.opendaylight.fpc.utils.eventStream.EventClient;
+import org.opendaylight.fpc.utils.eventStream.JettyServer;
+import org.opendaylight.fpc.utils.eventStream.NBEventPool;
+import org.opendaylight.fpc.utils.eventStream.ParseStream;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
 import org.opendaylight.netconf.sal.restconf.api.JSONRestconfService;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.FpcAgentInfo;
@@ -84,6 +88,8 @@ public class FpcProvider implements AutoCloseable {
     private ZMQSBListener zmqSbListener;
     private WriteToCache wtc;
     private Thread writeToCache;
+    private Thread jettyServer;
+    private Thread parseStreamThread;
     /**
      * Returns the instance of the FpcProvider
      * @return FpcProvider instance
@@ -214,8 +220,26 @@ public class FpcProvider implements AutoCloseable {
 
         fpcService = null;
         assignmentService = null;
+        jettyServer = new Thread ( new Runnable(){
+			@Override
+			public void run() {
+				JettyServer.init();
+			}
+        });
+        jettyServer.start();
 
+        parseStreamThread = new Thread(new ParseStream());
+        parseStreamThread.start();
 
+        try {
+            NBEventPool.createInstance(20);
+            NBEventPool.getInstance().start();
+            NBEventPool.getInstance().run();
+        } catch (Exception e) {
+        	ErrorLog.logError(e.getStackTrace());
+            close();
+            throw new Exception("FpcProvider - Error during start/run for NB Event Pool. Exiting...");
+        }
         LOG.info("FpcProvider - Constructor Complete");
     }
 
@@ -289,7 +313,25 @@ public class FpcProvider implements AutoCloseable {
         fpcCoreServices =
                 rpcRegistryDependency.addRpcImplementation(FpcService.class,
                         new FpcServiceImpl(this.dataBroker, this.notificationService, this.monitorService, this.activationService));
-        initJSON();
+        new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				try {
+					Thread.sleep(10000);
+					initJSON();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+
+			}
+
+        }).start();
+
+
     }
 
     /**
@@ -438,6 +480,14 @@ public class FpcProvider implements AutoCloseable {
             } catch (Exception e) {
             	ErrorLog.logError(e.getStackTrace());
             }
+        }
+
+        if(NBEventPool.getInstance() != null){
+        	try {
+        		NBEventPool.getInstance().close();
+        	} catch (Exception e) {
+        		ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
+        	}
         }
 
         LOG.info("FpcProvider - Closed");

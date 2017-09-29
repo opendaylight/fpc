@@ -70,8 +70,8 @@ import com.google.common.util.concurrent.Futures;
  */
 public class TenantManager implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TenantManager.class);
-    private static final Map<String, TenantManager> tenants = new HashMap<String, TenantManager>();
-    private static final Map<String, TenantManager> clientIdToTenants = new HashMap<String, TenantManager>();
+    private static final Map<String, TenantManager> tenants = new ConcurrentHashMap<String, TenantManager>();
+    private static final Map<String, TenantManager> clientIdToTenants = new ConcurrentHashMap<String, TenantManager>();
     private static final List<ActivatorFactory> defaultActivatorFactories = new ArrayList<ActivatorFactory>();
     private static DataBroker dataBroker;
     private int dpnIdCounter = 0;
@@ -446,14 +446,14 @@ public class TenantManager implements AutoCloseable {
 	    	            public void onSuccess(final Void result) {
 	    	                // Commited successfully
 	    	            	LOG.info("Dpn (nodeId = "+nodeId+") was deleted successfully");
-	    	            	ArrayList<Uri> uris = new ArrayList<Uri>();
-	    	            	for( Entry<String, TenantManager> entry: clientIdToTenants.entrySet()){
-	    	            		if(entry.getValue().getTenant().getTenantId().getString().equals(FpcProvider.getInstance().getConfig().getDefaultTenantId())){
-	    	            			uris.add(FpcServiceImpl.getNotificationUri(entry.getKey()));
-	    	            		}
-	    	            	}
+//	    	            	ArrayList<Uri> uris = new ArrayList<Uri>();
+//	    	            	for( Entry<String, TenantManager> entry: clientIdToTenants.entrySet()){
+//	    	            		if(entry.getValue().getTenant().getTenantId().getString().equals(FpcProvider.getInstance().getConfig().getDefaultTenantId())){
+//	    	            			uris.add(FpcServiceImpl.getNotificationUri(entry.getKey()));
+//	    	            		}
+//	    	            	}
 	    	            	if(dsType.equals(LogicalDatastoreType.CONFIGURATION))
-	    	            		Notifier.issueDpnAvailabilityNotification(uris,
+	    	            		Notifier.issueDpnAvailabilityNotification(
 	    	            			new DpnAvailabilityBuilder()
 	    	            			.setMessageType("Dpn-Availability")
 	    	            			.setDpnStatus(DpnStatusValue.DpnStatus.Unavailable)
@@ -525,14 +525,14 @@ public class TenantManager implements AutoCloseable {
 	            public void onSuccess(final Void result) {
 	                // Commited successfully
 	            	LOG.info("Dpn (nodeId = "+nodeId+") added successfully in the data store");
-	            	ArrayList<Uri> uris = new ArrayList<Uri>();
-	            	for( Entry<String, TenantManager> entry: clientIdToTenants.entrySet()){
-	            		if(entry.getValue().getTenant().getTenantId().getString().equals(FpcProvider.getInstance().getConfig().getDefaultTenantId())){
-	            			uris.add(FpcServiceImpl.getNotificationUri(entry.getKey()));
-	            		}
-	            	}
+//	            	ArrayList<Uri> uris = new ArrayList<Uri>();
+//	            	for( Entry<String, TenantManager> entry: clientIdToTenants.entrySet()){
+//	            		if(entry.getValue().getTenant().getTenantId().getString().equals(FpcProvider.getInstance().getConfig().getDefaultTenantId())){
+//	            			uris.add(FpcServiceImpl.getNotificationUri(entry.getKey()));
+//	            		}
+//	            	}
 	            	if(dsType.equals(LogicalDatastoreType.CONFIGURATION))
-	            		Notifier.issueDpnAvailabilityNotification(uris,
+	            		Notifier.issueDpnAvailabilityNotification(
 	            			new DpnAvailabilityBuilder()
 	            			.setMessageType("Dpn-Availability")
 	            			.setDpnStatus(DpnStatusValue.DpnStatus.Available)

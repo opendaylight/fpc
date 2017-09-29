@@ -60,7 +60,7 @@ abstract public class FpcagentServiceBase implements IetfDmmFpcagentService, Con
     protected NotificationPublishService notificationService;
     protected int TARGET_READ_LIMIT = 10; // Default
     protected boolean assignmentManagerRequired = true;
-    public static ConcurrentHashMap<String,Map.Entry<ConfigureWorker, ArrayList<Contexts>>> sessionMap = new ConcurrentHashMap<String,Map.Entry<ConfigureWorker, ArrayList<Contexts>>>();
+    public static ConcurrentHashMap<String,ConfigureWorker> sessionMap = new ConcurrentHashMap<String,ConfigureWorker>();
 
     /**
      * Primary Constructor which initializes the common services of the plugin.

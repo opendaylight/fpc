@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.cache.transaction.Transaction.OperationStatus;
@@ -38,8 +39,8 @@ public class DpnAPIListener {
     private static byte DPN_OVERLOAD_INDICATION = 0b0000_0101;
     private static byte DPN_REPLY = 0b0000_0100;
     private static String DOWNLINK_DATA_NOTIFICATION_STRING = "Downlink-Data-Notification";
-    static private Map<String, FpcDpnId> uplinkDpnMap = new HashMap<String, FpcDpnId>();
-    static private Map<String, Short> topicToNodeMap = new HashMap<String, Short>();
+    static private Map<String, FpcDpnId> uplinkDpnMap = new ConcurrentHashMap<String, FpcDpnId>();
+    static private Map<String, Short> topicToNodeMap = new ConcurrentHashMap<String, Short>();
 
     /**
      * Sets the mapping of a node id / network id key to DPN Identities.
@@ -187,7 +188,7 @@ public class DpnAPIListener {
 		if(t != null){
 			t.setStatus(OperationStatus.DPN_RESPONSE_PROCESSED, System.currentTimeMillis());
 			t.setCauseValue(buf[2]);
-			t.complete(System.currentTimeMillis());
+			t.sendNotification();
 		} else {
 			ErrorLog.logError("Transaction not found: "+ClientId+"/"+OpId);
 		}

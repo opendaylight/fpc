@@ -15,6 +15,7 @@ import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService
 import org.opendaylight.fpc.impl.FpcServiceImpl;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.FpcCodecUtils;
+import org.opendaylight.fpc.utils.eventStream.NotificationService;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigResultNotification;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ConfigResultNotificationBuilder;
@@ -30,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.notify.value.MonitorNotification;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.result.body.ResultType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -102,16 +104,12 @@ public class Notifier {
                         .build())
                 .build();
         try {
-            Uri uri = FpcServiceImpl.getNotificationUri(clientId);
-            if (uri != null) {
-                if (uri.getValue().startsWith("http") &&
-                    (HTTPClientPool.instance() != null)) {
-                    HTTPClientPool.instance().getWorker().getQueue().put(
-                        new AbstractMap.SimpleEntry<Uri,Notification>(
-                                uri,
-                                result));
-                }
-            }
+        	String streamString = fpcCodecUtils.notificationToJsonString(Notify.class,
+    		        (DataObject) result,
+    		        true);
+            streamString = streamString.replace("\n","");
+            streamString = "event:application/json;/notification\ndata:"+streamString+"\n";
+            NotificationService.blockingQueue.put(new AbstractMap.SimpleEntry<String,String>(clientId.getInt64().toString(),streamString));
             if (issueInternal &&
                     (notificationService != null)) {
                 notificationService.putNotification(result);
@@ -156,21 +154,51 @@ public class Notifier {
 
     /**
      * Issue a Downlink Data Notification.
-     * @param uris - Uris to issue the notification to
      * @param ddn - Downlink Data Notification to be issued
      */
-    static public void issueDownlinkDataNotification(Collection<Uri> uris,
-            DownlinkDataNotification ddn) {
-        issueNotification(ddn, uris);
+    static public void issueDownlinkDataNotification(DownlinkDataNotification ddn) {
+    	Long notificationId = NotificationInfo.next();
+        Notify notif = new NotifyBuilder()
+                .setNotificationId(new NotificationId(notificationId))
+                .setTimestamp(BigInteger.valueOf(System.currentTimeMillis()))
+                .setValue(ddn)
+                .build();
+        String streamString = fpcCodecUtils.notificationToJsonString(Notify.class,
+		        (DataObject) notif,
+		        true);
+        streamString = streamString.replace("\n", "");
+        streamString = "event:application/json;/notification\ndata:"+streamString+"\n";
+        try {
+			NotificationService.blockingQueue.put(new AbstractMap.SimpleEntry<String,String>(ddn.getClientId().getInt64().toString(),streamString));
+		} catch (InterruptedException e) {
+			ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
+		}
     }
 
     /**
      * Issue a DPN Availability Notification
-     * @param uris - Uris to issue the notification to
      * @param dpnAvailability - DPN
      */
-    static public void issueDpnAvailabilityNotification(Collection<Uri> uris, DpnAvailability dpnAvailability){
-    	issueNotification(dpnAvailability, uris);
+    static public void issueDpnAvailabilityNotification(DpnAvailability dpnAvailability){
+    	for(ClientIdentifier clientId : FpcServiceImpl.clientIdList){
+    		Long notificationId = NotificationInfo.next();
+            Notify notif = new NotifyBuilder()
+                    .setNotificationId(new NotificationId(notificationId))
+                    .setTimestamp(BigInteger.valueOf(System.currentTimeMillis()))
+                    .setValue(dpnAvailability)
+                    .build();
+            String streamString = fpcCodecUtils.notificationToJsonString(Notify.class,
+			        (DataObject) notif,
+			        true);
+            streamString = streamString.replace("\n", "");
+            streamString = "event:application/json;/notification\ndata:"+streamString+"\n";
+
+            try {
+				NotificationService.blockingQueue.put(new AbstractMap.SimpleEntry<String,String>(clientId.getInt64().toString(),streamString));
+			} catch (InterruptedException e) {
+				ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
+			}
+    	}
     }
 
     /**

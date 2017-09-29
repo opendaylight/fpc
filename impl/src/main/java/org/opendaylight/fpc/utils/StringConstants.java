@@ -7,6 +7,9 @@
  */
 package org.opendaylight.fpc.utils;
 
+/**
+ * Class to declare String Constants
+ */
 public class StringConstants {
 	public static String bindClient =
 			"{\n" +
@@ -31,7 +34,7 @@ public class StringConstants {
 			"                \"instructions\": {\n" +
 			"                    \"instr-3gpp-mob\": \"session uplink\"\n" +
 			"                },\n" +
-			"                \"context-id\": \"123\",\n" +
+			"                \"context-id\": \"test-context\",\n" +
 			"                \"dpn-group\": \"site1-l3\",\n" +
 			"                \"delegating-ip-prefixes\": [\n" +
 			"                    \"100.100.100.100/32\"\n" +
@@ -80,7 +83,7 @@ public class StringConstants {
 			"        \"op-id\": \"1\",\n" +
 			"        \"targets\": [\n" +
 			"            {\n" +
-			"                \"target\": \"/ietf-dmm-fpcagent:tenants/tenant/default/fpc-mobility/contexts/123\"\n" +
+			"                \"target\": \"/ietf-dmm-fpcagent:tenants/tenant/default/fpc-mobility/contexts/test-context\"\n" +
 			"            }\n" +
 			"        ],\n" +
 			"        \"client-id\": \"0\",\n" +

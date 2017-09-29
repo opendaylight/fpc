@@ -65,6 +65,7 @@ public class FpcServiceImpl implements FpcService {
     private final NotificationPublishService notificationService;
     private final ActivationThreadPool activationService;
     private final MonitorThreadPool monitorService;
+    public static ArrayList<ClientIdentifier> clientIdList = new ArrayList<ClientIdentifier>();
 
     /**
      * Returns a Notification Uri for a specific Client.
@@ -214,6 +215,7 @@ public class FpcServiceImpl implements FpcService {
                     clientId = new ClientIdentifier(clientNumericId.longValue());
                     clientNumericId.incrementAndGet();
                 }
+                clientIdList.add(clientId);
 
                 FpcagentServiceBase agentServiceStrategy = null;
                 if (!convergedFeatures.contains("urn:ietf:params:xml:ns:yang:fpcagent:fpc-client-assignments")) {
@@ -278,6 +280,7 @@ public class FpcServiceImpl implements FpcService {
              if (connections.remove(input.getClientId().toString()) != null) {
                  TenantManager.deregisterClient(input.getClientId());
                  FpcagentDispatcher.removeStrategy(input.getClientId());
+                 clientIdList.remove(input.getClientId());
                  LOG.info("Connection Removed for Client {}", input.getClientId());
                  checkPoint();
              }

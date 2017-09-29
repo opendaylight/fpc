@@ -37,7 +37,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </dependencyManagement>
 
   <dependencies>
-    <dependency>
+   <dependency>
 	  <groupId>org.opendaylight.netconf</groupId>
 	  <artifactId>sal-rest-connector</artifactId>
 	  	    <scope>provided</scope>
@@ -74,7 +74,57 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
          <artifactId>spymemcached</artifactId>
          <version>2.12.2</version>
      </dependency>
-	
+
+<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
+<!-- <dependency>
+    <groupId>org.glassfish.jersey.core</groupId>
+    <artifactId>jersey-client</artifactId>
+    <version>2.26-b09</version>
+</dependency> -->
+
+	 <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+  <dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <!-- <version>3.1.0</version> -->
+    <scope>provided</scope>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
+    <!-- <dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-server</artifactId>
+    <version>9.4.6.v20170531</version>
+</dependency>   -->
+<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
+   <dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-servlet</artifactId>
+    <version>8.1.19.v20160209</version>
+</dependency> 
+ <dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-http</artifactId>
+    <version>8.1.19.v20160209</version>
+</dependency>
+
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-annotations</artifactId>
+  <version>8.1.19.v20160209</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-util -->
+<dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-util</artifactId>
+    <version>8.1.19.v20160209</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/javax.annotation/jsr250-api -->
+<!-- <dependency>
+    <groupId>javax.annotation</groupId>
+    <artifactId>jsr250-api</artifactId>
+    <version>1.0</version>
+</dependency> -->
+
 
     <!-- Testing Dependencies -->
     <dependency>
@@ -105,10 +155,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 			      <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 			      <Bundle-Version>${project.version}</Bundle-Version>
 			      <Import-Package>*</Import-Package>
-			    <!--  <Embed-Dependency>*;scope=compile;inline=false</Embed-Dependency>  -->
+			    <!--  <Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency> -->
 			      <Export-Package>
-			          org.opendaylight.fpc.activation,
-			          org.zeromq, zmq, org.apache.commons, org.apache.commons.cli, org.apache.http.*, org.apache.http.client.*, org.apache.log, org.apache.log.*, org.apache.commons.logging.*
+			          org.opendaylight.fpc.activation,org.opendaylight.fpc.utils.eventStream.*,org.eclipse.jetty.servlet.*,org.eclipse.jetty.http.*,org.eclipse.jetty.*,javax.annotation.*,javax.servlet.*,org.mortbay.*,org.mortbay.log,org.mortbay.util.ajax,org.objectweb.asm,org.objectweb.asm.*,
+			          org.zeromq, zmq, org.apache.commons, org.apache.commons.cli, org.apache.http.*, org.apache.http.client.*, org.apache.log, org.apache.log.*, org.apache.commons.logging.*,org.opendaylight.netconf.sal.rest.impl.*,org.opendaylight.netconf.sal.restconf.impl.*
 			      </Export-Package>
 			      <SPI-Consumer>*</SPI-Consumer>
 			      <SPI-Provider>*</SPI-Provider>
