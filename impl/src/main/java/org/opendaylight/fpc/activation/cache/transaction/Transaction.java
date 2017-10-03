@@ -24,6 +24,7 @@ import org.opendaylight.fpc.activation.cache.PayloadCache;
 import org.opendaylight.fpc.activation.cache.StorageCache;
 import org.opendaylight.fpc.notification.Notifier;
 import org.opendaylight.fpc.tenant.TenantManager;
+import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.NameResolver;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpIdentifier;
@@ -189,7 +190,7 @@ public class Transaction {
         /**
          * Failed
          */
-        FAILED
+        FAILED, OK_RESPONSE_SENT
     };
 
     private short causeValue;
@@ -204,6 +205,7 @@ public class Transaction {
     private TenantManager tenantMgr;
     private boolean responseSent; //flag is set to true after response to original request is sent
     private boolean notificationReady; //flag is set to true if notification is ready to be sent
+    private boolean notifEnqueued;
     /**
      * Creates a new Operation.
      * @param input - Operation Input
@@ -475,52 +477,84 @@ public class Transaction {
 
     public void setResponseSent(){
     	this.responseSent = true;
-    	if(this.notificationReady){
-    		sendNotification();
-    	}
+    	this.setStatusTs(OperationStatus.OK_RESPONSE_SENT, System.currentTimeMillis());
     }
 
     public void sendNotification() {
-    	if(this.responseSent){
-    		Transaction that = this;
-    		new Thread(new Runnable(){
-
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					try {
-						Thread.sleep(0, 500);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					that.setStatusTs(OperationStatus.DISPATCHING_NOTIFICATION, System.currentTimeMillis());
-			         switch (input.getOpType()) {
-			         	case Create:
-			         	case Update:
-			         		rt = getOpCache(pc).getConfigSuccess();
-			         		//rt = new CommonSuccessBuilder().
-			         		break;
-			         	case Delete:
-			         		rt = new DeleteSuccessBuilder().setTargets(((DeleteOrQuery) input.getOpBody()).getTargets()).build();
-			         		break;
-			         	default:
-			         		break;
-			         }
-			         Notifier.issueConfigResult(that.getClientId(),
-			        		 that.getOpId(),
-			             OpStatus.Ok,
-			             rt,
-			             true,
-			             that.getCauseValue());
-			         that.complete(System.currentTimeMillis());
-				}
-
-    		}).start();
-
-    	} else {
-    		this.notificationReady = true;
+    	while(!this.responseSent){
+    		try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
     	}
+    	try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	this.setStatusTs(OperationStatus.DISPATCHING_NOTIFICATION, System.currentTimeMillis());
+        switch (input.getOpType()) {
+        	case Create:
+        	case Update:
+        		rt = getOpCache(pc).getConfigSuccess();
+        		//rt = new CommonSuccessBuilder().
+        		break;
+        	case Delete:
+        		rt = new DeleteSuccessBuilder().setTargets(((DeleteOrQuery) input.getOpBody()).getTargets()).build();
+        		break;
+        	default:
+        		break;
+        }
+        Notifier.issueConfigResult(this.getClientId(),
+       		 this.getOpId(),
+            OpStatus.Ok,
+            rt,
+            true,
+            this.getCauseValue());
+        this.complete(System.currentTimeMillis());
+//    	if(this.responseSent){
+//    		Transaction that = this;
+//    		new Thread(new Runnable(){
+//
+//				@Override
+//				public void run() {
+//					// TODO Auto-generated method stub
+//					try {
+//						Thread.sleep(1);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					that.setStatusTs(OperationStatus.DISPATCHING_NOTIFICATION, System.currentTimeMillis());
+//			         switch (input.getOpType()) {
+//			         	case Create:
+//			         	case Update:
+//			         		rt = getOpCache(pc).getConfigSuccess();
+//			         		//rt = new CommonSuccessBuilder().
+//			         		break;
+//			         	case Delete:
+//			         		rt = new DeleteSuccessBuilder().setTargets(((DeleteOrQuery) input.getOpBody()).getTargets()).build();
+//			         		break;
+//			         	default:
+//			         		break;
+//			         }
+//			         Notifier.issueConfigResult(that.getClientId(),
+//			        		 that.getOpId(),
+//			             OpStatus.Ok,
+//			             rt,
+//			             true,
+//			             that.getCauseValue());
+//			         that.complete(System.currentTimeMillis());
+//			         that.notifEnqueued = true;
+//				}
+//
+//    		}).start();
+//
+//    	} else {
+//    		this.notificationReady = true;
+//    	}
     }
 
     /**

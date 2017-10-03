@@ -26,7 +26,7 @@ import org.opendaylight.fpc.utils.ErrorLog;
  * A servlet context listener that sends event-data pairs for config result notifications
  */
 public class NotificationService implements ServletContextListener {
-	//key = client id, value = config-result-notificcation
+	//key = client id, value = config-result-notification
    public static BlockingQueue<Map.Entry<String,String>> blockingQueue = new LinkedBlockingQueue<Map.Entry<String,String>>();
    public void contextInitialized(ServletContextEvent sce) {
 	   Map<String, AsyncContext> notificationStreams = new ConcurrentHashMap<String, AsyncContext>();
