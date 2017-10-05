@@ -213,21 +213,21 @@ for update_nbr in range(900000):
         topic,msgnum,selector_type = struct.unpack('!BBB',string[:3])
 
         #Domain
-        if(selector_type == 1):
+        if(selector_type == 0):
             domain_name_length, = struct.unpack('!B',string[3:4])
             domain_name, = struct.unpack('!'+str(domain_name_length)+'s',string[4:4+int(domain_name_length)])
             next_index = 4+int(domain_name_length)
             print "Domain Name = ",domain_name
 
         #IP Address
-        if(selector_type == 2 or selector_type == 3):
+        if(selector_type == 1 or selector_type == 2):
             ip_address, = struct.unpack('!L',string[3:7])
             ip_addressa = socketlib.inet_ntoa(struct.pack('!L',ip_address))
             next_index = 7
             print "IP Address = ",ip_addressa
 
         #IP Prefix
-        if selector_type == 3:
+        if selector_type == 2:
             ip_prefix, = struct.unpack('!H',string[7:9])
             next_index += 2
             print "IP Prefix = ",ip_prefix

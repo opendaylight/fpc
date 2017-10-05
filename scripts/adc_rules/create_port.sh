@@ -32,7 +32,7 @@ sleep 1;
 ./rate-action.sh put 2 Google 1 0;
 ./policy.sh put 2 2 2;
 
-./prefix-descriptor.sh put 3 13.1.1.112/31;
+./prefix-descriptor.sh put 3 13.1.1.112/32;
 # same as rate-action but is used for dropping packets
 ./drop-action.sh put 3 Sprint 2 0;
 ./policy.sh put 3 3 3;

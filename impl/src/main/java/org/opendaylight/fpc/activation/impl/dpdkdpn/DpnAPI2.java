@@ -504,8 +504,8 @@ public class DpnAPI2 {
     		ip_address = new Ipv4Address(ip_split[0]);
     		ip_prefix = Short.parseShort(ip_split[1]);
     	}
-    	Short selector_type = (short) (domain_name!=null?1:ip_prefix!=null?3:ip_address!=null?2:0);
-    	if(selector_type == 0){
+    	Short selector_type = (short) (domain_name != null ? 0 : ip_prefix != null ? 2 : ip_address != null ? 1 : 255);
+    	if(selector_type == 255){
     		LOG.warn("Domain/IP not found, failed to send rules");
     		return;
     	}
@@ -513,18 +513,15 @@ public class DpnAPI2 {
     	bb.put(toUint8(topic))
     	.put(SEND_ADC_TYPE)
     	.put(toUint8(selector_type));
-    	if(selector_type == 1) {
-    		LOG.info("Sending via domain");
+    	if(selector_type == 0) {
 			bb.put(toUint8((short)domain_name.length()))
 			.put(domain_name.getBytes());
     	}
-    	if((selector_type == 2) || (selector_type == 3)){
+    	if((selector_type == 1) || (selector_type == 2)){
     		Long ip_address_long = IPToDecimal.ipv4ToLong(ip_address.getValue());
-    		LOG.info("Sending via IP address");
     		bb.put(toUint32(ip_address_long));
     	}
-    	if(selector_type == 3){
-    		LOG.info("Sending via IP prefix");
+    	if(selector_type == 2){
     		bb.put(toUint16(ip_prefix));
     	}
     	if(drop!=null)
