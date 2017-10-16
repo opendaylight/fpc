@@ -112,6 +112,7 @@ Note: ~/fpc/scripts/bindclient.sh is not required in teh E2E integrated system r
 
 
 |Following step is optional if Gx exists and FPC pushes initialization rules. It will push configured rules on DPs on behalf of FPC|
+
 7. Start FPC test script as follows. This script will wait for DP to start and then will
 push the test rules on DP. Refer test_rules/readme.md for more details.
 > cd ~/fpc/zmqforwarder/test_rules/
