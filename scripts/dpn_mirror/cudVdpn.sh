@@ -1,0 +1,1 @@
+./cudDpn.sh $1 vdpn1 true node9 network9

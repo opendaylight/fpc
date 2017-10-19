@@ -47,12 +47,12 @@ public class NotificationServer extends HttpServlet {
 				clientId = jsonObj.getString("client-id");
 				jsonStringBuilder.setLength(0);
 				HttpSession session = request.getSession();
-				session.setMaxInactiveInterval(60*60);
+				session.setMaxInactiveInterval(72*60*60);
 				response.setHeader("Content-Type", "text/event-stream");
 				response.setHeader("Cache-Control", "no-cache, no-store");
 				response.setHeader("Connection", "keep-alive");
 				AsyncContext asyncContext = request.startAsync(request,response);
-				asyncContext.setTimeout(60*60*1000);
+				asyncContext.setTimeout(72*60*60*1000);
 				asyncContext.getResponse().setBufferSize(1200);
 				try {
 					asyncContext.getResponse().flushBuffer();

@@ -46,14 +46,14 @@ public class EventServer extends HttpServlet {
 		LOG.info("Response Stream Inititated");
 		try{
 			HttpSession session = request.getSession();
-			session.setMaxInactiveInterval(60*60);
+			session.setMaxInactiveInterval(72*60*60);
 			EventClient client = new EventClient();
 			client.connectToClient(clientUri);
 			response.setHeader("Content-Type", "text/event-stream");
 			response.setHeader("Cache-Control", "no-cache, no-store");
 			response.setHeader("Connection", "keep-alive");
 			AsyncContext asyncContext = request.startAsync(request,response);
-			asyncContext.setTimeout(60*60*1000);
+			asyncContext.setTimeout(72*60*60*1000);
 			asyncContext.getResponse().setBufferSize(1200);
 			try {
 				asyncContext.getResponse().flushBuffer();

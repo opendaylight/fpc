@@ -313,25 +313,7 @@ public class FpcProvider implements AutoCloseable {
         fpcCoreServices =
                 rpcRegistryDependency.addRpcImplementation(FpcService.class,
                         new FpcServiceImpl(this.dataBroker, this.notificationService, this.monitorService, this.activationService));
-        new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				try {
-					Thread.sleep(10000);
-					initJSON();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-
-			}
-
-        }).start();
-
-
+        initJSON();
     }
 
     /**
@@ -500,4 +482,23 @@ public class FpcProvider implements AutoCloseable {
     public DataBroker getDataBroker() {
         return this.dataBroker;
     }
+
+    //osgi ConfigAdmin
+    //alternative - CSS config subsystem, using netconf
+//    private ConfigurationAdmin cfgAdmin;
+//    public void setConfigAdmin(ConfigurationAdmin cfgAdmin) {
+//        this.cfgAdmin = cfgAdmin;
+//        try {
+//            Configuration cfg =   (Configuration) cfgAdmin.getConfiguration("org.opendaylight.fpc.impl");
+//            Dictionary<String, Object> properties = ((org.osgi.service.cm.Configuration) cfg).getProperties();
+//            Enumeration<String> en = properties.keys();
+//            while(en.hasMoreElements()) {
+//                String key = en.nextElement();
+//
+//                System.out.println("KEY: " + key + " VAL: " + properties.get(key));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

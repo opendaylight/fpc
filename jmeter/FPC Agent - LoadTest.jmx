@@ -44,12 +44,12 @@
           </elementProp>
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">8181</stringProp>
-          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
-          <stringProp name="HTTPSampler.response_timeout"></stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path"></stringProp>
           <stringProp name="HTTPSampler.concurrentPool">6</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </ConfigTestElement>
         <hashTree/>
         <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Context ID Counter" enabled="true">
@@ -208,7 +208,7 @@
                 },&#xd;
                 &quot;dpns&quot;: [&#xd;
                     {&#xd;
-                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;dpn-id&quot;: &quot;vdpn1&quot;,&#xd;
                         &quot;direction&quot;: &quot;uplink&quot;,&#xd;
                         &quot;dpn-parameters&quot;: {}&#xd;
                     }&#xd;
@@ -241,8 +241,9 @@
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
           <boolProp name="HTTPSampler.use_keepalive">false</boolProp>
           <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
-          <boolProp name="HTTPSampler.monitor">false</boolProp>
           <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout">5000</stringProp>
+          <stringProp name="HTTPSampler.response_timeout">7000</stringProp>
         </HTTPSamplerProxy>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Update A Context" enabled="true">
@@ -284,7 +285,7 @@
                 },&#xd;
                 &quot;dpns&quot;: [&#xd;
                     {&#xd;
-                        &quot;dpn-id&quot;: &quot;dpn1&quot;,&#xd;
+                        &quot;dpn-id&quot;: &quot;vdpn1&quot;,&#xd;
                         &quot;direction&quot;: &quot;uplink&quot;,&#xd;
                         &quot;dpn-parameters&quot;: {}&#xd;
                     }&#xd;
@@ -317,8 +318,9 @@
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
           <boolProp name="HTTPSampler.use_keepalive">false</boolProp>
           <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
-          <boolProp name="HTTPSampler.monitor">false</boolProp>
           <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout">5000</stringProp>
+          <stringProp name="HTTPSampler.response_timeout">7000</stringProp>
         </HTTPSamplerProxy>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="FPC Agent - Delete A Context" enabled="false">
@@ -401,5 +403,9 @@
         <hashTree/>
       </hashTree>
     </hashTree>
+    <WorkBench guiclass="WorkBenchGui" testclass="WorkBench" testname="WorkBench" enabled="true">
+      <boolProp name="WorkBench.save">true</boolProp>
+    </WorkBench>
+    <hashTree/>
   </hashTree>
 </jmeterTestPlan>

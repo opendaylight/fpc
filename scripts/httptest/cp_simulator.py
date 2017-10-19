@@ -23,9 +23,22 @@ from multiprocessing.pool import ThreadPool
 import signal
 import threading
 
-NO_OF_UEs = 50000
-SESSION_ID_START = 100001
+RUN = True
+
+def signal_handler(signal, frame):
+    global RUN
+    RUN = False
+    time.sleep(2)
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
+###########################################################
+# Change these three values depending on your test case
+NO_OF_UEs = 10000
+SESSION_ID_START = 1
 DPN_ID = "dpn1"
+###########################################################
 
 NO_OF_RESPONSES = 0
 NO_OF_NOTIFS = 0
@@ -33,20 +46,10 @@ CLIENT_ID = None
 httpd = None
 PORT = 9996
 
-def signal_handler(signal, frame):
-    httpd.server_close()
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
-
-pool = ThreadPool(processes=1)
-
-
-
-
 def responseStream():
     global CLIENT_ID 
     global NO_OF_RESPONSES
+    global RUN
     count = 0
     print "Response Stream initiated"
     s = requests.Session()
@@ -66,22 +69,26 @@ def responseStream():
         count = count+1
         if(count % 2 == 0):
             NO_OF_RESPONSES = NO_OF_RESPONSES + 1
-        #print(decoded_line)
+        if not RUN:
+            break;
 th = threading.Thread(target=responseStream)
 th.start()
-#async_result = pool.apply_async(responseStream)
 
 def stats():
     global NO_OF_RESPONSES
+    global RUN
     count = 0
     while True:
         print count," | No of Responses: ",NO_OF_RESPONSES, "\tNo of Notifications: ",NO_OF_NOTIFS
         count = count + 1
         time.sleep(1)
+        if not RUN:
+            break
 
 
 def notificationStream(clientId=None):
     global NO_OF_NOTIFS
+    global RUN
     print "Notification Stream initiated"
     s = requests.Session()
     if clientId != None:
@@ -95,6 +102,8 @@ def notificationStream(clientId=None):
             count = count + 1
             if count%2 == 0:
                 NO_OF_NOTIFS = NO_OF_NOTIFS + 1
+                if not RUN:
+                    break
             #print(line)
 
 class ThreadingServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
@@ -104,6 +113,7 @@ class ServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         global CLIENT_ID
+        global RUN
         #SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
         self.protocol_version = "HTTP/1.1"
         self.send_response(200)
@@ -135,7 +145,7 @@ class ServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.wfile.write(strlen+"\r\n"+string+"\r\n")
             self.wfile.flush()
             time.sleep(0.00001)
-        time.sleep(10)
+        time.sleep(5)
         for i in range(0,NO_OF_UEs):
             inputStr = '{"input":{"op-id":"'+str(i+(SESSION_ID_START+NO_OF_UEs+NO_OF_UEs))+'","targets":[{"target":"/ietf-dmm-fpcagent:tenants/tenant/default/fpc-mobility/contexts/'+str(i+SESSION_ID_START)+'"}],"client-id":"'+str(CLIENT_ID)+'","session-state":"complete","admin-state":"enabled","op-type":"delete","op-ref-scope":"none"}}'
             string = "event:"+str(i)+"application/json;/restconf/operations/ietf-dmm-fpcagent:configure\ndata:"+inputStr+"\r\n"
@@ -143,20 +153,23 @@ class ServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.wfile.write(strlen+"\r\n"+string+"\r\n")
             self.wfile.flush()
             time.sleep(0.00001)
-        time.sleep(10)
+        time.sleep(5)
         string = "event:"+"application/json;/restconf/operations/fpc:deregister_client\ndata:"+'{"input":{"client-id":"'+str(CLIENT_ID)+'"}}'+"\r\n"
         strlen = (hex(len(string)))[2:]
         self.wfile.write(strlen+"\r\n"+string+"\r\n")
         self.wfile.flush()
-        time.sleep(1)
-        sys.exit(0)
+        time.sleep(5)
 
 def startServer():
     global httpd
+    global RUN
     print "Request Stream initiated"
     httpd = ThreadingServer(("", PORT), ServerHandler)
-
     httpd.serve_forever()
-    
+    while RUN:
+        pass
+    httpd.server_close()
+    sys.exit(0)
+
 th2 = threading.Thread(target=startServer)
 th2.start()

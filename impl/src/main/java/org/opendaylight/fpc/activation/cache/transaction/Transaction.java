@@ -190,7 +190,11 @@ public class Transaction {
         /**
          * Failed
          */
-        FAILED, OK_RESPONSE_SENT
+        FAILED,
+        /**
+         * Response sent
+         */
+        OK_RESPONSE_SENT
     };
 
     private short causeValue;
@@ -408,17 +412,9 @@ public class Transaction {
 
     private OpCache getOpCache(Cache cache) {
         OpCache rc = new OpCache();
-//        java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
-//    	while(i.hasNext()){
-//    		rc.addPort(i.next());
-//    	}
         for (Entry<FpcIdentity, FpcPort> port : cache.getPorts().entrySet()) {
         	rc.addPort(port.getValue());
     	}
-//    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
-//    	while(c.hasNext()){
-//    		rc.addContext(c.next());
-//    	}
         for (Entry<FpcIdentity, FpcContext> context : cache.getContexts().entrySet()) {
         	rc.addContext(context.getValue());
     	}
@@ -446,7 +442,6 @@ public class Transaction {
             case Create:
             case Update:
             	tenantMgr.getSc().addToCache(pc);
-                //rt = tenantMgr.getSc().addToCache(pc).getConfigSuccess();
                 break;
             case Delete:
                 StorageCache sc = tenantMgr.getSc();
@@ -468,38 +463,41 @@ public class Transaction {
                                 target.getTarget().getInt64().toString()));
                     }
                 }
-                //rt = new DeleteSuccessBuilder().setTargets(doq.getTargets()).build();
                 break;
             default:
                 break;
         }
     }
 
+    /**
+     * Set the response sent flag to True so that a notification maybe created and sent
+     */
     public void setResponseSent(){
     	this.responseSent = true;
     	this.setStatusTs(OperationStatus.OK_RESPONSE_SENT, System.currentTimeMillis());
     }
 
+    /**
+     * Prepares and enqueues a notification to be sent to a client
+     */
     public void sendNotification() {
     	while(!this.responseSent){
     		try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
 			}
     	}
     	try {
 			Thread.sleep(1);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLog.logError(e.getLocalizedMessage(),e.getStackTrace());
 		}
     	this.setStatusTs(OperationStatus.DISPATCHING_NOTIFICATION, System.currentTimeMillis());
         switch (input.getOpType()) {
         	case Create:
         	case Update:
         		rt = getOpCache(pc).getConfigSuccess();
-        		//rt = new CommonSuccessBuilder().
         		break;
         	case Delete:
         		rt = new DeleteSuccessBuilder().setTargets(((DeleteOrQuery) input.getOpBody()).getTargets()).build();
@@ -514,47 +512,6 @@ public class Transaction {
             true,
             this.getCauseValue());
         this.complete(System.currentTimeMillis());
-//    	if(this.responseSent){
-//    		Transaction that = this;
-//    		new Thread(new Runnable(){
-//
-//				@Override
-//				public void run() {
-//					// TODO Auto-generated method stub
-//					try {
-//						Thread.sleep(1);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//					that.setStatusTs(OperationStatus.DISPATCHING_NOTIFICATION, System.currentTimeMillis());
-//			         switch (input.getOpType()) {
-//			         	case Create:
-//			         	case Update:
-//			         		rt = getOpCache(pc).getConfigSuccess();
-//			         		//rt = new CommonSuccessBuilder().
-//			         		break;
-//			         	case Delete:
-//			         		rt = new DeleteSuccessBuilder().setTargets(((DeleteOrQuery) input.getOpBody()).getTargets()).build();
-//			         		break;
-//			         	default:
-//			         		break;
-//			         }
-//			         Notifier.issueConfigResult(that.getClientId(),
-//			        		 that.getOpId(),
-//			             OpStatus.Ok,
-//			             rt,
-//			             true,
-//			             that.getCauseValue());
-//			         that.complete(System.currentTimeMillis());
-//			         that.notifEnqueued = true;
-//				}
-//
-//    		}).start();
-//
-//    	} else {
-//    		this.notificationReady = true;
-//    	}
     }
 
     /**

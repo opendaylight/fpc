@@ -21,7 +21,10 @@ import org.opendaylight.fpc.utils.zeromq.ZMQClientSocket;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DPDK DPN API over ZeroMQ.
@@ -36,7 +39,9 @@ public class DpnAPI2 {
     private static byte DELETE_BEARER_TYPE = 0b0000_0110;
     private static byte HELLO = 0b0000_1000;
     private static byte BYE = 0b0000_1001;
+    private static byte SEND_ADC_TYPE = 0b001_0001;
     private static byte DDN_ACK = 0b0000_0110;
+	protected static final Logger LOG = LoggerFactory.getLogger(DpnAPI2.class);
     /**
      * Topic for broadcasting
      */
@@ -476,5 +481,66 @@ public class DpnAPI2 {
         return new byte[]{value.shiftRight(56).byteValue(),value.shiftRight(48).byteValue(),value.shiftRight(40).byteValue(),
                 value.shiftRight(32).byteValue(),value.shiftRight(24).byteValue(),value.shiftRight(16).byteValue(),
                 value.shiftRight(8).byteValue(),value.and(BigInteger.valueOf(0xFF)).byteValue()};
+    }
+
+    /**
+     * Creates the byte buffer to send ADC rules over ZMQ
+     * @param topic - DPN Topic
+     * @param domain_name - domain
+     * @param ip - ipaddress/ipprefix (i.e. 127.0.0.1/32)
+     * @param drop - Drop if 1
+     * @param rating_group - Rating Group
+     * @param service_ID - Service ID
+     * @param sponsor_ID - Sponsor ID
+     */
+    public void send_ADC_rules(Short topic,
+    		String domain_name, String ip,
+    		Short drop, Long rating_group,
+    		Long service_ID, String sponsor_ID)
+    {
+    	Ipv4Address ip_address = null;
+    	Short ip_prefix = null;
+    	if(ip!=null){
+    		String[] ip_split = ip.split("/");
+    		ip_address = new Ipv4Address(ip_split[0]);
+    		ip_prefix = Short.parseShort(ip_split[1]);
+    	}
+    	Short selector_type = (short) (domain_name != null ? 0 : ip_prefix != null ? 2 : ip_address != null ? 1 : 255);
+    	if(selector_type == 255){
+    		LOG.warn("Domain/IP not found, failed to send rules");
+    		return;
+    	}
+    	ByteBuffer bb = ByteBuffer.allocate(200);
+    	bb.put(toUint8(topic))
+    	.put(SEND_ADC_TYPE)
+    	.put(toUint8(selector_type));
+    	if(selector_type == 0) {
+			bb.put(toUint8((short)domain_name.length()))
+			.put(domain_name.getBytes());
+    	}
+    	if((selector_type == 1) || (selector_type == 2)){
+    		Long ip_address_long = IPToDecimal.ipv4ToLong(ip_address.getValue());
+    		bb.put(toUint32(ip_address_long));
+    	}
+    	if(selector_type == 2){
+    		bb.put(toUint16(ip_prefix));
+    	}
+    	if(drop!=null)
+    		bb.put(toUint8(drop));
+    	if(rating_group!=null)
+    		bb.put(toUint32(rating_group));
+    	if(service_ID!=null)
+    		bb.put(toUint32(service_ID));
+    	if(sponsor_ID!=null && (short)sponsor_ID.length()>0){
+    		bb.put(toUint8((short)sponsor_ID.length()))
+    		.put(sponsor_ID.getBytes());
+    	}
+    	bb.put(toUint8(ZMQSBListener.getControllerTopic()));
+    	try {
+    		LOG.info("Sending rules...");
+            sock.getBlockingQueue().put(bb);
+          } catch (InterruptedException e) {
+            	ErrorLog.logError(e.getStackTrace());
+          };
     }
 }

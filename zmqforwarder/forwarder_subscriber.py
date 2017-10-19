@@ -30,8 +30,7 @@ msgnum3count = 0
 msgnum4count = 0
 msgnum5count = 0
 msgnum6count = 0
-session_list = []
-for update_nbr in range(900000):
+while True:
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     string = socket.recv()

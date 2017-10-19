@@ -6,12 +6,15 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.fpc.tenant;
+import org.opendaylight.fpc.policy.BasePolicyManager;
+import org.opendaylight.fpc.policy.BasePortManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -26,6 +29,8 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.fpc.activation.ActivationManager;
 import org.opendaylight.fpc.activation.ActivatorFactory;
 import org.opendaylight.fpc.activation.cache.StorageCache;
+import org.opendaylight.fpc.activation.cache.transaction.ContextInfoHolder;
+import org.opendaylight.fpc.activation.cache.transaction.Transaction;
 import org.opendaylight.fpc.activation.impl.dpdkdpn.DpnAPIListener;
 import org.opendaylight.fpc.assignment.AssignmentManager;
 import org.opendaylight.fpc.dpn.DpnHolder;
@@ -36,6 +41,7 @@ import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.ClientIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.DpnStatusValue;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.Tenants;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.notify.value.DpnAvailabilityBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.Tenant;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.TenantBuilder;
@@ -48,6 +54,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.PortsKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContextId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnControlProtocol;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.DpnsKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnControlProtocol;
@@ -74,6 +82,10 @@ public class TenantManager implements AutoCloseable {
     private static final Map<String, TenantManager> clientIdToTenants = new ConcurrentHashMap<String, TenantManager>();
     private static final List<ActivatorFactory> defaultActivatorFactories = new ArrayList<ActivatorFactory>();
     private static DataBroker dataBroker;
+    public static Map<FpcDpnId, List<FpcDpnId>> vdpnDpnsMap =
+    		new ConcurrentHashMap<FpcDpnId, List<FpcDpnId>>();
+    public static Map<FpcDpnId, Map<Contexts, ContextInfoHolder>> vdpnContextsMap =
+    		new ConcurrentHashMap<FpcDpnId, Map<Contexts, ContextInfoHolder>>();
     private int dpnIdCounter = 0;
 
     protected StorageCache sc;
@@ -81,6 +93,8 @@ public class TenantManager implements AutoCloseable {
     protected final Map<String, DpnHolder> dpnInfo;
     protected AssignmentManager assignmentManager;
     protected final ActivationManager activationManager;
+    protected final BasePolicyManager BasePolicyManager;
+    protected final BasePortManager BasePortManager;
 
     /**
      * Creates a Tenant Manager.
@@ -236,6 +250,8 @@ public class TenantManager implements AutoCloseable {
                 .build() : t;
 
         this.activationManager = new ActivationManager(this, dataBroker);
+        this.BasePolicyManager = new BasePolicyManager(this, dataBroker);
+        this.BasePortManager = new BasePortManager(this, dataBroker);
         if (cpFactories != null) {
             if (!cpFactories.isEmpty()) {
                 for (Map.Entry<Class<? extends FpcDpnControlProtocol>,ActivatorFactory> entry : cpFactories.entrySet()) {
@@ -516,6 +532,7 @@ public class TenantManager implements AutoCloseable {
 					.setDpnId(new FpcDpnId(dpnId))
 					.setNetworkId(networkId)
 					.setNodeId(nodeId)
+					.setAbstract(false)
 					.build());
 			CheckedFuture<Void,TransactionCommitFailedException> submitFuture = dpnTx.submit();
 

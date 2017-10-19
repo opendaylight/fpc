@@ -7,12 +7,17 @@
  */
 package org.opendaylight.fpc.activation.impl.dpdkdpn;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendaylight.fpc.activation.Activator;
 import org.opendaylight.fpc.activation.ResponseManager;
 import org.opendaylight.fpc.activation.cache.Cache;
 import org.opendaylight.fpc.dpn.DpnHolder;
+import org.opendaylight.fpc.policy.BasePolicyManager;
+import org.opendaylight.fpc.tenant.TenantManager;
 import org.opendaylight.fpc.utils.ErrorLog;
 import org.opendaylight.fpc.utils.IPToDecimal;
 import org.opendaylight.fpc.utils.zeromq.ZMQClientPool;
@@ -21,11 +26,28 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev1608
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.OpIdentifier;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.instructions.Instructions;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Contexts;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.payload.Ports;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.mobility.Ports;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcagent.rev160803.tenants.tenant.fpc.topology.Dpns;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcAction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcContext;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcIdentity;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDescriptor;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcDpnId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPolicy;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPolicyGroup;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPolicyGroupId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.FpcPolicyId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.PmipSelectorDescriptor;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.action.action.value.Drop;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.action.action.value.Rate;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.descriptor.descriptor.value.DomainDescriptor;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.descriptor.descriptor.value.PmipSelector;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.descriptor.descriptor.value.PrefixDescriptor;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.policy.Rules;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Actions;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.fpc.rule.Descriptors;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.fpcbase.rev160803.targets.value.Targets;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.threegpp.rev160803.ThreeGPPTunnel;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.threegpp.rev160803.ThreegppCommandset;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.threegpp.rev160803.ThreegppProperties;
@@ -58,8 +80,7 @@ public class DpdkImpl implements Activator {
 	/**
 	 * Constructor
 	 *
-	 * @param dpnHolder
-	 *            - DPN assigned to the Activator.
+	 * @param dpnHolder - DPN assigned to the Activator.
 	 */
 	public DpdkImpl(DpnHolder dpnHolder) {
 		this.dpnHolder = dpnHolder;
@@ -75,6 +96,51 @@ public class DpdkImpl implements Activator {
 		if (dpnHolder.dpn == null)
 			return false;
 		return (DpnAPIListener.getTopicFromDpnId(dpnHolder.dpn.getDpnId()) != null);
+	}
+
+	/**
+	 * Retrieves rules from the port and sends them to the DPN
+	 *
+	 * @param topic - topic of DPN assigned to Context
+	 * @param port - Port assigned to Context
+	 */
+	public void send_ADC_rules(Short topic, Ports port){
+		this.api = new DpnAPI2(ZMQClientPool.getInstance().getWorker());
+		LOG.info("Obtaining rules from port...");
+		for(FpcPolicyGroupId polgroId : port.getPolicyGroups()){
+			FpcPolicyGroup polgro = BasePolicyManager.fpcPolicyGroupMap.get(polgroId);
+			for(FpcPolicyId policyId : polgro.getPolicies()){
+				if(!BasePolicyManager.fpcPolicyMap.containsKey(policyId))
+					continue;
+				FpcPolicy policy = BasePolicyManager.fpcPolicyMap.get(policyId);
+				for(Rules rule : policy.getRules()){
+					for(Descriptors descrip: rule.getDescriptors()){
+						FpcDescriptor desc = BasePolicyManager.fpcDescriptorMap.get(descrip.getDescriptorId());
+						for(Actions act: rule.getActions()){
+							FpcAction action = BasePolicyManager.fpcActionMap.get(act.getActionId());
+							Short drop = 0;
+							String ip = null, domainName = null;
+
+							if(desc.getDescriptorValue() instanceof PrefixDescriptor)
+								ip = new String(((PrefixDescriptor) desc.getDescriptorValue()).getDestinationIp().getValue());
+							else if(desc.getDescriptorValue() instanceof DomainDescriptor)
+								domainName = ((DomainDescriptor) desc.getDescriptorValue()).getDestinationDomains().get(0).getValue();
+
+							if(action.getActionValue() instanceof Rate){
+								Rate theAction = ((Rate) action.getActionValue());
+								this.api.send_ADC_rules(topic, domainName, ip,  drop, theAction.getRatingGroup(), theAction.getServiceIdentifier(), theAction.getSponsorIdentity().getValue());
+							}else if(action.getActionValue() instanceof Drop){
+								Drop theAction = ((Drop) action.getActionValue());
+								if(theAction.isDrop()){
+									drop = 1;
+								}
+								this.api.send_ADC_rules(topic, domainName, ip,  drop, theAction.getRateInfo().getRatingGroup(), theAction.getRateInfo().getServiceIdentifier(), theAction.getRateInfo().getSponsorIdentity().getValue());
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -93,8 +159,6 @@ public class DpdkImpl implements Activator {
 	@Override
 	public boolean start() {
 		if (this.dpnHolder.dpn != null) {
-			//api = new DpnAPI2(ZMQClientPool.getInstance().getWorker());
-			//this.dpnTopic = dpnHolder.dpn.getTopic().substring(0, 1);
 			this.dpnTopic = DpnAPIListener.getTopicFromNode(this.dpnHolder.dpn.getNodeId().toString()+"/"+this.dpnHolder.dpn.getNetworkId().toString());
 			return true;
 		}
@@ -312,7 +376,7 @@ public class DpdkImpl implements Activator {
 			throw new Exception("Downlink Create Requested but no UL Tunnel Info provided");
 		}
 
-		if (target.getTarget().toString().endsWith("ul") || target.getTarget().toString().endsWith("dl")) {
+		if (target!=null && (target.getTarget().toString().endsWith("ul") || target.getTarget().toString().endsWith("dl"))) {
 			api.delete_bearer(dpnTopic, teid);
 			txMessages.incrementAndGet();
 		} else {

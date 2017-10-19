@@ -7,4 +7,4 @@
 #  and is available at http://www.eclipse.org/legal/epl-v10.html
 # ------------------------------------------------------------------
 
-../karaf/target/assembly/bin/karaf debug
+../karaf/target/assembly/bin/karaf

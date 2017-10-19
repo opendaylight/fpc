@@ -482,6 +482,7 @@ public class StorageCache implements AutoCloseable {
                 .child(Contexts.class, new ContextsKey(new FpcContextId(key)))) );
         return (dObj != null) ? (FpcContext) dObj : null;
     }
+    
 
     /**
      * Removes a Context
@@ -556,17 +557,9 @@ public class StorageCache implements AutoCloseable {
      * @param cache - Cache to be added
      */
     public void addToCache(Cache cache) {
-//    	java.util.Iterator<FpcPort> i = cache.getPorts().values().iterator();
-//    	while(i.hasNext()){
-//    		addPort(i.next());
-//    	}
         for (Entry<FpcIdentity, FpcPort> port : cache.getPorts().entrySet()) {
             addPort(port.getValue());
         }
-//    	java.util.Iterator<FpcContext> c = cache.getContexts().values().iterator();
-//    	while(c.hasNext()){
-//    		addContext(c.next());
-//    	}
         for (Entry<FpcIdentity, FpcContext> context : cache.getContexts().entrySet()) {
             addContext(context.getValue());
         }

@@ -33,7 +33,7 @@ public class JettyServer {
 		connector.setPort(8070);
 		connector.setAcceptors(3);
 		connector.setThreadPool(new QueuedThreadPool(50));
-		connector.setMaxIdleTime(60*60*1000);
+		connector.setMaxIdleTime(72*60*60*1000);
 		connector.setAcceptQueueSize(50000);
 		connector.setRequestBufferSize(50000);
 		connector.setResponseBufferSize(50000);

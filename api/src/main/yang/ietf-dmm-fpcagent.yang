@@ -413,7 +413,61 @@ module ietf-dmm-fpcagent {
       }
     }
 
+    grouping result-body-dpn {
+      leaf result {
+        type result;
+      }
+      choice result-type {
+        case err {
+          leaf error-type-id {
+            type fpcagent:error-type-id;
+          }
+          leaf error-info {
+            type string {
+              length "1..1024";
+            }
+          }
+        }
+        case common-success {
+          uses fpcbase:fpc-dpn;
+        }
+        case delete-success {
+          uses fpcbase:fpc-dpn;
+        }
+        case empty-case {
+        }
+      }
+    }
+
+    typedef dpn-operation {
+        type enumeration {
+            enum add { value 0; }
+            enum remove { value 1; }
+        }
+    }
+
+    grouping dpn-input {
+      leaf abstract-dpn-id {
+        type fpcbase:fpc-dpn-id;
+      }
+      leaf dpn-id {
+        type fpcbase:fpc-dpn-id;
+      }
+      leaf operation {
+        type fpcagent:dpn-operation;
+      }
+    }
+
     // Common RPCs
+    rpc configure-dpn {
+      input {
+        uses fpcagent:dpn-input;
+      }
+      output {
+        uses fpcagent:result-body-dpn;
+      }
+    }
+
     rpc configure {
       input {
         uses fpcagent:op-input;
