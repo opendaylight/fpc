@@ -31,60 +31,80 @@ from configparser import ConfigParser
 parser = ConfigParser()
 
 def parse_pcc_values(pub_socket,topicId):
-	# TBD: Needs to handle exception
-        parser.read('./config/pcc_config.cfg')
-        print "\n ---> Reading Values from PCC config file <--- \n"
-        print "\n ---> Hello Start PCC Rule Sending ....!!!!!"
-        msg_type = 18
+	# TBD: Need to handle exception
+	parser.read('./config/pcc_rules.cfg')
+	print "\n ---> Reading Values from PCC config file <--- \n"
+	print "\n ---> Sending PCC Rules <---"
+	MSG_TYPE = 18
+	RULE_ID = 0
 
-	# Formed a struture for PCC rule and parse the values in that. 
-        for val in parser.sections():
-		# TBD: Needs to handle exception
-                rule_id = int(parser.get(val, 'rule_id'))
-                rule_name = str(parser.get(val, 'rule_name'))
-                rating_group = int(parser.get(val, 'rating_group'))
-                service_id = int(parser.get(val, 'service_id'))
-                rule_status = int(parser.get(val, 'rule_status'))
-                gate_status = int(parser.get(val, 'gate_status'))
-                session_cont = int(parser.get(val, 'session_cont'))
-                report_level = int(parser.get(val, 'report_level'))
-                charging_mode = int(parser.get(val, 'charging_mode'))
-                metering_method = int(parser.get(val, 'metering_method'))
-                mute_notify = int(parser.get(val, 'mute_notify'))
-                monitoring_key = int(parser.get(val, 'monitoring_key'))
-                sponsor_id = str(parser.get(val, 'sponsor_id'))
-                redirect_info = int(parser.get(val, 'redirect_info'))
-                precedence = int(parser.get(val, 'precedence'))
-                mtr_profile_index = int(parser.get(val, 'mtr_profile_index'))
+	# Create a struture for PCC rule and parse the values in that.
+	for val in parser.sections():
+		if val != 'GLOBAL':
+			# TBD: Need to handle exception
+			#RULE_ID = int(parser.get(val, 'RULE_ID'))
+			RULE_ID += 1
+			RULE_NAME = str(parser.get(val, 'RULE_NAME'))
+			RATING_GROUP = int(parser.get(val, 'RATING_GROUP'))
+			SERVICE_ID = int(parser.get(val, 'SERVICE_ID'))
+			RULE_STATUS = int(parser.get(val, 'RULE_STATUS'))
+			GATE_STATUS = int(parser.get(val, 'GATE_STATUS'))
+			SESSION_CONT = int(parser.get(val, 'SESSION_CONT'))
+			REPORT_LEVEL = int(parser.get(val, 'REPORT_LEVEL'))
+			CHARGING_MODE = int(parser.get(val, 'CHARGING_MODE'))
+			METERING_METHOD = int(parser.get(val, 'METERING_METHOD'))
+			MUTE_NOTIFY = int(parser.get(val, 'MUTE_NOTIFY'))
+			MONITORING_KEY = int(parser.get(val, 'MONITORING_KEY'))
+			SPONSOR_ID = str(parser.get(val, 'SPONSOR_ID'))
+			REDIRECT_INFO = int(parser.get(val, 'REDIRECT_INFO'))
+			PRECEDENCE = int(parser.get(val, 'PRECEDENCE'))
+			DROP_PKT_COUNT = int(parser.get(val, 'DROP_PKT_COUNT'))
+			UL_MBR_MTR_PROFILE_IDX = int(parser.get(val, \
+						'UL_MBR_MTR_PROFILE_IDX'))
+			DL_MBR_MTR_PROFILE_IDX = int(parser.get(val, \
+						'DL_MBR_MTR_PROFILE_IDX'))
 
-                var = struct.Struct('!BBBBHBBLLBBBI'+str(len(rule_name))+'sI'\
-			+str(len(sponsor_id))+'s')
+			var = struct.Struct('!BBBBHBBBLLBBQHHBI'+str(\
+						len(RULE_NAME))+'sI'\
+						+str(len(SPONSOR_ID))+'s')
 
-                values = (topicId, msg_type, metering_method, charging_mode,\
-				 rating_group, rule_status, gate_status, \
-				monitoring_key, precedence, report_level, \
-				mute_notify, redirect_info, len(rule_name)\
-				, rule_name, len(sponsor_id), sponsor_id)
+			values = (topicId, MSG_TYPE, METERING_METHOD, \
+					CHARGING_MODE, RATING_GROUP, \
+					RULE_STATUS, GATE_STATUS, SESSION_CONT,\
+					MONITORING_KEY, PRECEDENCE, \
+					REPORT_LEVEL, MUTE_NOTIFY, \
+					DROP_PKT_COUNT, \
+					UL_MBR_MTR_PROFILE_IDX, \
+					DL_MBR_MTR_PROFILE_IDX, \
+					REDIRECT_INFO,\
+					len(RULE_NAME), RULE_NAME, \
+					len(SPONSOR_ID), SPONSOR_ID)
 
-		# TBD: Needs to handle exception
-		# Pack the structure and send over the zmq socket to dp
- 
-                pub_socket.send("%s" % (var.pack(*values)))
-                time.sleep(1)
+			# TBD: Need to handle exception
+			# Pack the structure and send over the zmq socket to dp
 
-                print "\nPrint PCC Rule Values for %s ::\nrule_id :%s \
-			\nrule_name : %s \nrating_group : %s\nservice_id : %s \
-			\nrule_status : %s \ngate_status : %s \nsession_cont :\
-			 %s \nreport_level : %s \ncharging_mode : %s \
-			\nmetering_method : %s \nmute_notify : %s \
-			\nmonitoring_key : %s \nsponsor_id : %s \
-			\nredirect_info : %s \nprecedence : %s \
-			\nmtr_profile_index : %s\n\n" % (val, rule_id, \
-			rule_name, rating_group, service_id, rule_status, \
-			gate_status, session_cont, report_level, \
-			charging_mode, metering_method, mute_notify, \
-			monitoring_key, sponsor_id, redirect_info, precedence\
-			, mtr_profile_index)
-                print '\n --->## Successfuly Send PCC Rule ##<---\n'
-        parser.clear()
+			pub_socket.send("%s" % (var.pack(*values)))
+			time.sleep(1)
 
+			print "\nPCC Rule Values for %s ::\nRULE_ID :%s \
+					\nRULE_NAME :%s\nRATING_GROUP :%s\
+					\nSERVICE_ID :%s\nRULE_STATUS :%s\
+					\nGATE_STATUS :%s\nSESSION_CONT :%s\
+					\nREPORT_LEVEL :%s \nCHARGING_MODE :%s\
+					\nMETERING_METHOD :%s\nMUTE_NOTIFY :%s\
+					\nMONITORING_KEY :%s\nSPONSOR_ID :%s\
+					\nREDIRECT_INFO :%s\nPRECEDENCE :%s\
+					\nDROP_PKT_COUNT :%s\
+					\nul_mbr_DROP_PKT_COUNT :%s\
+					\ndl_mbr_DROP_PKT_COUNT :%s\n\n" % \
+					(val, RULE_ID, RULE_NAME, RATING_GROUP,\
+					SERVICE_ID, RULE_STATUS, GATE_STATUS, \
+					SESSION_CONT, REPORT_LEVEL, \
+					CHARGING_MODE, METERING_METHOD, \
+					MUTE_NOTIFY, MONITORING_KEY, \
+					SPONSOR_ID, REDIRECT_INFO, PRECEDENCE,\
+					DROP_PKT_COUNT, UL_MBR_MTR_PROFILE_IDX,\
+					DL_MBR_MTR_PROFILE_IDX)
+
+			print '\n ---># PCC Rule Successfully sent..#<---\n'
+	parser.clear()

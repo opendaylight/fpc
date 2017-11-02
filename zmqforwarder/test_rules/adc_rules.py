@@ -19,7 +19,6 @@
 # Reference : message_sdn_dp.docx
 # Section : Table No.11 ADC Rule
 ##############################################################################
-
 import sys
 import os
 import time
@@ -30,85 +29,124 @@ from configparser import ConfigParser
 
 parser = ConfigParser()
 
+# Covert the string into num and stored into usigned 32 bit integer.
+def name_to_num(name):
+	num = 0
+	for ch in name[::-1]:
+		num = (num << 4) | (ord(ch) - ord('a'))
+	return num & 0xffffffff
+
 def parse_adc_values(pub_socket,topicId):
-	try:
-		parser.read('./config/adc_config.cfg')
-		print "\n ---> Reading Values from ADC config file <---"
-		print "\n ---> Hello Start ADC Rule Sending ....!!!!!"
-		msg_type = 17
+	parser.read('./config/adc_rules.cfg')
+	print "\n ---> Reading Values from ADC rules file <---"
+	print "\n ---> Sending ADC rules   <---"
+	MSG_TYPE = 17
 
-		# Formed a structure for ADC rule and parse values in that.
-		for val in parser.sections():
-			# TBD: Needs to handle exception
-		        adc_type = int(parser.get(val, 'ADC_TYPE'))
-		        if adc_type == 0:
-		                domain = str(parser.get(val, 'DOMAIN'))
-		        if adc_type == 1:
-		                print "IP Is---->"
-		                print parser.get(val, 'IP')
-		                ip = struct.unpack('!L', \
-					socket.inet_aton(str(parser.get(val, \
-					'IP'))))
-		        if adc_type == 2:
-		                ip = struct.unpack('!L', \
-					socket.inet_aton(str(parser.get(val, \
-					'IP'))))
-		                prefix = int(parser.get(val, 'PREFIX'))
-		        gate = int(parser.get(val, 'GATE'))
-		        rating_group = int(parser.get(val, 'RATING_GROUP'))
-		        service_id = int(parser.get(val, 'SERVICE_ID'))
-		        sponsor = str(parser.get(val, 'SPONSOR'))
+	# Create a structure for ADC rule and parse values in that.
+	for val in parser.sections():
+		if val != 'GLOBAL':
+			# TBD: Need to handle exception
+			ADC_TYPE = int(parser.get(val, 'ADC_TYPE'))
+			if ADC_TYPE == 0:
+				DOMAIN = str(parser.get(val, 'DOMAIN'))
+			if ADC_TYPE == 1:
+				IP = struct.unpack('!L', \
+						socket.inet_aton(str(parser.get(val, \
+						'IP'))))
+			if ADC_TYPE == 2:
+				IP = struct.unpack('!L', \
+						socket.inet_aton(str(parser.get(val, \
+						'IP'))))
+				PREFIX = int(parser.get(val, 'PREFIX'))
 
-			#TBD:: Needs to handle exception
+			GATE_STATUS = int(parser.get(val, 'GATE_STATUS'))
+			RATING_GROUP = name_to_num(str(parser.get(val, \
+							'RATING_GROUP')))
+			SERVICE_ID = name_to_num(str(parser.get(val, \
+							'SERVICE_ID')))
+			PRECEDENCE = int(parser.get(val, 'PRECEDENCE'))
+			MTR_PROFILE_INDEX = int(parser.get(val, \
+							'MTR_PROFILE_INDEX'))
+			SPONSOR = str(parser.get(val, 'SPONSOR'))
+
+			#TBD:: Need to handle exception
 			# Pack the structure and send over the zmq socket to DP
-			time.sleep(1)		
-		        if adc_type == 0:
-		                pub_socket.send("%s" % (struct.pack('!BBBB'+ \
-					str(len(domain))+'sBLLB'+\
-					str(len(sponsor))+'s',topicId, \
-					msg_type, adc_type, len(domain), \
-					domain, gate, rating_group, service_id, \
-					len(sponsor), sponsor)))
-		                time.sleep(1)
-		
-		                print "\nPrint ADC Rule Values for \nadc_type \
-					: %s \nadc_val : %s \ngate : %s \
-					\nrating group : %s \nservice : %s \
-					\nsponsor len : %s\nsponsor : %s" % \
-					(adc_type, domain, gate, rating_group\
-					, service_id, len(sponsor), sponsor)
-		        if adc_type == 1:
-		                pub_socket.send("%s" % (struct.pack('!BBBLBLLB'+\
-					str(len(sponsor))+'s',topicId, \
-					msg_type, adc_type, ip[0], gate, \
-					rating_group, service_id, len(sponsor), \
-					sponsor)))
-		
-		                print "\nPrint ADC Rule Values for ::\
-					\nadc_type : %s \nadc_val : %s \ngate \
-					: %s \nrating group : %s \nservice : \
-					%s\nsponsor len : %s \nsponsor : %s" \
-					% (adc_type, ip[0], gate, rating_group,\
-					 service_id, len(sponsor), sponsor)
-		
-		        if adc_type == 2:
-		                pub_socket.send("%s" % (struct.pack('!BBBLHBL\
-					LB'+str(len(sponsor))+'s',topicId, \
-					msg_type, adc_type, ip[0], prefix, \
-					gate, rating_group, service_id, \
-					len(sponsor), sponsor)))
-		
-		                print "\nPrint ADC Rule Values for ::\
-					\nadc_type : %s \nIP : %s \nprefix : \
-					%s\ngate : %s \nrating group : %s \n\
-					service - %s\nsponsor len : %s \n\
-					sponsor - %s" % (adc_type, ip[0], \
-					prefix, gate, rating_group, \
-					service_id, len(sponsor), sponsor)
-		
-		
-		        time.sleep(1)
-		        print '\n --->## Successfuly ADC Meter Rule ##<---\n'
-		parser.clear()
-	except:
-		print "\n ---> Error, while parsing adc rules <---\n"	
+			time.sleep(1)
+			if ADC_TYPE == 0:
+				pub_socket.send("%s" % (struct.pack('!BBBB'+ \
+						str(len(DOMAIN))+'sBLLLHB'+\
+						str(len(SPONSOR))+'s', \
+						topicId, MSG_TYPE, ADC_TYPE, \
+						len(DOMAIN), DOMAIN, \
+						GATE_STATUS, RATING_GROUP, \
+						SERVICE_ID, PRECEDENCE, \
+						MTR_PROFILE_INDEX, \
+						len(SPONSOR), SPONSOR)))
+				time.sleep(1)
+
+				print "\nADC Rule Values for ::\
+						\nADC_TYPE :%s \nDOMAIN :%s\
+						\nGATE_STATUS :%s\
+						\nrating group :%s \
+						\nSERVICE_ID :%s \
+						\nPRECEDENCE :%s \
+						\nMTR_PROFILE_INDEX :%s\
+						\nSPONSOR_LEN :%s\
+						\nSPONSOR :%s" % \
+						(ADC_TYPE, DOMAIN, GATE_STATUS,\
+						RATING_GROUP, SERVICE_ID, \
+						PRECEDENCE, MTR_PROFILE_INDEX, \
+						len(SPONSOR), SPONSOR)
+
+			if ADC_TYPE == 1:
+				pub_socket.send("%s" % (struct.pack('!BBBLBLLLHB'+\
+						str(len(SPONSOR))+'s',topicId, \
+						MSG_TYPE, ADC_TYPE, IP[0], \
+						GATE_STATUS, RATING_GROUP, \
+						SERVICE_ID, PRECEDENCE, \
+						MTR_PROFILE_INDEX, \
+						len(SPONSOR), SPONSOR)))
+
+				print "\nADC Rule Values for ::\
+						\nADC_TYPE :%s \nIP :%s \
+						\nGATE_STATUS :%s\
+						\nRATING_GROUP :%s\
+						\nSERVICE_ID :%s\
+						\nPRECEDENCE :%s\
+						\nMTR_PROFILE_INDEX :%s\
+						\nSPONSOR_LEN :%s \
+						\nSPONSOR :%s" % \
+						(ADC_TYPE, IP[0], GATE_STATUS,\
+						RATING_GROUP, SERVICE_ID, \
+						PRECEDENCE, MTR_PROFILE_INDEX, \
+						len(SPONSOR), SPONSOR)
+
+			if ADC_TYPE == 2:
+				pub_socket.send("%s" % (struct.pack('!BBBLHBL\
+						LLHB'+str(len(SPONSOR))+'s', \
+						topicId, MSG_TYPE, ADC_TYPE, \
+						IP[0], PREFIX, GATE_STATUS, \
+						RATING_GROUP, SERVICE_ID, \
+						PRECEDENCE, MTR_PROFILE_INDEX, \
+						len(SPONSOR), SPONSOR)))
+
+				print "\nADC Rule Values for ::\
+						\nADC_TYPE :%s \nIP :%s \
+						\nPREFIX :%s\nGATE_STATUS :%s \
+						\nRATING_GROUP:%s \
+						\nSERVICE_ID :%s\
+						\nPRECEDENCE :%s \
+						\nMTR_PROFILE_INDEX :%s\
+						\nSPONSOR_LEN :%s\
+						\nSPONSOR :%s"\
+						 % (ADC_TYPE, IP[0], \
+						PREFIX, GATE_STATUS, \
+						RATING_GROUP, SERVICE_ID, \
+						PRECEDENCE, MTR_PROFILE_INDEX, \
+						len(SPONSOR), SPONSOR)
+
+
+			time.sleep(1)
+			print '\n ---># ADC Rule Successfully sent...#<---\n'
+	parser.clear()
+

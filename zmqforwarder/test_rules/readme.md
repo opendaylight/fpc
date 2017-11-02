@@ -2,6 +2,7 @@
 	- python is installed
 	- Configparser is installed 
 	- ZeroMQ is installed
+	- netaddr is installed
 	- Python Binding of ZeroMQ is installed
 
 # Run FPC Agent
@@ -33,7 +34,7 @@ Following is the sequence of operations to do for launching test_rule.
 Above steps will start FPC. Once FPC is running then use following to start
 test_rule program.
 
-#Run Rule Push Script
+# Run Rule Push Script
 Start script to push ADC, PCC, MTR and SDF rules to DP over ZMQ
 
 * Go to following folder
