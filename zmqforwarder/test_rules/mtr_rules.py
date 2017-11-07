@@ -32,32 +32,39 @@ from configparser import ConfigParser
 parser = ConfigParser()
 
 def parse_mtr_values(pub_socket,topicId):
-	# TBD: Needs to handle exception
-        parser.read('./config/meter_config.cfg')
-        print "\n ---> Reading Values from Meter config file <--- "
-        print "\n ---> Hello Start Meter Rule Sending ....!!!!!"
-        msg_type = 19
+	# TBD: Need to handle exception
+	parser.read('./config/meter_profile.cfg')
+	print "\n ---> Reading Values from Meter profile file <--- "
+	print "\n ---> Sending Meter Rules  <---"
+	MSG_TYPE = 19
+	RULE_ID = 0
 
-	# Formed struct for meter rule and parse values in that.
-        for val in parser.sections():
-		# TBD: Needs to handle exception
-                mtr_profile_index = int(parser.get(val, 'mtr_profile_index'))
-                cir = int(parser.get(val, 'CIR'))
-                cbs = int(parser.get(val, 'CBS'))
-                ebs = int(parser.get(val, 'EBS'))
-                metering_method = int(parser.get(val, 'metering_method'))
+	# Create struct for meter rule and parse values in that.
+	for val in parser.sections():
+		if val != 'GLOBAL':
+			RULE_ID += 1
+			# TBD: Need to handle exception
+			CIR = int(parser.get(val, 'CIR'))
+			CBS = int(parser.get(val, 'CBS'))
+			EBS = int(parser.get(val, 'EBS'))
+			MTR_PROFILE_IDX = int(parser.get(val, \
+					'MTR_PROFILE_IDX'))
 
-		# Pack the struct and send over the zmq socket to dp.
-                pub_socket.send("%s" % (struct.pack('!BBHQQQH',topicId, \
-			msg_type, mtr_profile_index, cir, cbs, ebs, \
-			metering_method)))
+			METERING_METHOD = 0
 
-                print "\nPrint METER Rule Values for %s ::\ntopicId : %s \
-			\nmsg_type : %s \nmtr_profile_index : %s \nCIR : %s \
-			\nCBS : %s \nEBS : %s \nmetering_method : %s\n " % \
-			(val, topicId, msg_type, mtr_profile_index, cir, cbs,\
-			 ebs, metering_method)
-                time.sleep(1)
+			# Pack the struct and send over the zmq socket to dp.
+			pub_socket.send("%s" % (struct.pack('!BBHQQQH',topicId,\
+			       MSG_TYPE, MTR_PROFILE_IDX, CIR, CBS, EBS, \
+			       METERING_METHOD)))
 
-                print '\n --->## Successfuly Send Meter Rule ##<---\n'
-        parser.clear()
+			print "\nMETER Rule Values for %s ::\nRULE_ID :%s\
+					\nMSG_TYPE :%s \nCIR :%s \nCBS :%s \
+					\nEBS :%s \nMTR_PROFILE_IDX :%s\
+					\nMETERING_METHOD :%s\n " % \
+					(val, RULE_ID, MSG_TYPE, CIR, \
+					CBS, EBS, MTR_PROFILE_IDX, \
+					METERING_METHOD)
+			time.sleep(1)
+
+			print '\n ---># Meter Rule Successfully sent..#<---\n'
+	parser.clear()
