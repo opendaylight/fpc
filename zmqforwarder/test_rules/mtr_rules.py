@@ -64,7 +64,6 @@ def parse_mtr_values(pub_socket,topicId):
 					(val, RULE_ID, MSG_TYPE, CIR, \
 					CBS, EBS, MTR_PROFILE_IDX, \
 					METERING_METHOD)
-			time.sleep(1)
 
 			print '\n ---># Meter Rule Successfully sent..#<---\n'
 	parser.clear()

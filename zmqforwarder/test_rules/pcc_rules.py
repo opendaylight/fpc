@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #coding: utf8
-#Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.  All rights 
+#Copyright © 2016 - 2017 Copyright (c) Sprint, Inc. and others.	 All rights
 #reserved.
 #
 #This program and the accompanying materials are made available under the
@@ -25,7 +25,6 @@ import os
 import time
 import struct
 import socket
-
 from configparser import ConfigParser
 
 parser = ConfigParser()
@@ -49,42 +48,56 @@ def parse_pcc_values(pub_socket,topicId):
 			SERVICE_ID = int(parser.get(val, 'SERVICE_ID'))
 			RULE_STATUS = int(parser.get(val, 'RULE_STATUS'))
 			GATE_STATUS = int(parser.get(val, 'GATE_STATUS'))
-			SESSION_CONT = int(parser.get(val, 'SESSION_CONT'))
 			REPORT_LEVEL = int(parser.get(val, 'REPORT_LEVEL'))
 			CHARGING_MODE = int(parser.get(val, 'CHARGING_MODE'))
 			METERING_METHOD = int(parser.get(val, 'METERING_METHOD'))
 			MUTE_NOTIFY = int(parser.get(val, 'MUTE_NOTIFY'))
 			MONITORING_KEY = int(parser.get(val, 'MONITORING_KEY'))
+			PRECEDENCE = int(parser.get(val, 'PRECEDENCE'))
 			SPONSOR_ID = str(parser.get(val, 'SPONSOR_ID'))
 			REDIRECT_INFO = int(parser.get(val, 'REDIRECT_INFO'))
-			PRECEDENCE = int(parser.get(val, 'PRECEDENCE'))
+			SESSION_CONT = int(parser.get(val, 'SESSION_CONT'))
 			DROP_PKT_COUNT = int(parser.get(val, 'DROP_PKT_COUNT'))
 			UL_MBR_MTR_PROFILE_IDX = int(parser.get(val, \
-						'UL_MBR_MTR_PROFILE_IDX'))
+									'UL_MBR_MTR_PROFILE_IDX'))
 			DL_MBR_MTR_PROFILE_IDX = int(parser.get(val, \
-						'DL_MBR_MTR_PROFILE_IDX'))
+									'DL_MBR_MTR_PROFILE_IDX'))
+			
+			SDF_FILTER_IDX = str()						
+			if parser.has_option(val, 'SDF_FILTER_IDX'):
+				SDF_FILTER_IDX = str(parser.get(val, 'SDF_FILTER_IDX'))
+				print "\nTest rule values :%s\n " %(SDF_FILTER_IDX)
 
-			var = struct.Struct('!BBBBHBBBLLBBQHHBI'+str(\
-						len(RULE_NAME))+'sI'\
-						+str(len(SPONSOR_ID))+'s')
+			ADC_FILTER_IDX=-1
+			if parser.has_option(val, 'ADC_FILTER_IDX'):
+				ADC_FILTER_IDX = int(parser.get(val, 'ADC_FILTER_IDX'))
+				print (ADC_FILTER_IDX)
+
+			var = struct.Struct('!BBBBLBBLLBBHHBBQiB'+str(\
+									len(SDF_FILTER_IDX))+'sB'+str(\
+									len(RULE_NAME))+'sB'\
+							+str(len(SPONSOR_ID))+'s')
 
 			values = (topicId, MSG_TYPE, METERING_METHOD, \
-					CHARGING_MODE, RATING_GROUP, \
-					RULE_STATUS, GATE_STATUS, SESSION_CONT,\
-					MONITORING_KEY, PRECEDENCE, \
-					REPORT_LEVEL, MUTE_NOTIFY, \
-					DROP_PKT_COUNT, \
-					UL_MBR_MTR_PROFILE_IDX, \
-					DL_MBR_MTR_PROFILE_IDX, \
-					REDIRECT_INFO,\
-					len(RULE_NAME), RULE_NAME, \
-					len(SPONSOR_ID), SPONSOR_ID)
+							CHARGING_MODE, RATING_GROUP, \
+							RULE_STATUS, GATE_STATUS, \
+							MONITORING_KEY, PRECEDENCE, \
+							REPORT_LEVEL, MUTE_NOTIFY, \
+							UL_MBR_MTR_PROFILE_IDX, \
+							DL_MBR_MTR_PROFILE_IDX, \
+							REDIRECT_INFO, \
+							SESSION_CONT, \
+							DROP_PKT_COUNT, \
+							ADC_FILTER_IDX, \
+							len(SDF_FILTER_IDX), \
+							SDF_FILTER_IDX, \
+							len(RULE_NAME), RULE_NAME, \
+							len(SPONSOR_ID), SPONSOR_ID)
 
 			# TBD: Need to handle exception
 			# Pack the structure and send over the zmq socket to dp
 
 			pub_socket.send("%s" % (var.pack(*values)))
-			time.sleep(1)
 
 			print "\nPCC Rule Values for %s ::\nRULE_ID :%s \
 					\nRULE_NAME :%s\nRATING_GROUP :%s\
@@ -94,17 +107,20 @@ def parse_pcc_values(pub_socket,topicId):
 					\nMETERING_METHOD :%s\nMUTE_NOTIFY :%s\
 					\nMONITORING_KEY :%s\nSPONSOR_ID :%s\
 					\nREDIRECT_INFO :%s\nPRECEDENCE :%s\
-					\nDROP_PKT_COUNT :%s\
+					\nDROP_PKT_COUNT :%s\nADC_FILTER_IDX :%s\
+					\nSDF_FILTER_CNT :%s\nSDF_FILTER_IDX : %s\
 					\nul_mbr_DROP_PKT_COUNT :%s\
 					\ndl_mbr_DROP_PKT_COUNT :%s\n\n" % \
 					(val, RULE_ID, RULE_NAME, RATING_GROUP,\
-					SERVICE_ID, RULE_STATUS, GATE_STATUS, \
-					SESSION_CONT, REPORT_LEVEL, \
-					CHARGING_MODE, METERING_METHOD, \
-					MUTE_NOTIFY, MONITORING_KEY, \
-					SPONSOR_ID, REDIRECT_INFO, PRECEDENCE,\
-					DROP_PKT_COUNT, UL_MBR_MTR_PROFILE_IDX,\
-					DL_MBR_MTR_PROFILE_IDX)
+					 SERVICE_ID, RULE_STATUS, GATE_STATUS, \
+					 SESSION_CONT, REPORT_LEVEL, \
+					 CHARGING_MODE, METERING_METHOD, \
+					 MUTE_NOTIFY, MONITORING_KEY, \
+					 SPONSOR_ID, REDIRECT_INFO, PRECEDENCE,\
+					 DROP_PKT_COUNT,ADC_FILTER_IDX, len(SDF_FILTER_IDX),\
+					 SDF_FILTER_IDX, UL_MBR_MTR_PROFILE_IDX,\
+					 DL_MBR_MTR_PROFILE_IDX)
 
 			print '\n ---># PCC Rule Successfully sent..#<---\n'
 	parser.clear()
+

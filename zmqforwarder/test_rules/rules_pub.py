@@ -72,15 +72,11 @@ for update_nbr in range(900000):
 	
 		if topicId == topId_t:
 			# TBD: Needs to handle exception
-
+			time.sleep(1)
 			parse_adc_values(pub_socket, topicId)
-			time.sleep(1)
 			parse_mtr_values(pub_socket, topicId)
-			time.sleep(1)
 			parse_pcc_values(pub_socket, topicId)
-			time.sleep(1)
 			parse_sdf_values(pub_socket, topicId)
-			time.sleep(1)
 		socket.close()
 		pub_socket.close()
 		sys.exit(0)

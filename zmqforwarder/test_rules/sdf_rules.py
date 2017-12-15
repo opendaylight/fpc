@@ -51,7 +51,6 @@ def parse_sdf_values(pub_socket,topicId):
 	LOCAL_HIGH_LIMIT_PORT = 65535
 	REMOTE_LOW_LIMIT_PORT = 0
 	REMOTE_HIGH_LIMIT_PORT = 65535
-	PRECEDENCE = 0
 	PROTOCOL = hex(0)
 	PROTOCOL_MASK = hex(0)
 
@@ -67,17 +66,9 @@ def parse_sdf_values(pub_socket,topicId):
 				RULE_TYPE = int(parser.get(val, \
 						'RULE_TYPE'))
 
-			if parser.has_option(val, 'RATING_GROUP'):
-				RATING_GROUP = int(parser.get(val, \
-						'RATING_GROUP'))
-
 			if parser.has_option(val, 'DIRECTION'):
 				DIRECTION = str(parser.get(val, \
 						'DIRECTION'))
-
-			if parser.has_option(val, 'PRECEDENCE'):
-				PRECEDENCE = int(parser.get(val, \
-						'PRECEDENCE'))
 
 			if parser.has_option(val, 'LOCAL_IP'):
 				LOCAL_IP = str(parser.get(val, \
@@ -158,13 +149,13 @@ def parse_sdf_values(pub_socket,topicId):
 
 			# TBD: Need to handle exception
 			# Pack the structure and send over the zmq socket to DP
-			pub_socket.send("%s" % (struct.pack('!BBLLBI'+\
+			pub_socket.send("%s" % (struct.pack('!BBBI'+\
 				str(len(RULE_STRING))+'s',topicId, MSG_TYPE,\
-				PCC_RULE_ID, PRECEDENCE, RULE_TYPE, \
+				RULE_TYPE, \
 				len(RULE_STRING), RULE_STRING)))
-			time.sleep(1)
-			print "\nSDF Rule Values for %s ::  \nPCC_RULE_ID :%s \
-					\nPRECEDENCE :%s \nRULE_TYPE :%s \nRULE_STRING :%s"\
-					 % (val, PCC_RULE_ID, PRECEDENCE, RULE_TYPE, RULE_STRING)
+
+			print "\nSDF Rule Values for %s ::  \nRULE_ID :%s \
+					\nRULE_TYPE :%s \nRULE_STRING :%s"\
+					 % (val, PCC_RULE_ID, RULE_TYPE, RULE_STRING)
 			print '\n ---># SDF Rule Successfully sent.. #<---\n'
 	parser.clear()
